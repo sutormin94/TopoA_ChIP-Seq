@@ -11,7 +11,7 @@ After post-trimming QC, processed reads are mapped to the reference genome, prod
 converted to BAM, sorted and indexed. Additionally, coverage depth is computed for initial BAm files and 
 for ones after removal of PCR-duplicates.
 
-**Requirements:** factqc, trimmomatic, bwa, samtools (1.9 and higher), sra-toolkit, shell
+**Requirements:** factqc, trimmomatic, bwa, samtools (1.9 or higher), sra-toolkit, shell
 
 **Input:** Raw reads files (FASTQ), Genome file (FASTA)
 
@@ -65,4 +65,4 @@ plots distribution of peaks GC-content in comparison to genome GC-content and th
 
 ## Normalize_calc_FE.py
 
-Script with advanced data analysis. Not completed yet.
+Script for advanced data analysis. Not completed yet.
