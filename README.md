@@ -63,6 +63,18 @@ plots distribution of peaks GC-content in comparison to genome GC-content and th
 **Output:** MFA with sequences under the peaks, plots
 
 
+## Return_reproducible_peaks.py
+
+Takes a dictionary of narrowPeak files with peaks called by MACS2 for different biological replicas.
+Identifies reproducible regions and writes them as a broadPeak file.
+
+**Requirements:** Python 2 or 3
+
+**Input:** Peaks coordinates (NarrowPeaks), reference genome (FASTA)
+
+**Output:** Reproducible peaks coordinates (broadPeak)
+
+
 ## Normalize_calc_FE.py
 
 Script for advanced data analysis. Not completed yet.
