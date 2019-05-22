@@ -75,6 +75,18 @@ Identifies reproducible regions and writes them as a broadPeak file.
 **Output:** Reproducible peaks coordinates (broadPeak)
 
 
+## FE_over_US_GB_DS.py
+
+Takes wig tracks of different genome features (GC%, MukB ChiP-Seq, etc.). Computes signal over TUs upstream (US),
+downstream (DS) and over TUs bodies (GB). 
+
+**Requirements:** Python 3
+
+**Input:** Files with signal data (WIG), genome annotation (GFF or BroadPeak), regions to be omitted (BroadPeak)
+
+**Output:** WIG files with average signal over all TUs, TAB files with average signal for each of TUs, plot of average signal over all TUs, histogram of the signal over TUs
+
+
 ## Normalize_calc_FE.py
 
 Script for advanced data analysis. Not completed yet.
