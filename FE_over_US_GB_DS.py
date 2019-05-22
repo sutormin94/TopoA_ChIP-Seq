@@ -31,8 +31,8 @@ from pandas import DataFrame
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
 #Path to the input annotation, type of annotation and name of TUs set.
-Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Escherichia_coli_K_12_w3110_Mu_genes_annotation.gff'
-Type_of_annot='gff'
+Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\DOOR_Mu_del_cor_genes_expression.txt'
+Type_of_annot='broadPeak'
 Genes_set_name='All genes'
 #Path to the file with regions to be omitted (e.g. deletions).
 Deletions_inpath=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
@@ -377,7 +377,7 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
 
     #Write wig-like file with FE over US, GB, DS.
     print(f'Writing FE over TU, GB, DS...')
-    write_wig(np.concatenate((gene_US, gene_B, gene_DS), axis=None), f'{Output_path}Signal_of_TUs_wig\\Signal_{FE_track_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp.wig', f'{win_width}_{length}')
+    write_wig(np.concatenate((gene_US, gene_B, gene_DS), axis=None), f'{out_path}\Signal_of_TUs_wig\\Signal_{FE_track_name}_over_{genes_set_name}_width_{win_width}bp_gb_{length}bp.wig', f'{win_width}_{length}')
 
     #Plot FE over US, GB, DS. 
     print(f'Plotting FE over TU, GB, DS...')
@@ -405,7 +405,7 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
     plot1.set_xlabel('Distance, bp', size=20)
     plot1.set_ylabel('TopoA fold enrichment', size=20)
     plot1.set_title(f'{FE_track_name} over the {genes_set_name}s', size=20)     
-    plt.savefig(f'{out_path}Figures\Plots\\{FE_track_name}_over_{genes_set_name}s_{win_width}bp.png', dpi=400, figsize=(10, 6))   
+    plt.savefig(f'{out_path}\Figures\Plots\\{FE_track_name}_over_{genes_set_name}s_{win_width}bp.png', dpi=400, figsize=(10, 6))   
     plt.close()      
 
     #Make ar from dict.
@@ -415,11 +415,11 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
 
     #Write table contains FE for US, GB, DS of TUs in a set.
     print(f'Writing FE for TUs\' TU, GB, DS...')
-    write_genes_FE(gene_US_mean_dict, gene_B_mean_dict, gene_DS_mean_dict, f'{out_path}Signal_of_TUs_tab\\{FE_track_name}_over_{genes_set_name}s_{win_width}bp.txt')
+    write_genes_FE(gene_US_mean_dict, gene_B_mean_dict, gene_DS_mean_dict, f'{out_path}\Signal_of_TUs_tab\\{FE_track_name}_over_{genes_set_name}s_{win_width}bp.txt')
 
     #Plot distribution of mean TUs' FEs.
     print(f'Plotting FE distribution over TU, GB, DS...')
-    plot_FE_dist_UDB(gene_US_mean, f'{FE_track_name} US', gene_B_mean, f'{FE_track_name} TU body', gene_DS_mean, f'{FE_track_name} DS', f'{out_path}Figures\Histograms\Signal_distribution_{FE_track_name}_over_{genes_set_name}s_{win_width}bp.png')
+    plot_FE_dist_UDB(gene_US_mean, f'{FE_track_name} US', gene_B_mean, f'{FE_track_name} TU body', gene_DS_mean, f'{FE_track_name} DS', f'{out_path}\Figures\Histograms\Signal_distribution_{FE_track_name}_over_{genes_set_name}s_{win_width}bp.png')
     print(len(gene_US_mean), len(gene_DS_mean), len(gene_B_mean))
     return gene_US, gene_DS, gene_B, gene_US_mean, gene_DS_mean, gene_B_mean, gene_US_mean_dict, gene_DS_mean_dict, gene_B_mean_dict
 
@@ -436,7 +436,7 @@ def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot
     
     #Reads annotation.
     if type_of_annot=='gff':
-        gene_annotation=parse_gff_annotation(path_to_annotation, deletions_inpath)
+        gene_annotation=parse_gff_annotation(path_to_annotation, deletions_inpath)[0]['Gene']
     elif type_of_annot=='broadPeak':
         gene_annotation=parse_expression_annotation(path_to_annotation)
     
