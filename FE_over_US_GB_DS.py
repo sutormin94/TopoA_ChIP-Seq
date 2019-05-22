@@ -21,9 +21,9 @@ from Bio import SeqIO
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
 #Path to the input annotation, type of annotation and name of TUs set.
-Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\DOOR_Mu_del_cor_high_expression_operons_186.txt'
+Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\DOOR_Mu_del_Top_long_and_active_expression_operons.txt'
 Type_of_annot='broadPeak'
-Genes_set_name='HEO_186'
+Genes_set_name='LAO_27'
 #Path to the file with regions to be omitted (e.g. deletions).
 Deletions_inpath=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
 #Width of US, DS regions.
