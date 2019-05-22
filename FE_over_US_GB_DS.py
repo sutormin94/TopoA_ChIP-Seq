@@ -15,6 +15,7 @@ import os
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 import scipy
 import scipy.cluster.hierarchy as sch
 from scipy import stats
@@ -31,9 +32,9 @@ from pandas import DataFrame
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
 #Path to the input annotation, type of annotation and name of TUs set.
-Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\DOOR_Mu_del_cor_genes_expression.txt'
+Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\DOOR_Mu_del_cor_high_expression_genes_370.txt'
 Type_of_annot='broadPeak'
-Genes_set_name='All genes'
+Genes_set_name='HEG_370'
 #Path to the file with regions to be omitted (e.g. deletions).
 Deletions_inpath=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
 #Width of US, DS regions.
@@ -68,10 +69,10 @@ def Dir_check_create(some_path):
 #Output path.
 Out_path=PWD
 Dir_check_create(Out_path)
-Dir_check_create(PWD+'\Figures\Plots')
-Dir_check_create(PWD+'\Figures\Histograms')
-Dir_check_create(PWD+'\Signal_of_TUs_tab')
-Dir_check_create(PWD+'\Signal_of_TUs_wig')
+Dir_check_create(PWD+'\Figures\Plots\\'+Genes_set_name)
+Dir_check_create(PWD+'\Figures\Histograms\\'+Genes_set_name)
+Dir_check_create(PWD+'\Signal_of_TUs_tab\\'+Genes_set_name)
+Dir_check_create(PWD+'\Signal_of_TUs_wig\\'+Genes_set_name)
 
 
 
@@ -222,7 +223,7 @@ def scale_gene_body(ar, length):
         #Determines positions to be taken (other positions will be discarded).
         positions_to_take=[]
         while len(positions_to_take)!=length:
-            position=np.random.random_integers(0,len(ar)-1)
+            position=random.randint(0,len(ar)-1)
             if position not in positions_to_take:
                 positions_to_take.append(position)
             else:
@@ -234,7 +235,7 @@ def scale_gene_body(ar, length):
         #Determine positions to be duplicated (other positions will be discarded).
         scaled=ar
         for i in range(length-len(ar)):
-            position=np.random.random_integers(0,len(scaled))
+            position=random.randint(0,len(scaled))
             if position==0:
                 scaled=scaled[:position+1]+scaled[position:position+1]+scaled[position+1:]
             else:
@@ -277,7 +278,7 @@ def plot_FE_dist_UDB(ar0, name0, ar1, name1, ar2, name2, pathout):
     mean_FE0=round(np.mean(ar0),2)
     print(f'Mean FE in {name0}={mean_FE0}')
     fig=plt.figure(figsize=(15, 3), dpi=100)
-    bins0=np.arange(float(-7), float(10), 0.25)
+    bins0=np.arange(min(ar0+ar1+ar2), max(ar0+ar1+ar2), 0.25)
     plot0=plt.subplot2grid((1,3),(0,0), rowspan=1, colspan=1)
     plot0.hist(ar0, bins0, color='#ff878b', edgecolor='black', alpha=0.8, label=f'{name0}')
     plot0.annotate(f'Mean FE={mean_FE0}', xy=(0.60, 0.8), xycoords='axes fraction', size=15)
@@ -289,7 +290,7 @@ def plot_FE_dist_UDB(ar0, name0, ar1, name1, ar2, name2, pathout):
        
     mean_FE1=round(np.mean(ar1),2)
     print(f'Mean FE in {name1}={mean_FE1}')
-    bins1=np.arange(float(-7), float(10), 0.25)
+    bins1=np.arange(min(ar0+ar1+ar2), max(ar0+ar1+ar2), 0.25)
     plot1=plt.subplot2grid((1,3),(0,1), rowspan=1, colspan=1)     
     plot1.hist(ar1, bins1, color='#ffce91', edgecolor='black', alpha=0.5, label=f'{name1}')
     plot1.annotate(f'Mean FE={mean_FE1}', xy=(0.60, 0.8), xycoords='axes fraction', size=15)
@@ -301,7 +302,7 @@ def plot_FE_dist_UDB(ar0, name0, ar1, name1, ar2, name2, pathout):
     
     mean_FE2=round(np.mean(ar2),2)
     print(f'Mean FE in {name2}={mean_FE2}')
-    bins2=np.arange(float(-7), float(10), 0.25)
+    bins2=np.arange(min(ar0+ar1+ar2), max(ar0+ar1+ar2), 0.25)
     plot2=plt.subplot2grid((1,3),(0,2), rowspan=1, colspan=1) 
     plot2.hist(ar2, bins2, color='#7FCE79', edgecolor='black', alpha=0.5, label=f'{name2}')
     plot2.annotate(f'Mean FE={mean_FE2}', xy=(0.60, 0.8), xycoords='axes fraction', size=15)
