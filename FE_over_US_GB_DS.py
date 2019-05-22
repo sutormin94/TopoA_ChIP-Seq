@@ -32,18 +32,30 @@ from scipy.cluster import hierarchy as hc
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
 #Path to the input annotation, type of annotation and name of TUs set.
-path_to_gff_annot=PWD+'\Gyrase_Topo-seq\Additional_genome_features\Escherichia_coli_K_12_w3110_Mu_genes_annotation.gff'
+path_to_gff_annot=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Escherichia_coli_K_12_w3110_Mu_genes_annotation.gff'
 Type_of_annot='gff'
 Genes_set_name='All genes'
 #Path to the file with regions to be omitted (e.g. deletions).
-Deletions=PWD+'\Gyrase_Topo-seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
+Deletions=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
 #Width of US, DS regions.
 Win_width=15000
 #Length of GB.
 Length=5000
 
-#Dictionary of ways to input data.
-Dict_of_wigs_path={}
+#Dictionary of pathes to input data.
+Dict_of_wigs_path={'PolSofi' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Pol_Sofi_LB_w3110_for_Mu.wig',
+                   'RpoB' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\RpoB_ME_Kahramanoglou.wig',
+                   'HNS' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\HNS_ME_Kahramanoglou.wig',
+                   'GC' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig',
+                   'Fis' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Fis_ME_Kahramanoglou.wig',
+                   'MukB' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\MukB_Nolivos_cov.wig',
+                   'MatP' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\MatP_Nolivos_cov.wig',
+                   'TopoA -Rif' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\TopoA_average_Rep1_FE_Rep2_FE.wig',
+                   'TopoA +Rif' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\TopoA_average_Rif_Rep1_FE_Rif_Rep2_FE.wig',
+                   'Gyrase Cfx' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Gyrase_Cfx_10mkM_average_FE.wig',
+                   'TopoIV Cfx' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\TopoIV_Cfx_average_FE.wig',
+                   'RpoS' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\RpoS_Peano_av.wig',
+                   }
 
 #Output path.
 Out_path=PWD+'Signal_over_TUs'
