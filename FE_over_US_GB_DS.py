@@ -66,7 +66,7 @@ def Dir_check_create(some_path):
     return
 
 #Output path.
-Out_path=PWD+'Signal_over_TUs'
+Out_path=PWD
 Dir_check_create(Out_path)
 Dir_check_create(PWD+'\Figures\Plots')
 Dir_check_create(PWD+'\Figures\Histograms')
@@ -256,6 +256,16 @@ def write_genes_FE(dict1, dict2, dict3, path_out):
     fileout.close()
     return
 
+#######
+#Convert dictionary to array, discard keys.
+#######
+
+def dict_to_ar(dictionary):
+    ar=[]
+    for k,v in dictionary.items():
+        ar.append(v[0]) 
+    return ar
+
 
 #########
 ##Makes histogram for FE over TUs: US, GB, DS.
@@ -405,7 +415,7 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
     plot1.set_xlabel('Distance, bp', size=20)
     plot1.set_ylabel('TopoA fold enrichment', size=20)
     plot1.set_title(f'{FE_track_name} over the {genes_set_name}s', size=20)     
-    plt.savefig(f'{out_path}\Figures\Plots\\{FE_track_name}_over_{genes_set_name}s_{win_width}bp.png', dpi=400, figsize=(10, 6))   
+    plt.savefig(f'{out_path}\Figures\Plots\\{FE_track_name}_over_{genes_set_name}_{win_width}bp.png', dpi=400, figsize=(10, 6))   
     plt.close()      
 
     #Make ar from dict.
@@ -415,11 +425,11 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
 
     #Write table contains FE for US, GB, DS of TUs in a set.
     print(f'Writing FE for TUs\' TU, GB, DS...')
-    write_genes_FE(gene_US_mean_dict, gene_B_mean_dict, gene_DS_mean_dict, f'{out_path}\Signal_of_TUs_tab\\{FE_track_name}_over_{genes_set_name}s_{win_width}bp.txt')
+    write_genes_FE(gene_US_mean_dict, gene_B_mean_dict, gene_DS_mean_dict, f'{out_path}\Signal_of_TUs_tab\\{FE_track_name}_over_{genes_set_name}_{win_width}bp.txt')
 
     #Plot distribution of mean TUs' FEs.
     print(f'Plotting FE distribution over TU, GB, DS...')
-    plot_FE_dist_UDB(gene_US_mean, f'{FE_track_name} US', gene_B_mean, f'{FE_track_name} TU body', gene_DS_mean, f'{FE_track_name} DS', f'{out_path}\Figures\Histograms\Signal_distribution_{FE_track_name}_over_{genes_set_name}s_{win_width}bp.png')
+    plot_FE_dist_UDB(gene_US_mean, f'{FE_track_name} US', gene_B_mean, f'{FE_track_name} TU body', gene_DS_mean, f'{FE_track_name} DS', f'{out_path}\Figures\Histograms\Signal_distribution_{FE_track_name}_over_{genes_set_name}_{win_width}bp.png')
     print(len(gene_US_mean), len(gene_DS_mean), len(gene_B_mean))
     return gene_US, gene_DS, gene_B, gene_US_mean, gene_DS_mean, gene_B_mean, gene_US_mean_dict, gene_DS_mean_dict, gene_B_mean_dict
 

@@ -79,6 +79,7 @@ def Find_rep_peaks(genome_ar, thr):
             peak=0
             current_peak.append(i)
             rep_peaks_ar.append(current_peak)
+            continue
     return rep_peaks_ar
         
 #######
