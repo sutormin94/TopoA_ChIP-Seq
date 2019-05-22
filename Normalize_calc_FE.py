@@ -28,7 +28,6 @@ import collections
 from collections import OrderedDict
 import pandas as pd
 from pandas import DataFrame
-from scipy.cluster import hierarchy as hc
 
 #Dict of wig files to be read with the number of reads indicated.
 Wig_input_dict={'Rep1_mock' : ['F:\TopoI_ChIP-Seq\Ec_TopoI_data\Cov_depth_nodup\DSu_67_S54_ns_fm_ps_nodup.wig', 5849528],
@@ -241,9 +240,9 @@ def Clustering(df):
 
 def correlation_dendrogram(df, cor_method, title, outpath):
     corr_inv=1-df.corr(method=cor_method) #compute correlation and inverse to distance
-    corr_inv_condensed=hc.distance.squareform(corr_inv) #convert to condensed
-    z=hc.linkage(corr_inv_condensed, method='average')
-    dendrogram=hc.dendrogram(z, labels=corr_inv.columns, leaf_rotation=90)
+    corr_inv_condensed=sch.distance.squareform(corr_inv) #convert to condensed
+    z=sch.linkage(corr_inv_condensed, method='average')
+    dendrogram=sch.dendrogram(z, labels=corr_inv.columns, leaf_rotation=90)
     plt.title(title)
     plt.tight_layout()
     plt.savefig(outpath, dpi=400, figsize=(8, 8))

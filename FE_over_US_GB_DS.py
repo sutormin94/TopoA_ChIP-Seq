@@ -27,7 +27,6 @@ import collections
 from collections import OrderedDict
 import pandas as pd
 from pandas import DataFrame
-from scipy.cluster import hierarchy as hc
 
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
