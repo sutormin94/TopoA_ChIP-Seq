@@ -31,11 +31,11 @@ from pandas import DataFrame
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
 #Path to the input annotation, type of annotation and name of TUs set.
-path_to_gff_annot=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Escherichia_coli_K_12_w3110_Mu_genes_annotation.gff'
+Path_to_annotation=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Escherichia_coli_K_12_w3110_Mu_genes_annotation.gff'
 Type_of_annot='gff'
 Genes_set_name='All genes'
 #Path to the file with regions to be omitted (e.g. deletions).
-Deletions=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
+Deletions_inpath=PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Deletions_w3110_G_Mu_SGS.broadPeak'
 #Width of US, DS regions.
 Win_width=15000
 #Length of GB.
@@ -56,6 +56,15 @@ Dict_of_wigs_path={'PolSofi' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\P
                    'RpoS' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\RpoS_Peano_av.wig',
                    }
 
+#######
+#Checks if directory exists and if not creates.
+#######
+
+def Dir_check_create(some_path):
+    if not os.path.exists(some_path):
+        os.makedirs(some_path)    
+    return
+
 #Output path.
 Out_path=PWD+'Signal_over_TUs'
 Dir_check_create(Out_path)
@@ -65,14 +74,7 @@ Dir_check_create(PWD+'\Signal_of_TUs_tab')
 Dir_check_create(PWD+'\Signal_of_TUs_wig')
 
 
-#######
-#Checks if directory exists and if not creates.
-#######
 
-def Dir_check_create(some_path):
-    if not os.path.exists(some_path):
-        os.makedirs(some_path)    
-    return
 
 #######
 #Parses WIG file with N3/5E values.
