@@ -1,5 +1,5 @@
 ###############################################
-##Dmitry Sutormin, 2018##
+##Dmitry Sutormin, 2019##
 ##TopoA ChIP-Seq analysis##
 
 #Takes wig files for IP and mock control,
@@ -17,6 +17,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
+import scipy.cluster.hierarchy as sch
 from scipy import stats
 from Bio import SeqIO
 from Bio.SeqUtils import GC as GC_count
@@ -202,7 +203,7 @@ def correlation_matrix(df, cor_method, title, outpath):
     fig=plt.figure(figsize=(8,8), dpi=100)
     ax1=fig.add_subplot(111)
     cmap=cm.get_cmap('rainbow', 30)
-    cax=ax1.imshow(df.corr(method=cor_method), interpolation="nearest", cmap=cmap, norm=None, vmin=0, vmax=1)
+    cax=ax1.imshow(df.corr(method=cor_method), interpolation="nearest", cmap=cmap, norm=None, vmin=-1, vmax=1)
     ax1.grid(True, which='minor', linestyle="--", linewidth=0.5, color="black")
     plt.title(title)
     labels=list(df)
@@ -210,13 +211,29 @@ def correlation_matrix(df, cor_method, title, outpath):
     ax1.set_yticks(np.arange(len(labels)))    
     ax1.set_xticklabels(labels, fontsize=12, rotation=90)
     ax1.set_yticklabels(labels, fontsize=12)
-    #Add colorbar, make sure to specify tick locations to match desired ticklabels
-    fig.colorbar(cax, ticks=[-0.10, -0.05, 0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00])
+    #Add colorbar, make sure to specify tick locations to match desired ticklabels.
+    #Full scale:[-1.00, -0.95, -0.90, -0.85, -0.80, -0.75, -0.70, -0.65, -0.60, -0.55, -0.50, -0.45, -0.40, -0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, 0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00])
+    fig.colorbar(cax, ticks=[-1.00, -0.90, -0.80, -0.70, -0.60, -0.50, -0.40, -0.30, -0.20, -0.10, 0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00], shrink=0.7)
     plt.tight_layout()
     plt.savefig(outpath, dpi=400, figsize=(8, 8))
     plt.show()
     plt.close()
     return
+
+
+#######
+#Identify clusters in a corralation matrix (hierarchy clustering).
+#Code stolen from https://github.com/TheLoneNut/CorrelationMatrixClustering/blob/master/CorrelationMatrixClustering.ipynb
+#######
+
+def Clustering(df):
+    X = df.corr().values
+    d = sch.distance.pdist(X)   # vector of pairwise distances
+    L = sch.linkage(d, method='complete')
+    ind = sch.fcluster(L, 0.5*d.max(), 'distance')
+    columns = [df.columns.tolist()[i] for i in list((np.argsort(ind)))]
+    df = df.reindex_axis(columns, axis=1)
+    return df
 
 #######
 #Plot dendrogram on the basis of correlation matrix.
@@ -1994,8 +2011,9 @@ Special_data={'PolSofi' : 'C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\A
               'MatP' : 'F:\E_coli_ChIPs\Cov_depth_nodup\MatP_Nolivos_cov.wig',
               'TopoA -Rif' : 'F:\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment\TopoA_average_Rep1_FE_Rep2_FE.wig',
               'TopoA +Rif' : 'F:\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment\TopoA_average_Rif_Rep1_FE_Rif_Rep2_FE.wig',
-              'TopoIV' : '',
-              'DNA-Gyrase' : ''
+              'Gyrase Cfx' : 'F:\Gyrase_Topo-Seq_data\Cfx_10mkM_average.wig',
+              'TopoIV Cfx' : 'F:\TopoIV_Topo-Seq\Fold_enrichment\Cfx_average.wig',
+              'RpoS' : 'F:\E_coli_ChIPs\Cov_depth\RpoS_Peano_av.wig',
               }
 
 def read_correlate_data(replicas_input_dict, out_path):
@@ -2007,6 +2025,9 @@ def read_correlate_data(replicas_input_dict, out_path):
     #Compute and plot correlation matrix.    
     wig_dataframe=pd.DataFrame(data_dict)    
     correlation_matrix(wig_dataframe, 'pearson', f'Correlation matrix between ChIP-Seq datasets', f'{out_path}\Figures\Correlation_between_E_coli_ChIP-Seq_datasets.png')
+    #Perform hierarchy clustering and plot again.
+    wig_dataframe_clusterized=Clustering(wig_dataframe)
+    correlation_matrix(wig_dataframe_clusterized, 'pearson', f'Clusterized correlation matrix between ChIP-Seq datasets', f'{out_path}\Figures\Clusterized_correlation_between_E_coli_ChIP-Seq_datasets.png')
     return
 
 read_correlate_data(Special_data, 'F:\TopoI_ChIP-Seq\Ec_TopoI_data')
