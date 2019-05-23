@@ -31,13 +31,13 @@ from pandas import DataFrame
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
 #Name of the signal to plotted (protein or smth.).
-Signal_name='TopoA -Rif'
+Signal_name='TopoA +Rif'
 #Half-window width will be used to smooth signal.
 Sm_window=100
 #Dictionary of pathes to input WIG data.
-Wig_data_in_dict={'All genes' : 'F:\Signal_over_TUs\Signal_of_TUs_wig\All_genes\Signal_TopoA -Rif_over_All genes_width_15000bp_gb_5000bp.wig',
-                  'HEG 270' : 'F:\Signal_over_TUs\Signal_of_TUs_wig\HEG_270\Signal_TopoA -Rif_over_HEG_270_width_15000bp_gb_5000bp.wig',
-                  'LEG 270' : 'F:\Signal_over_TUs\Signal_of_TUs_wig\LEG_270\Signal_TopoA -Rif_over_LEG_270_width_15000bp_gb_5000bp.wig',
+Wig_data_in_dict={'All genes' : 'F:\Signal_over_TUs\Signal_of_TUs_wig\All_genes\Signal_TopoA +Rif_over_All genes_width_15000bp_gb_5000bp.wig',
+                  'HEG 270' : 'F:\Signal_over_TUs\Signal_of_TUs_wig\HEG_270\Signal_TopoA +Rif_over_HEG_270_width_15000bp_gb_5000bp.wig',
+                  'LEG 270' : 'F:\Signal_over_TUs\Signal_of_TUs_wig\LEG_270\Signal_TopoA +Rif_over_LEG_270_width_15000bp_gb_5000bp.wig',
                   }
 
 #######
