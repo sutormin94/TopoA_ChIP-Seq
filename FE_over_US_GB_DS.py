@@ -238,9 +238,9 @@ def scale_gene_body(ar, length):
 #Write .tab file with FE info for genes US, GB, and DS.
 #######
 
-def write_genes_FE(dict1, dict2, dict3, path_out):
+def write_genes_FE(dict1, dict2, dict3, FE_track_name, path_out):
     fileout=open(path_out, 'w')
-    fileout.write('Gene_name\tStart\tEnd\tStrand\tTopoA_FE_US\tTopoA_FE_GB\tTopoA_FE_DS\n')
+    fileout.write(f'Gene_name\tStart\tEnd\tStrand\t{FE_track_name}_FE_US\t{FE_track_name}_FE_GB\t{FE_track_name}_FE_DS\n')
     for k, v in dict1.items():
         fileout.write(f'{k}\t{v[1]}\t{v[2]}\t{v[3]}\t{v[0]}\t{dict2[k][0]}\t{dict3[k][0]}\n')
     fileout.close()
@@ -415,7 +415,7 @@ def genes_and_FE(gene_annotation, genes_set_name, FE_track, FE_track_name, out_p
 
     #Write table contains FE for US, GB, DS of TUs in a set.
     print(f'Writing FE for TUs\' TU, GB, DS...')
-    write_genes_FE(gene_US_mean_dict, gene_B_mean_dict, gene_DS_mean_dict, f'{out_path}\Signal_of_TUs_tab\\{genes_set_name}\{FE_track_name}_over_{genes_set_name}_{win_width}bp.txt')
+    write_genes_FE(gene_US_mean_dict, gene_B_mean_dict, gene_DS_mean_dict, FE_track_name, f'{out_path}\Signal_of_TUs_tab\\{genes_set_name}\{FE_track_name}_over_{genes_set_name}_{win_width}bp.txt')
 
     #Plot distribution of mean TUs' FEs.
     print(f'Plotting FE distribution over TU, GB, DS...')
