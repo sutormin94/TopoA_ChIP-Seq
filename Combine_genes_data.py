@@ -2,10 +2,10 @@
 ##Dmitry Sutormin, 2019##
 ##TopoA ChIP-Seq analysis##
 
-#Takes wig files for IP and mock control,
-#Performes normalization on the number of reads,
-#Calculates fold enrichment of IP over the mock control.
-#Calculates correlation between tracks.
+#Takes tab files contain cumulative average signal of differet factors
+#over TUs (produced by FE_over_US_GB_DS.py script).
+#Combine information about TUs bodies signal with expression data in a dataframe and write it.
+#Additionally computes and plots correlation matrix for signals over TUs bodies.
 ###############################################
 
 #######
@@ -41,7 +41,6 @@ TUs_data_dict={'TopoA -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\To
                }
 #Main table (to be added to).
 Main_table='F:\TopoI_ChIP-Seq\Ec_TopoI_data\FE_of_genes\\noRif_Rif_Ded_FE_over_Genes_5000bp.xlsx'
-#Main_table='F:\TopoI_ChIP-Seq\Ec_TopoI_data\FE_of_genes\\noRif_Rif_Ded_FE_over_Genes_5000bp.txt'
 #Set of genes.
 Set_of_genes='All_genes'
 
@@ -90,7 +89,8 @@ def correlation_matrix(df, cor_method, title, outpath):
 
 #######
 #Identify clusters in a corralation matrix (hierarchy clustering).
-#Code stolen from https://github.com/TheLoneNut/CorrelationMatrixClustering/blob/master/CorrelationMatrixClustering.ipynb
+#Code was stolen from https://github.com/TheLoneNut/CorrelationMatrixClustering/blob/master/CorrelationMatrixClustering.ipynb
+#with some modifications.
 #######
 
 def Clustering(df, cor_method):
@@ -129,26 +129,18 @@ def read_FE_tables_combine_together(data_dict, main_table, cor_method, set_of_ge
             current_set_df[f'{dataset_name}_FE_GB']=data_dataframe.iloc[: , 5:6] #Extracts column with signal over GB: FE_GB
             Df_of_critical_data=pd.merge(Df_of_critical_data, current_set_df)
             
-    
-    print(Df_of_critical_data.shape)
-     
-        
-    #Read main table.
+    #Read main table to merge data to.
     main_data=pd.read_excel(main_table)
-    #main_data=pd.read_csv(main_table, sep='\t')
-    #print(main_data.shape)
     main_and_critical_df=pd.merge(Df_of_critical_data, main_data, how='right')
-    #print(main_and_critical_df.shape)
     
     #Write new dataframe.
-    #Df_of_critical_data.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_{set_of_genes_name}.txt', sep='\t', index=False)    
-    #main_and_critical_df.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_and_regulonDB_info_eq_len_{set_of_genes_name}.txt', sep='\t', index=False)        
+    Df_of_critical_data.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_{set_of_genes_name}.txt', sep='\t', index=False)    
+    main_and_critical_df.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_and_regulonDB_info_eq_len_{set_of_genes_name}.txt', sep='\t', index=False)        
     
     #Data cross-correlations.
     #Prepare only signal-containing columns.
     Data_to_correlate=Df_of_critical_data
     Data_to_correlate.drop(['GeneID', 'Gene_name', 'Start', 'End', 'Strand', 'Gene_description', 'OperonID'], 1, inplace=True)
-    print(Data_to_correlate)
     #Plot the correlation matrix.
     correlation_matrix(Data_to_correlate, cor_method, f'Correlation of signals over TUs for {set_of_genes_name}', 
                        f'{path_out}\Figures\Datasets_correlation\\{set_of_genes_name}\\Signal_over_TUs_correlation_for_{set_of_genes_name}.png')
