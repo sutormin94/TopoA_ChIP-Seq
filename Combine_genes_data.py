@@ -17,6 +17,10 @@ import numpy as np
 import scipy
 import pandas as pd
 from pandas import DataFrame
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import scipy.cluster.hierarchy as sch
+from matplotlib import cm as cm
 
 #Path to the working directory.
 PWD='F:\Signal_over_TUs'
@@ -36,7 +40,8 @@ TUs_data_dict={'TopoA -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\To
                'RpoS' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\RpoS_over_All genes_15000bp.txt',
                }
 #Main table (to be added to).
-Main_table='F:\TopoI_ChIP-Seq\Ec_TopoI_data\FE_of_genes\noRif_Rif_Ded_FE_over_Genes_5000bp.xlsx'
+Main_table='F:\TopoI_ChIP-Seq\Ec_TopoI_data\FE_of_genes\\noRif_Rif_Ded_FE_over_Genes_5000bp.xlsx'
+#Main_table='F:\TopoI_ChIP-Seq\Ec_TopoI_data\FE_of_genes\\noRif_Rif_Ded_FE_over_Genes_5000bp.txt'
 #Set of genes.
 Set_of_genes='All_genes'
 
@@ -53,53 +58,106 @@ def Dir_check_create(some_path):
 Out_path=PWD
 Dir_check_create(Out_path)
 Dir_check_create(PWD+'\Signal_of_TUs_tab_all\\'+Set_of_genes)
+Dir_check_create(PWD+'\Figures\Datasets_correlation\\'+Set_of_genes)
+
+
+#########
+##Compute correlation matrix and draw heatmaps.
+#########
+
+#Plot diagonal correlation matrix.
+def correlation_matrix(df, cor_method, title, outpath):
+    fig=plt.figure(figsize=(8,8), dpi=100)
+    ax1=fig.add_subplot(111)
+    cmap=cm.get_cmap('rainbow', 30)
+    cax=ax1.imshow(df.corr(method=cor_method), interpolation="nearest", cmap=cmap, norm=None, vmin=-1, vmax=1)
+    ax1.grid(True, which='minor', linestyle="--", linewidth=0.5, color="black")
+    plt.title(title)
+    labels=list(df)
+    ax1.set_xticks(np.arange(len(labels)))
+    ax1.set_yticks(np.arange(len(labels)))    
+    ax1.set_xticklabels(labels, fontsize=12, rotation=90)
+    ax1.set_yticklabels(labels, fontsize=12)
+    #Add colorbar, make sure to specify tick locations to match desired ticklabels.
+    #Full scale:[-1.00, -0.95, -0.90, -0.85, -0.80, -0.75, -0.70, -0.65, -0.60, -0.55, -0.50, -0.45, -0.40, -0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, 0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00])
+    fig.colorbar(cax, ticks=[-1.00, -0.90, -0.80, -0.70, -0.60, -0.50, -0.40, -0.30, -0.20, -0.10, 0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00], shrink=0.7)
+    plt.tight_layout()
+    plt.savefig(outpath, dpi=400, figsize=(8, 8))
+    plt.show()
+    plt.close()
+    return
+
+
+#######
+#Identify clusters in a corralation matrix (hierarchy clustering).
+#Code stolen from https://github.com/TheLoneNut/CorrelationMatrixClustering/blob/master/CorrelationMatrixClustering.ipynb
+#######
+
+def Clustering(df, cor_method):
+    X = df.corr(method=cor_method).values
+    d = sch.distance.pdist(X)   # vector of pairwise distances
+    L = sch.linkage(d, method='complete')
+    ind = sch.fcluster(L, 0.5*d.max(), 'distance')
+    columns = [df.columns.tolist()[i] for i in list((np.argsort(ind)))]
+    df = df.reindex_axis(columns, axis=1)
+    return df
 
 
 #######
 #Read .tab-file with TopoA FE over TUs.
 #######
 
-def read_FE_tables_combine_together(data_dict, main_table, path_out):
+def read_FE_tables_combine_together(data_dict, main_table, cor_method, set_of_genes_name, path_out):
     #Read input dataframes.
-    Dict_of_dataset={}
+    Dict_of_full_dataset={}
+    Df_of_critical_data=pd.DataFrame()
+    #Initiate with Expression data.
+    Expression_dataframe=pd.read_csv(data_dict['Expression'], sep='\t')
+    for index, row in Expression_dataframe.iterrows():
+        Expression_dot=row['Expression'].replace(',', '.')    
+        Expression_dataframe.at[index, 'Expression']=Expression_dot
+    Expression_dataframe=Expression_dataframe.astype({'Expression': np.float64})
+    Dict_of_full_dataset['Expression']=Expression_dataframe
+    Df_of_critical_data=Expression_dataframe
+    #Read other dataframes.
     for dataset_name, dataset in data_dict.items():
         data_dataframe=pd.read_csv(dataset, sep='\t')
-        print(data_dataframe.iloc[: , 5:6])
-        #Dict_of_dataset[dataset_name]=
+        if dataset_name!='Expression':
+            Dict_of_full_dataset[dataset_name]=data_dataframe
+            current_set_df=pd.DataFrame()
+            current_set_df['Gene_name']=data_dataframe['Gene_name'] #Extracts column with gene names.
+            current_set_df[f'{dataset_name}_FE_GB']=data_dataframe.iloc[: , 5:6] #Extracts column with signal over GB: FE_GB
+            Df_of_critical_data=pd.merge(Df_of_critical_data, current_set_df)
+            
+    
+    print(Df_of_critical_data.shape)
+     
         
     #Read main table.
-    #main_data=pd.read_excel(main_table, header=1)
-    #Iteratively merge new data with main table.
-    #for dataset_name, dataset in Dict_of_dataset.items():
-    #    noRif_Rif_Ded_df_exp_trRNA=pd.merge(noRif_Rif_Ded_df_exp, tRNA_rRNA_all_df)
-        
-    #noRif_df=pd.read_csv(Path_in+noRif_table_name, sep='\t')
-    #Rif_df=pd.read_csv(Path_in+Rif_table_name, sep='\t')
-    #Ded_df=pd.read_csv(Path_in+Ded_table_name, sep='\t')
-    #Combune into new dataframe.
-    #Data={'Gene_name' : noRif_df['Gene_name'], 'Strand' : noRif_df['Strand'], 'Start' : noRif_df['Start'], 'End' : noRif_df['End'],
-    #      'TopoA_noRif_FE_US' : noRif_df['TopoA_FE_US'], 'TopoA_noRif_FE_GB' : noRif_df['TopoA_FE_GB'], 'TopoA_noRif_FE_DS' : noRif_df['TopoA_FE_DS'], 
-    #      'TopoA_Rif_FE_US' : Rif_df['TopoA_FE_US'], 'TopoA_Rif_FE_GB' : Rif_df['TopoA_FE_GB'], 'TopoA_Rif_FE_DS' : Rif_df['TopoA_FE_DS'],
-    #      'TopoA_Ded_FE_US' : Ded_df['TopoA_FE_US'], 'TopoA_Ded_FE_GB' : Ded_df['TopoA_FE_GB'], 'TopoA_Ded_FE_DS' : Ded_df['TopoA_FE_DS']
-    #      }
-    #noRif_Rif_Ded_df=pd.DataFrame(Data, columns=['Gene_name', 'Strand', 'Start', 'End', 'TopoA_noRif_FE_US', 'TopoA_noRif_FE_GB', 'TopoA_noRif_FE_DS',
-    #                                            'TopoA_Rif_FE_US', 'TopoA_Rif_FE_GB', 'TopoA_Rif_FE_DS', 'TopoA_Ded_FE_US', 'TopoA_Ded_FE_GB', 'TopoA_Ded_FE_DS'])
+    main_data=pd.read_excel(main_table)
+    #main_data=pd.read_csv(main_table, sep='\t')
+    #print(main_data.shape)
+    main_and_critical_df=pd.merge(Df_of_critical_data, main_data, how='right')
+    #print(main_and_critical_df.shape)
     
-    #Read expression data.
-    #Expression=pd.read_csv(Expression_data, sep='\t')
-    #print(Expression)
-    #Make some changes over expression data.
-    #for index, row in Expression.iterrows():
-    #    #print(index, row)
-    #    Genes_ID_changed=row['Gene_name'].rstrip(';')
-    #    Expression_dot=row['Expression'].replace(',', '.')        
-    #    Expression.at[index, 'Gene_name']=Genes_ID_changed
-    #    Expression.at[index, 'Expression']=Expression_dot
-    #Combine TopoA FE and expression data.
-    #Expression=Expression.astype({'Expression': np.float64})
-    #noRif_Rif_Ded_df_exp=pd.merge(noRif_Rif_Ded_df, Expression)
     #Write new dataframe.
-    #noRif_Rif_Ded_df_exp_trRNA.to_csv(f'{path_out}FE_of_genes\\noRif_Rif_Ded_FE_Exp_tRNA_rRNA_over_{TU_set_name}_15000bp.txt', sep='\t', index=False)    
+    #Df_of_critical_data.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_{set_of_genes_name}.txt', sep='\t', index=False)    
+    #main_and_critical_df.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_and_regulonDB_info_eq_len_{set_of_genes_name}.txt', sep='\t', index=False)        
+    
+    #Data cross-correlations.
+    #Prepare only signal-containing columns.
+    Data_to_correlate=Df_of_critical_data
+    Data_to_correlate.drop(['GeneID', 'Gene_name', 'Start', 'End', 'Strand', 'Gene_description', 'OperonID'], 1, inplace=True)
+    print(Data_to_correlate)
+    #Plot the correlation matrix.
+    correlation_matrix(Data_to_correlate, cor_method, f'Correlation of signals over TUs for {set_of_genes_name}', 
+                       f'{path_out}\Figures\Datasets_correlation\\{set_of_genes_name}\\Signal_over_TUs_correlation_for_{set_of_genes_name}.png')
+    #Perform the hierarchial clustering
+    Data_to_correlate_Clusterized=Clustering(Data_to_correlate, cor_method)
+    #Plot the correlation matrix after clustering.
+    correlation_matrix(Data_to_correlate_Clusterized, cor_method, f'Clusterized correlation of signals over TUs for {set_of_genes_name}', 
+                       f'{path_out}\Figures\Datasets_correlation\\{set_of_genes_name}\\Signal_over_TUs_clusterized_correlation_for_{set_of_genes_name}.png')    
+    
     return
 
-read_FE_tables_combine_together(TUs_data_dict, Main_table, Out_path)
+read_FE_tables_combine_together(TUs_data_dict, Main_table, 'pearson', Set_of_genes, Out_path)
