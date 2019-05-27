@@ -12,6 +12,10 @@
 #######
 
 import os
+import matplotlib.pyplot as plt
+from matplotlib_venn import venn2
+from matplotlib_venn import venn3
+
 
 #######
 #Variables to be defined.
@@ -57,42 +61,59 @@ Dir_check_create(PWD+'\Tables_of_synonyms\\')
 #######
 
 def read_GO_input(file_input):
+    #Read data, make dict of ars.
     filein=open(file_input)
     Dict_of_GO_groups={}
+    Dict_of_GO_groups_names=[]
     for line in filein:
         if len(Dict_of_GO_groups)==0 and line[0]=="#":
             ar=[]
             group_name=line[3:-4]
+            Dict_of_GO_groups_names.append(group_name)
             Dict_of_GO_groups[group_name]=[]
-            #print(group_name, "First appearance")
         elif len(Dict_of_GO_groups)!=0 and line[0]=="#":
             Dict_of_GO_groups[group_name]=ar
             group_name=line[3:-4]
+            Dict_of_GO_groups_names.append(group_name)
             Dict_of_GO_groups[group_name]=[]
             ar=[]
-            #print(group_name, "Second appearance")
         elif line[0]!="#":
             line=line.rstrip(',\n').split('\t')[1].split(',')
             for gene in line:
                 if gene not in ar:
                     ar.append(gene)
-            #print(ar)
     Dict_of_GO_groups[group_name]=ar
     filein.close()
-    return Dict_of_GO_groups
+    
+    #Plot Venn diagram shows overlapping between genes sets.
+    if len(Dict_of_GO_groups_names)==2:
+        venn2([set(Dict_of_GO_groups[Dict_of_GO_groups_names[0]]), set(Dict_of_GO_groups[Dict_of_GO_groups_names[1]])], 
+              (Dict_of_GO_groups_names[0], Dict_of_GO_groups_names[1]))
+        plt.show()    
+    
+    if len(Dict_of_GO_groups_names)==3:
+        venn3([set(Dict_of_GO_groups[Dict_of_GO_groups_names[0]]), set(Dict_of_GO_groups[Dict_of_GO_groups_names[1]]), set(Dict_of_GO_groups[Dict_of_GO_groups_names[2]])], 
+          (Dict_of_GO_groups_names[0], Dict_of_GO_groups_names[1], Dict_of_GO_groups_names[2]))
+        plt.show()
+    
+    #Reorder data - make dict of genes: {'Gene_name' : 'Gene_set1; Gene_set2;'}
+    Dict_of_genes={}
+    for set_name, set_list in Dict_of_GO_groups.items():
+        for gene_name in set_list:
+            if gene_name not in Dict_of_genes:
+                Dict_of_genes[gene_name]=set_name
+            else:
+                old_set_name=Dict_of_genes[gene_name]
+                new_set_name=old_set_name+'; '+set_name
+                Dict_of_genes[gene_name]=new_set_name
+    return Dict_of_GO_groups, Dict_of_genes
 
-Membrane_GO_Genes_dict=read_GO_input(GO_membrane_input) #Dict of ars.
-print(len(Membrane_GO_Genes_dict['Plasma_membrane']), 'GO Ecocyc Plasma membrane proteins')
-print(len(Membrane_GO_Genes_dict['Periplasmic_space']), 'GO Ecocyc Periplasmic space proteins')
-print(len(Membrane_GO_Genes_dict['Outer_membrane']), 'GO Ecocyc Outer membrane proteins')
-#print(Membrane_GO_Genes_dict['Plasma_membrane'])
-#print(Membrane_GO_Genes_dict['Periplasmic_space'])
-#print(Membrane_GO_Genes_dict['Outer_membrane'])
+Membrane_GO_Genes_groups_dict, Membrane_GO_Genes_dict=read_GO_input(GO_membrane_input) #Dict of ars and dict of genes names.
+print(len(Membrane_GO_Genes_dict), 'GO Ecocyc membrane proteins')
 #print('\n')
 
-All_GO_Genes_dict=read_GO_input(Ecocyc_GO_input) #Dict of ars.
-print(len(All_GO_Genes_dict['All_GO_enlisted_genes']), 'GO Ecocyc all genes')
-#print(All_GO_Genes_dict['All_GO_enlisted_genes'])
+All_GO_Genes_groups_dict, All_GO_Genes_dict=read_GO_input(Ecocyc_GO_input) #Dict of ars and dict of genes names.
+print(len(All_GO_Genes_dict), 'GO Ecocyc all genes')
 #print('\n')
 
 
@@ -299,97 +320,78 @@ def combine_datasets(w3110_gff, ecocyc, uniprot, GO_ecocyc, GO_membrane, pathout
     GFF_genes_listed=len(w3110_gff)
     Ecocyc_genes_listed=len(ecocyc)  
     Uniprot_genes_listed=len(uniprot) 
-    #Merge Ecocyc and Uniprot.
+    
+    #Merge Ecocyc and Uniprot: add Uniprot data to queries from Ecocyc.
     Ecocyc_Uniprot_merged={}
     count_eco_uni=0
     count_eco_uni_syn=0
     count_eco_uni_locus_tag=0
     for ecocyc_name, ecocyc_data in ecocyc.items():
-        if ecocyc_name in uniprot:
+        if ecocyc_name in uniprot:      #Look for primary gene name.
             eco_uni_combined=merge_lists(ecocyc_data, uniprot[ecocyc_name])
             count_eco_uni+=1
             Ecocyc_Uniprot_merged[ecocyc_name]=eco_uni_combined
             continue
         else:
-            found_syn=0
-            for uniprot_name, uniprot_data in uniprot.items():
-                if ecocyc_name in uniprot_data:
-                    count_eco_uni_syn+=1      
-                    found_syn=1
+            found_locus_tag=0
+            for uniprot_name, uniprot_data in uniprot.items(): #If nothing found with primary name, search for locus tag.
+                if ecocyc_data[1] in uniprot_data:
+                    count_eco_uni_locus_tag+=1  
+                    found_locus_tag=1
                     eco_uni_combined=merge_lists(ecocyc_data, uniprot_data)
                     Ecocyc_Uniprot_merged[ecocyc_name]=eco_uni_combined
-                    continue                    
-            if found_syn==0:
-                found_locus_tag=0
-                for uniprot_name, uniprot_data in uniprot.items():
-                    if ecocyc_data[1] in uniprot_data:
-                        count_eco_uni_locus_tag+=1  
-                        found_locus_tag=1
+                    continue 
+            if found_locus_tag==0:
+                found_syn=0
+                for uniprot_name, uniprot_data in uniprot.items(): #If nothing returned with locus tag, look among synonyms.
+                    if ecocyc_name in uniprot_data:
+                        count_eco_uni_syn+=1      
+                        found_syn=1
                         eco_uni_combined=merge_lists(ecocyc_data, uniprot_data)
                         Ecocyc_Uniprot_merged[ecocyc_name]=eco_uni_combined
-                        continue                        
-                if found_locus_tag==0:
-                    #print(ecocyc_name, ecocyc_data)
+                        continue          
+                if found_syn==0:        #If nothing is still be found - just take quiery as it is.
                     eco_uni_combined=ecocyc_data
                     Ecocyc_Uniprot_merged[ecocyc_name]=eco_uni_combined
                     continue                    
-    print('Ecocyc Uniprot by Primary name, among synonyms, and by locus tag', Ecocyc_genes_listed, Uniprot_genes_listed, 
+    print('Ecocyc vs Uniprot by Primary name, among synonyms, and by locus tag', Ecocyc_genes_listed, Uniprot_genes_listed, 
           count_eco_uni, count_eco_uni_syn, count_eco_uni_locus_tag, count_eco_uni+count_eco_uni_syn+count_eco_uni_locus_tag, len(Ecocyc_Uniprot_merged))    
     
-    #Merge Uniprot and Ecocyc.
+    #Merge Uniprot and Ecocyc: add unique subjects from Uniprot, didn't identify on a previous step of merging.
     count_uni_eco=0
     count_uni_eco_syn=0
     count_uni_eco_locus_tag=0
     for uniprot_name, uniprot_data in uniprot.items():
-        if uniprot_name in ecocyc:
+        if uniprot_name in ecocyc: #Look for primary gene name.
             count_uni_eco+=1
+            continue
         else:
-            found_syn=0
-            for ecocyc_name, ecocyc_data in ecocyc.items():
-                if uniprot_name in ecocyc_data:
-                    count_uni_eco_syn+=1     
-                    found_syn=1
-            if found_syn==0:
-                found_locus_tag=0
-                for ecocyc_name, ecocyc_data in ecocyc.items():
-                    if uniprot_data[0] in ecocyc_data:
-                        count_uni_eco_locus_tag+=1
-                if found_locus_tag==0:
-                    #print(uniprot_name, uniprot_data)
+            found_locus_tag=0
+            for ecocyc_name, ecocyc_data in ecocyc.items(): #If nothing found with primary name, search for locus tag.
+                if uniprot_data[0] in ecocyc_data:
+                    count_uni_eco_locus_tag+=1
+                    continue
+            if found_locus_tag==0:
+                found_syn=0
+                for ecocyc_name, ecocyc_data in ecocyc.items(): #If nothing returned with locus tag, look among synonyms.
+                    if uniprot_name in ecocyc_data:
+                        count_uni_eco_syn+=1     
+                        found_syn=1
+                        continue
+                if found_syn==0: #If nothing is still be found - just take quiery as it is.
                     Ecocyc_Uniprot_merged[uniprot_name]=uniprot_data
-    print('Uniprot Ecocyc by Primary name, among synonyms, and by locus tag', Uniprot_genes_listed, Ecocyc_genes_listed, 
+                    continue
+    print('Uniprot vs Ecocyc by Primary name, among synonyms, and by locus tag', Uniprot_genes_listed, Ecocyc_genes_listed, 
           count_uni_eco, count_uni_eco_syn, count_uni_eco_locus_tag, count_uni_eco+count_uni_eco_syn+count_uni_eco_locus_tag, len(Ecocyc_Uniprot_merged)) 
     
     Ecocyc_Uniprot_merged_genes_listed=len(Ecocyc_Uniprot_merged) 
-    
-    #Overlap GO Ecocyc and Ecocyc merged with Uniprot.
-    count_GO_all_ecouni=0
-    count_GO_all_ecouni_syn=0
-    for set_name, data in GO_ecocyc.items():
-        GO_ecocyc_genes_listed=len(data)
-        for GO_gene in data:
-            if GO_gene in Ecocyc_Uniprot_merged:
-                count_GO_all_ecouni+=1
-                continue
-            else:
-                found=0
-                for ecouni_name, ecouni_data in Ecocyc_Uniprot_merged.items():
-                    if GO_gene in ecouni_data:
-                        count_GO_all_ecouni_syn+=1
-                        found=1
-                        continue
-                if found==0:
-                    #print(GO_gene)
-                    continue
-    print('GO_All Uniprot/Ecocyc by Primary name and among synonyms', GO_ecocyc_genes_listed, Ecocyc_Uniprot_merged_genes_listed, 
-          count_GO_all_ecouni, count_GO_all_ecouni_syn, count_GO_all_ecouni+count_GO_all_ecouni_syn)    
     
     #Overlap W3110 GFF and Ecocyc merged with Uniprot.
     count_gff_eco=0
     count_gff_eco_syn=0
     W3110_based_list_of_syns={}
     for gff_name, gff_data in w3110_gff.items():
-        if gff_name in Ecocyc_Uniprot_merged:
+        if gff_name in Ecocyc_Uniprot_merged: #Look for primary gene name.
             count_gff_eco+=1
             gff_eco_uni_combined=merge_lists(gff_data, Ecocyc_Uniprot_merged[gff_name])
             W3110_based_list_of_syns[gff_name]=gff_eco_uni_combined
@@ -397,22 +399,51 @@ def combine_datasets(w3110_gff, ecocyc, uniprot, GO_ecocyc, GO_membrane, pathout
         else:
             found=0
             for ecocyc_name, ecocyc_data in Ecocyc_Uniprot_merged.items():
-                if gff_name in ecocyc_data:
+                if gff_name in ecocyc_data:     #If nothing returned with locus tag, look among synonyms.
                     count_gff_eco_syn+=1
                     gff_eco_uni_combined=merge_lists(gff_data, ecocyc_data)
                     W3110_based_list_of_syns[gff_name]=gff_eco_uni_combined
                     found=1
                     continue
             if found==0:
-                #print(gff_name, gff_data)
-                W3110_based_list_of_syns[gff_name]=gff_data
+                W3110_based_list_of_syns[gff_name]=gff_data     #If nothing is still be found - just take quiery as it is.
                 continue
-    print('W3110 GFF Uniprot/Ecocyc by Primary name and among synonyms', GFF_genes_listed, Ecocyc_Uniprot_merged_genes_listed, 
+    print('W3110 GFF vs Uniprot/Ecocyc by Primary name and among synonyms', GFF_genes_listed, Ecocyc_Uniprot_merged_genes_listed, 
           count_gff_eco, count_gff_eco_syn, count_gff_eco+count_gff_eco_syn, len(W3110_based_list_of_syns))
+    
+    #Overlap W3110 GFF and GO Membrane database.
+    GO_membrane_genes_listed=len(GO_membrane)
+    count_GO_all_ecouni=0
+    count_GO_all_ecouni_syn=0
+    W3110_based_list_of_syns_and_membrane_info={}
+    for GO_gene, gene_type in GO_membrane.items():
+        if GO_gene in W3110_based_list_of_syns: #Look for primary gene name.
+            count_GO_all_ecouni+=1
+            W3110_based_list_of_syns_and_membrane_info[GO_gene]=[gene_type]+W3110_based_list_of_syns[GO_gene]
+            continue
+        else:
+            found=0
+            for w3110_name, w3110_syns in W3110_based_list_of_syns.items():
+                if GO_gene in w3110_syns:      #If nothing returned with locus tag, look among synonyms.
+                    count_GO_all_ecouni_syn+=1
+                    found=1
+                    W3110_based_list_of_syns_and_membrane_info[w3110_name]=[gene_type]+W3110_based_list_of_syns[w3110_name]
+                    continue
+            if found==0:
+                print(GO_gene, gene_type)
+                continue
+    #Add not membrane w3110 genes.
+    for w3110_name, gene_syns in W3110_based_list_of_syns.items():
+        if w3110_name not in W3110_based_list_of_syns_and_membrane_info:
+            W3110_based_list_of_syns_and_membrane_info[w3110_name]=['-']+W3110_based_list_of_syns[w3110_name]
+    print('GO membrane vs W3110 GFF powered with Uniprot/Ecocyc synonyms by Primary name and among synonyms', GO_membrane_genes_listed, GFF_genes_listed, 
+          count_GO_all_ecouni, count_GO_all_ecouni_syn, count_GO_all_ecouni+count_GO_all_ecouni_syn)  
     
     #Write combined data.
     Write_dict_of_lists(W3110_based_list_of_syns, f'{pathout}\Tables_of_synonyms\\E_coli_W3110_based_table_of_synonyms.txt')
-    Write_dict_of_lists(Ecocyc_Uniprot_merged, f'{pathout}\Tables_of_synonyms\\E_coli_Uniprot_Ecocyc_merged_table_of_synonyms.txt')
+    Write_dict_of_lists(Ecocyc_Uniprot_merged, f'{pathout}\Tables_of_synonyms\\E_coli_Uniprot_Ecocyc_merged_table_of_synonyms.txt')  
+    Write_dict_of_lists(W3110_based_list_of_syns_and_membrane_info, f'{pathout}\Tables_of_synonyms\\E_coli_W3110_based_table_of_synonyms_membrane_info.txt')  
+
     return
 
 combine_datasets(W3110_GFF_genome_annotation[0], Ecocyc_data, Uniprot_data, All_GO_Genes_dict, Membrane_GO_Genes_dict, Out_path)
