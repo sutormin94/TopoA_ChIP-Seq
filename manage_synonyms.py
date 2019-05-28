@@ -23,7 +23,7 @@ class Synonyms(object):
             Primary_name=query
             Membrane_assignment=syns_dataframe[query].dropna()[1]
             Synonyms=syns_dataframe[query].dropna()[1:].tolist()
-            print(f'{query} is found: {Primary_name}, {Synonyms}, {Membrane_assignment}')
+            #print(f'{query} is found: {Primary_name}, {Synonyms}, {Membrane_assignment}')
             return Primary_name, Membrane_assignment, Synonyms   
         else:
             found=0
@@ -32,11 +32,11 @@ class Synonyms(object):
                 Membrane_assignment=syns_dataframe[gene].dropna()[1]
                 Synonyms=syns_dataframe[gene].dropna()[1:].tolist()
                 if query in Synonyms:
-                    print(f'{query} is found: {Primary_name}, {Synonyms}, {Membrane_assignment}')
+                    #print(f'{query} is found: {Primary_name}, {Synonyms}, {Membrane_assignment}')
                     found=1
                     return Primary_name, Membrane_assignment, Synonyms                
             if found==0:
-                print(f'{query} was not found in synonyms database {Path_to_syns_table}')       
+                print(f'{query} was not found in synonyms database!')       
                 return -1
 
  
