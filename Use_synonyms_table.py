@@ -105,12 +105,12 @@ def read_regulonDB_TF(path_in, dataframe_of_syns, sep, some_genes_dataframe, pat
             Genes_TF_data['Number_of_TF_sites'].append(gene_data['Number_of_TF_sites'])
             Genes_TF_data['TF_list'].append(concat_list(gene_data['TF_list'], sep))
             Genes_TF_data['Evidence_list'].append(concat_list(gene_data['Evidence_list'], sep))
-            Genes_TF_data['Gene_name'].append(w3110_gene_name)
+            Genes_TF_data['Gene_name'].append(w3110_gene_name[0])
         else:
             print(f'{gene_name} was not found among E. coli W3110 genes, hence is dropped.')
             Missed+=1
     
-    Genes_TF_dataframe=pd.DataFrame(Genes_TF_data, columns=['Gene_name_RDB', 'Number_of_TF_sites', 'TF_list', 'Evedence_list', 'Gene_name'])   
+    Genes_TF_dataframe=pd.DataFrame(Genes_TF_data, columns=['Gene_name_RDB', 'Number_of_TF_sites', 'TF_list', 'Evidence_list', 'Gene_name'])   
     print(Genes_TF_dataframe)
     print(f'{Missed}/{len(Genes_TF_dict)} genes were missed (do not correspond to any gene from E. coli W3110 annotation)')
     List_and_added_info=pd.merge(some_genes_dataframe, Genes_TF_dataframe, how='left', on='Gene_name')
