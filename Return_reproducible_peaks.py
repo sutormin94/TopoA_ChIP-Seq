@@ -11,17 +11,19 @@
 #######
 
 import numpy as np
+import Bio
+from Bio import SeqIO
 
 #Dictionary of pathes to NarrowPeak file with peaks coordinates (MACS2 output).
-Peaks_data={'Replic 1' : "Path\Peaks_1.narrowPeak",
-            'Replic 2' : "Path\Peaks_2.narrowPeak",
+Peaks_data={'Replic 1' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep1_FC_nm_0.01_peaks.narrowPeak",
+            'Replic 2' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep2_FC_nm_0.01_peaks.narrowPeak",
             }
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-Genome="Path\Genome.fasta"
+Genome="C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Threshold for reproducible peaks calling (must not exceed number of replicas).
-Threshold=int()
+Threshold=int(2)
 #Outpath.
-Path_out="Path\Reproducible_peaks.broadPeak"
+Path_out="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_FC_nm_0.01_peaks.narrowPeak"
     
     
 #######
@@ -33,7 +35,7 @@ def read_genome(genome_path):
     genome=open(genome_path, 'r')
     for record in SeqIO.parse(genome, "fasta"):
         genomefa=str(record.seq)
-        genome_id=record.ID
+        genome_id=record.name
     return len(genomefa), genome_id
 
 #######
