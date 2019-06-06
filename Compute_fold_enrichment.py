@@ -10,15 +10,15 @@
 
 
 #Path to the file with IP data
-IP_path="F:\V_cholerae_ToxR\Cov_depth\ToxR_ChIP_B.wig"
+IP_path="F:\Gyrase_Topo-Seq_data\RifCfx_IP_Mu_122mkM_10mkM_3\RifCfx_IP_Mu_122mkM_10mkM_3_edt_for_rev_depth.wig"
 #Path to the file Mock control data
-Mock_path="F:\V_cholerae_ToxR\Cov_depth\ToxR_ChIP_control.wig"
+Mock_path="F:\Gyrase_Topo-Seq_data\RifCfx_IN_Mu_122mkM_10mkM_3\RifCfx_IN_Mu_122mkM_10mkM_3_edt_for_rev_depth.wig"
 #ID or short description of the track (will be the name of a track in IGV).
 name='ToxR_ChIP_B_Fold_enrichment'
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name=''
 #Output path to the final file (fold enrichment).
-FE_file_path="F:\V_cholerae_ToxR\Cov_depth\ToxR_ChIP_B_Fold_enrichment.wig"
+FE_file_path="F:\Gyrase_Topo-Seq_data\Fold_enrichment\RifCfx_122mkM_10mkM_3_FE.wig"
 
 
 #######
