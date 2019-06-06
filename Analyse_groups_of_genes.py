@@ -336,9 +336,9 @@ def wrapper_gene_groups(pathin, pathout):
     print(f'Total number of genes: {Num_of_genes}\nNumber of genes encoding membrane proteins: {Num_of_genes_M}')
     print(f'Number of genes with complex promoters: {Num_of_genes_CP}')
     print(f'Number of genes encoding mem proteins and having complex promoters: {Num_of_genes_MCP}')
-    #plot_signal_dist(All_noRif, Membrane_TopoA_noRif, Complex_promoter_TopoA_noRif, IMCP_TopoA_noRif, 
-    #                 All_Rif, Membrane_TopoA_Rif, Complex_promoter_TopoA_Rif, IMCP_TopoA_Rif, 
-    #                 pathout)
+    plot_signal_dist(All_noRif, Membrane_TopoA_noRif, Complex_promoter_TopoA_noRif, IMCP_TopoA_noRif, 
+                     All_Rif, Membrane_TopoA_Rif, Complex_promoter_TopoA_Rif, IMCP_TopoA_Rif, 
+                     pathout)
     
     #Analysis of the enrichment of membrane protein encoding genes and genes with complex promoters among 
     #genes enriched with TopoA in -Rif conditions.
@@ -371,26 +371,26 @@ def wrapper_gene_groups(pathin, pathout):
         interval_M=binom.interval(Confidence, Sampling, Num_of_genes_M/Num_of_genes)
         Low_CP.append(interval_CP[0]), Low_M.append(interval_M[0]), High_CP.append(interval_CP[1]), High_M.append(interval_M[1])
     
-        #print(f'Lower conf interval genes CP: {interval_CP[0]}\nExpected num of CP genes: {Num_of_CP_Sampl_Expected}\nHigher conf interval genes CP: {interval_CP[1]}')
-        #print(f'Number of CP genes among Top: {Num_of_CP_Top}\nNumber of CP genes among Bot: {Num_of_CP_Bot}')
-        #print(f'Lower conf interval genes M: {interval_M[0]}\nExpected num of M genes: {Num_of_MG_Sampl_Expected}\nHigher conf interval genes M: {interval_M[1]}')
-        #print(f'Number of M genes among Top: {Num_of_MG_Top}\nNumber of M genes among Bot: {Num_of_MG_Bot}')     
+        print(f'Lower conf interval genes CP: {interval_CP[0]}\nExpected num of CP genes: {Num_of_CP_Sampl_Expected}\nHigher conf interval genes CP: {interval_CP[1]}')
+        print(f'Number of CP genes among Top: {Num_of_CP_Top}\nNumber of CP genes among Bot: {Num_of_CP_Bot}')
+        print(f'Lower conf interval genes M: {interval_M[0]}\nExpected num of M genes: {Num_of_MG_Sampl_Expected}\nHigher conf interval genes M: {interval_M[1]}')
+        print(f'Number of M genes among Top: {Num_of_MG_Top}\nNumber of M genes among Bot: {Num_of_MG_Bot}')     
         
-    #Mem_CP_among_Top_Bot(Window, Expected_CP, Low_CP, High_CP, Top_CP, Bot_CP, Confidence, 'CP', pathout)
-    #Mem_CP_among_Top_Bot(Window, Expected_M, Low_M, High_M, Top_M, Bot_M, Confidence, 'M', pathout)
+    Mem_CP_among_Top_Bot(Window, Expected_CP, Low_CP, High_CP, Top_CP, Bot_CP, Confidence, 'CP', pathout)
+    Mem_CP_among_Top_Bot(Window, Expected_M, Low_M, High_M, Top_M, Bot_M, Confidence, 'M', pathout)
     
     #Analysis of different parameters (GC%, Expression level, etc) among 
     #genes enriched with TopoA in -Rif conditions.   
     Confidence=0.999
     Depth_of_sampling=500
-    #Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'Expression', pathout)   
-    #Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Expression', pathout)
-    #Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'genlogistic', 'GC_FE_GB', pathout)   
-    #Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'T-test', 'GC_FE_GB', pathout) 
-    #Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'RpoB_FE_GB', pathout)   
-    #Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'RpoB_FE_GB', pathout)     
-    #Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'Gyrase_FE_GB', pathout)   
-    #Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Gyrase_FE_GB', pathout)  
+    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'Expression', pathout)   
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Expression', pathout)
+    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'genlogistic', 'GC_FE_GB', pathout)   
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'T-test', 'GC_FE_GB', pathout) 
+    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'RpoB_FE_GB', pathout)   
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'RpoB_FE_GB', pathout)     
+    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'Gyrase_FE_GB', pathout)   
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Gyrase_FE_GB', pathout)  
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'TopoIV_FE_GB', pathout)   
     Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'TopoIV_FE_GB', pathout)     
     return
