@@ -105,7 +105,7 @@ def plot_signal_dist(S1, S2, S3, S4, S1a, S2a, S3a, S4a, outpath):
     
     plt.tight_layout()
     #plt.show()
-    plt.savefig(outpath+'Membrane_loc_promoter_complexity_and_FE.png', dpi=300, figsize=(15, 10))
+    plt.savefig(outpath+'Membrane_loc_promoter_complexity_and_TopoA_FE.png', dpi=300, figsize=(15, 10))
     plt.close()     
     return
 
@@ -273,7 +273,7 @@ def Mem_CP_among_Top_Bot(Window, Expected, Low, High, Top, Bot, confidence, char
     plot1.legend(fontsize=12)    
   
     plt.show()
-    plt.savefig(f'{outpath}Enrichment_of_{char}_genes_among_top_and_bot_{len(Window)}_of_TopoA_signal_confidence_{confidence}.png', dpi=300, figsize=(10, 6))
+    plt.savefig(f'{outpath}Enrichment_of_{char}_genes_among_top_and_bot_{len(Window)}_of_+Rif_TopoA_signal_confidence_{confidence}.png', dpi=300, figsize=(10, 6))
     plt.close()
     return
 
@@ -301,7 +301,7 @@ def Prop_among_Top_Bot(Window, Expected, Low, High, Top, Bot, Stat, confidence, 
     plot1.legend(loc='best', fontsize=12)    
   
     plt.show()
-    plt.savefig(f'{outpath}{char}_of_genes_top_and_bot_{len(Window)}_of_TopoA_conf_{confidence}_with_{stat_method}.png', dpi=300, figsize=(10, 6))
+    plt.savefig(f'{outpath}{char}_of_genes_top_and_bot_{len(Window)}_of_+Rif_TopoA_conf_{confidence}_with_{stat_method}.png', dpi=300, figsize=(10, 6))
     plt.close()
     return
 
@@ -342,10 +342,10 @@ def wrapper_gene_groups(pathin, pathout):
     
     #Analysis of the enrichment of membrane protein encoding genes and genes with complex promoters among 
     #genes enriched with TopoA in -Rif conditions.
-    Depth_of_sampling=100
-    Confidence=0.95
-    Data_frame_NN=Data_frame[Data_frame['TopoA -Rif_FE_GB'].notnull()]
-    Data_frame_NN_SNR=Data_frame_NN.sort_values('TopoA -Rif_FE_GB', axis=0, ascending=False, na_position='last')
+    Data_frame_NN=Data_frame[Data_frame['TopoA +Rif_FE_GB'].notnull()]
+    Data_frame_NN_SNR=Data_frame_NN.sort_values('TopoA +Rif_FE_GB', axis=0, ascending=False, na_position='last')
+    Depth_of_sampling=len(Data_frame_NN_SNR)
+    Confidence=0.999    
     #Store stat data.
     Window=[]
     Expected_CP, Low_CP, High_CP, Top_CP, Bot_CP=[], [], [], [], []
@@ -382,7 +382,7 @@ def wrapper_gene_groups(pathin, pathout):
     #Analysis of different parameters (GC%, Expression level, etc) among 
     #genes enriched with TopoA in -Rif conditions.   
     Confidence=0.999
-    Depth_of_sampling=500
+    Depth_of_sampling=len(Data_frame_NN_SNR)
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'Expression', pathout)   
     Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Expression', pathout)
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'genlogistic', 'GC_FE_GB', pathout)   
