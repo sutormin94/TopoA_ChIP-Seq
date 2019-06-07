@@ -44,6 +44,7 @@ Dict_of_wigs_path={'PolSofi' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\P
                    'Gyrase Cfx' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\Gyrase_Cfx_10mkM_average_FE.wig',
                    'TopoIV Cfx' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\TopoIV_Cfx_average_FE.wig',
                    'RpoS' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\RpoS_Peano_av.wig',
+                   'Gyrase Cfx +Rif' : PWD+'\TopoA_ChIP-Seq\Additional_genome_features\RifCfx_122mkM_10mkM_average_FE.wig'
                    }
 
 #######

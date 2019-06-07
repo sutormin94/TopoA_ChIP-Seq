@@ -22,7 +22,7 @@ import pandas as pd
 Path_to_syns_table="F:\E_coli_membrane_proteins\Tables_of_synonyms\E_coli_W3110_based_table_of_synonyms_membrane_info.txt"
 
 #List (table) of genes to be ajusted with synonyms table.
-Path_to_genes_list="F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_and_regulonDB_info_eq_len_All_genes_membrane_syns.txt"
+Path_to_genes_list="F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_All_genes.txt"
 
 #Path to RegulonDB table of TFs sites.
 TF_path="F:\RegulonDB_E_coli\BindingSiteSet.txt"
@@ -31,7 +31,6 @@ TF_path="F:\RegulonDB_E_coli\BindingSiteSet.txt"
 Dataframe_of_syns=pd.read_csv(Path_to_syns_table, sep='\t', index_col=0, header=None).T #Genes become columns, not rows.
 Some_genes_list=pd.read_csv(Path_to_genes_list, sep='\t', header=0)
 
-#syn.return_info('nalA', Dataframe_of_syns)
 
 #######
 #Add membrane assignment to some table.
@@ -115,6 +114,7 @@ def read_regulonDB_TF(path_in, dataframe_of_syns, sep, some_genes_dataframe, pat
     print(f'{Missed}/{len(Genes_TF_dict)} genes were missed (do not correspond to any gene from E. coli W3110 annotation)')
     List_and_added_info=pd.merge(some_genes_dataframe, Genes_TF_dataframe, how='left', on='Gene_name')
     List_and_added_info.to_csv(path_out, sep='\t', index=False)       
-    return Genes_TF_dataframe
+    return List_and_added_info
 
-read_regulonDB_TF(TF_path, Dataframe_of_syns, ';', Some_genes_list, 'F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_and_regulonDB_info_eq_len_All_genes_membrane_syns_TF.txt')
+Datframe_with_TF=read_regulonDB_TF(TF_path, Dataframe_of_syns, ';', Some_genes_list, 'F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_and_TF.txt')
+add_membrane_info(Datframe_with_TF, Dataframe_of_syns, 'F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_and_TF_syns_Mem.txt')

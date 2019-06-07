@@ -28,7 +28,8 @@ PWD='F:\Signal_over_TUs'
 TUs_data_dict={'TopoA -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\TopoA -Rif_over_All genes_15000bp.txt',
                'TopoA +Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\TopoA +Rif_over_All genes_15000bp.txt',
                'TopoIV' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\TopoIV Cfx_over_All genes_15000bp.txt',
-               'Gyrase' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\Gyrase Cfx_over_All genes_15000bp.txt',
+               'Gyrase -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\Gyrase Cfx_over_All genes_15000bp.txt',
+               'Gyrase +Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\Gyrase Cfx +Rif_over_All_genes_15000bp.txt',
                'MukB' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\MukB_over_All genes_15000bp.txt',
                'RpoB' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\RpoB_over_All genes_15000bp.txt',
                'H-NS' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\HNS_over_All genes_15000bp.txt',
@@ -40,7 +41,7 @@ TUs_data_dict={'TopoA -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\To
                'RpoS' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\RpoS_over_All genes_15000bp.txt',
                }
 #Main table (to be added to).
-Main_table='F:\TopoI_ChIP-Seq\Ec_TopoI_data\FE_of_genes\\noRif_Rif_Ded_FE_over_Genes_5000bp.xlsx'
+Main_table='F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Old\\Signal_over_TUs_and_regulonDB_info_eq_len_All_genes_membrane_syns_TF.xlsx'
 #Set of genes.
 Set_of_genes='All_genes'
 
@@ -131,7 +132,7 @@ def read_FE_tables_combine_together(data_dict, main_table, cor_method, set_of_ge
             
     #Read main table to merge data to.
     main_data=pd.read_excel(main_table)
-    main_and_critical_df=pd.merge(Df_of_critical_data, main_data, how='right')
+    main_and_critical_df=pd.merge(Df_of_critical_data, main_data, how='right', on=['Gene_name', 'GeneID', 'Start', 'End', 'Strand', 'OperonID'])
     
     #Write new dataframe.
     Df_of_critical_data.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_{set_of_genes_name}.txt', sep='\t', index=False)    

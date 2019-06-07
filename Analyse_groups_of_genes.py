@@ -18,7 +18,7 @@ from scipy import stats
 from scipy.stats import binom, poisson
 
 #Path to the all-containing table.
-Data_path="F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_and_regulonDB_info_eq_len_All_genes_membrane_syns_TF.xlsx"
+Data_path="F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Signal_over_TUs_and_TF_syns_Mem.txt"
 #Path to the output histogram.
 Outpath="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Figures\Membrane_Promoter_complexity_and_FE\\"
 
@@ -309,9 +309,12 @@ def Prop_among_Top_Bot(Window, Expected, Low, High, Top, Bot, Stat, confidence, 
 #Wrap data.
 #######
 
-def wrapper_gene_groups(pathin, pathout):
+def wrapper_gene_groups(pathin, file_type, pathout):
     #Read data.
-    Data_frame=pd.read_excel(pathin, header=0)
+    if file_type=='xlsx':
+        Data_frame=pd.read_excel(pathin, header=0)
+    elif file_type=='txt':
+        Data_frame=pd.read_csv(pathin, sep='\t', header=0)
     #All genes.
     All_noRif=Data_frame[Data_frame['TopoA -Rif_FE_GB'].notnull()]['TopoA -Rif_FE_GB']
     All_Rif=Data_frame[Data_frame['TopoA +Rif_FE_GB'].notnull()]['TopoA +Rif_FE_GB']
@@ -344,7 +347,7 @@ def wrapper_gene_groups(pathin, pathout):
     #genes enriched with TopoA in -Rif conditions.
     Data_frame_NN=Data_frame[Data_frame['TopoA +Rif_FE_GB'].notnull()]
     Data_frame_NN_SNR=Data_frame_NN.sort_values('TopoA +Rif_FE_GB', axis=0, ascending=False, na_position='last')
-    Depth_of_sampling=len(Data_frame_NN_SNR)
+    Depth_of_sampling=500
     Confidence=0.999    
     #Store stat data.
     Window=[]
@@ -382,17 +385,21 @@ def wrapper_gene_groups(pathin, pathout):
     #Analysis of different parameters (GC%, Expression level, etc) among 
     #genes enriched with TopoA in -Rif conditions.   
     Confidence=0.999
-    Depth_of_sampling=len(Data_frame_NN_SNR)
+    Depth_of_sampling=500
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'Expression', pathout)   
     Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Expression', pathout)
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'genlogistic', 'GC_FE_GB', pathout)   
     Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'T-test', 'GC_FE_GB', pathout) 
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'RpoB_FE_GB', pathout)   
-    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'RpoB_FE_GB', pathout)     
-    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'Gyrase_FE_GB', pathout)   
-    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Gyrase_FE_GB', pathout)  
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'RpoB_FE_GB', pathout) 
+    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'wald', 'PolSofi_FE_GB', pathout)   
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'PolSofi_FE_GB', pathout)       
+    #Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'Gyrase -Rif_FE_GB', pathout)   
+    #Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Gyrase -Rif_FE_GB', pathout)  
+    Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'Gyrase +Rif_FE_GB', pathout)   
+    Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'Gyrase +Rif_FE_GB', pathout)    
     Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp=Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_NN_SNR, 'gamma', 'TopoIV_FE_GB', pathout)   
     Prop_among_Top_Bot(Window, Expected_E, Low_E, High_E, Top_Exp, Bot_Exp, Stat_Exp, Confidence, 'Mann-Whitney U', 'TopoIV_FE_GB', pathout)     
     return
 
-wrapper_gene_groups(Data_path, Outpath)
+wrapper_gene_groups(Data_path, 'txt', Outpath)
