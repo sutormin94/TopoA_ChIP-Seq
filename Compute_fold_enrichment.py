@@ -10,15 +10,15 @@
 
 
 #Path to the file with IP data
-IP_path="F:\Gyrase_stationary_Topo-Seq\WIG\DSu_86_S73_edt_for_rev_depth.wig"
+IP_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Raw_wig\Coverage\+IP+Cfx_R2\DSu_48_S120_eq_edt_for_rev_depth.wig"
 #Path to the file Mock control data
-Mock_path="F:\Gyrase_stationary_Topo-Seq\WIG\DSu_85_S72_edt_for_rev_depth.wig"
+Mock_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Raw_wig\Coverage\-IP+Cfx_R2\DSu_40_S112_eq_edt_for_rev_depth.wig"
 #ID or short description of the track (will be the name of a track in IGV).
-name='Gyrase_Topo-Seq_Stationary_2_FE'
+name='Gyrase_tc_Topo-Seq_30min_2_FE'
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name=''
 #Output path to the final file (fold enrichment).
-FE_file_path="F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_2_FE.wig"
+FE_file_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Fold_enrichment\Gyrase_tc_Topo-Seq_30min_2_FE.wig"
 
 
 #######
