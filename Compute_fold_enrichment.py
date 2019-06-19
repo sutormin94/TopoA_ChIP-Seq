@@ -8,17 +8,28 @@
 
 ###############################################
 
+import numpy as np
 
 #Path to the file with IP data
-IP_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Raw_wig\Coverage\+IP+Cfx_R2\DSu_48_S120_eq_edt_for_rev_depth.wig"
+IP_path_dict={'1' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_82_S69_edt_for_rev_depth.wig",
+              '2' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_86_S73_edt_for_rev_depth.wig"}
+
 #Path to the file Mock control data
-Mock_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Raw_wig\Coverage\-IP+Cfx_R2\DSu_40_S112_eq_edt_for_rev_depth.wig"
+Mock_path_dict={'1' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_81_S68_edt_for_rev_depth.wig",
+                '2' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_85_S72_edt_for_rev_depth.wig"}
+
+
 #ID or short description of the track (will be the name of a track in IGV).
-name='Gyrase_tc_Topo-Seq_30min_2_FE'
+name_dict={'1' : "Gyrase_Topo-Seq_Stationary_1_FE",
+           '2' : "Gyrase_Topo-Seq_Stationary_2_FE"}
+
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
-Chromosome_name=''
+Chromosome_name_manual=''
+#Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
+Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Fold_enrichment\Gyrase_tc_Topo-Seq_30min_2_FE.wig"
+FE_file_path_dict={'1' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_1_FE.wig",
+                   '2' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_2_FE.wig"}
 
 
 #######
@@ -37,21 +48,48 @@ def wig_parsing(wigfile):
         if line[0] not in ['track', 'fixedStep']:
             Dict_of_chromosomes_data[chrom_name].append(float(line[0]))
     wigin.close()
+    
+    for Chromosome_name, data in Dict_of_chromosomes_data.items():
+        data_array=np.array(data)
+        data_mean=np.mean(data_array)
+        print(f'Mean coverage of Chromosome_name: {data_mean}')
+        data_array_scaled=data_array/data_mean
+        Dict_of_chromosomes_data[Chromosome_name]=data_array_scaled
     return Dict_of_chromosomes_data
-    
-IP=wig_parsing(IP_path)
-Mock=wig_parsing(Mock_path)
 
 
-FE_out=open(FE_file_path, 'w')
-#Write file with fold enrichment data.
-for Chromosome_name, data in IP.items():
-    FE_out.write('track type=wiggle_0 name="'+name+'" autoScale=off viewLimits=0.0:25.0\nfixedStep chrom='+Chromosome_name+' start=1 step=1\n')
-    for i in range(len(data)):
-        if Mock[Chromosome_name][i]!=0:
-            FE_data_position=IP[Chromosome_name][i]/Mock[Chromosome_name][i]
-            FE_out.write(str(FE_data_position)+'\n')
-        else:
-            FE_out.write(str(0)+'\n')
-    
-FE_out.close()
+def read_files(input_dict):
+    Data_dict={}
+    for name, path in input_dict.items():
+        Data_dict[name]=wig_parsing(path)
+        print(f'Progress: {name}/{len(input_dict)}')
+    return Data_dict
+
+IP_dict=read_files(IP_path_dict)
+Mock_dict=read_files(Mock_path_dict)
+
+
+def divide_write(IP_dict, Mock_dict, name_dict, Auto_or_manual, Chromosome_name_manual, FE_file_path_dict):
+    for sample_name, sample_data in IP_dict.items():
+        print(f'Now is processing: {sample_name}')
+        print(f'Progress: {sample_name}/{len(IP_dict)}')
+        FE_out=open(FE_file_path_dict[sample_name], 'w')
+        #Write file with fold enrichment data.
+        for Chromosome_name, data in sample_data.items():
+            print(f'Average fold enrichment of IP: {np.mean(data)}')
+            print(f'Average fold enrichment of Mock: {np.mean(Mock_dict[sample_name][Chromosome_name])}')
+            if Auto_or_manual==0:
+                FE_out.write('track type=wiggle_0 name="'+name_dict[sample_name]+'" autoScale=off viewLimits=0.0:25.0\nfixedStep chrom='+Chromosome_name+' start=1 step=1\n')
+            elif Auto_or_manual==1:
+                FE_out.write('track type=wiggle_0 name="'+name_dict[sample_name]+'" autoScale=off viewLimits=0.0:25.0\nfixedStep chrom='+Chromosome_name_manual+' start=1 step=1\n')
+            for i in range(len(data)):
+                if Mock_dict[sample_name][Chromosome_name][i]!=0:
+                    FE_data_position=IP_dict[sample_name][Chromosome_name][i]/Mock_dict[sample_name][Chromosome_name][i]
+                    FE_out.write(str(FE_data_position)+'\n')
+                else:
+                    FE_out.write(str(0)+'\n')
+            
+        FE_out.close()        
+    return
+
+divide_write(IP_dict, Mock_dict, name_dict, Auto_or_manual, Chromosome_name_manual, FE_file_path_dict)

@@ -19,18 +19,17 @@ from matplotlib import cm as cm
 
 #Dictionary of replicas 
 #'Replica name' : 'Path to wig file'
-Dict_of_replicas={'Replic 1' : "F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Fold_enrichment\Gyrase_tc_Topo-Seq_20min_1_FE.wig",
-                  'Replic 2' : "F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Fold_enrichment\Gyrase_tc_Topo-Seq_20min_2_FE.wig",
-                  }
+Dict_of_replicas={'Replic 1' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_1_FE.wig",
+                  'Replic 2' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_2_FE.wig"}
 
 #ID or short description of the track (will be the name of a track in IGV).
-name='Gyrase_tc_Topo-Seq_20min_FE'
+name='Gyrase_Topo-Seq_Stationary_average_FE'
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name='NC_007779.1_w3110_Mu'
 #Output path for the final file.
-average_file_path="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Fold_enrichment\Gyrase_tc_Topo-Seq_20min_average_FE_Early_Stat.wig"
+average_file_path="F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_average_FE.wig"
 #Output path for the corralation matrix.
-Outpath="F:\Gyrase_time-course_experiment\Reads_eq\WIG_files\Fold_enrichment\Gyrase_tc_Topo-Seq_20min_FE_correlation_matrix.png"
+Outpath="F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_FE_correlation_matrix.png"
 
 
 #######
