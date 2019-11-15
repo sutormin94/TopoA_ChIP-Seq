@@ -13,17 +13,21 @@
 import numpy as np
 import Bio
 from Bio import SeqIO
+from matplotlib import pyplot as plt
+from matplotlib_venn import venn2, venn2_circles
 
 #Dictionary of pathes to NarrowPeak file with peaks coordinates (MACS2 output).
-Peaks_data={'Replic 1' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep1_FC_nm_0.01_peaks.narrowPeak",
-            'Replic 2' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep2_FC_nm_0.01_peaks.narrowPeak",
+Peaks_data={'Rif-' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_FC_nm_0.001_peaks.narrowPeak",
+            'Rif+' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_Rif_FC_nm_0.001_peaks.narrowPeak",
             }
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
 Genome="C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Threshold for reproducible peaks calling (must not exceed number of replicas).
 Threshold=int(2)
 #Outpath.
-Path_out="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_FC_nm_0.01_peaks.narrowPeak"
+Path_out="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\Test_TopoA_min_Rif_plus_Rif_common_0.001_peaks.narrowPeak"
+#Pics outpath.
+Pics_path_out="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\\"
     
     
 #######
@@ -36,7 +40,7 @@ def read_genome(genome_path):
     for record in SeqIO.parse(genome, "fasta"):
         genomefa=str(record.seq)
         genome_id=record.name
-    return len(genomefa), genome_id
+    return len(genomefa), genomefa, genome_id
 
 #######
 #Opens and reads BED or narrowPeak files.
@@ -100,9 +104,9 @@ def write_bed(rep_peaks_ar, chrom_name, outpath):
 #Identifies reproducible regions, writes broadPeak file with reproducible peaks.
 #######    
 
-def Wrapper(reps_dict, thr, genome_path, outpath):
+def Wrapper(reps_dict, thr, genome_path, outpath, pics_outpath):
     #Reads genome fasta.
-    genome_length, chrom_name=read_genome(genome_path)
+    genome_length, genome_seq, chrom_name=read_genome(genome_path)
     #Reads replicas data.
     rep_data={}
     for name, rep_path in reps_dict.items():
@@ -114,9 +118,16 @@ def Wrapper(reps_dict, thr, genome_path, outpath):
         genome_ar=Indicate_where_peaks(genome_ar, peaks_ar)
     #Identify reproducible peaks.
     Rep_peaks_array=Find_rep_peaks(genome_ar, thr)
+    #Create Venn diagram represents replicas overlapping.
+    plt.figure(figsize=(4,4))    
+    keys_list=list(rep_data.keys())
+    venn2(subsets=(len(rep_data[keys_list[0]])-len(Rep_peaks_array), len(rep_data[keys_list[1]])-len(Rep_peaks_array), len(Rep_peaks_array)), set_labels=(keys_list[0], keys_list[1]))
+    venn2_circles(subsets=(len(rep_data[keys_list[0]])-len(Rep_peaks_array), len(rep_data[keys_list[1]])-len(Rep_peaks_array), len(Rep_peaks_array)), linestyle='solid')    
+    plt.show()
+    plt.savefig(pics_outpath+'Test_reproducible_peaks_between_Rif_plus_and_minus.png', dpi=400, figsize=(4, 4))
     #Write reproducible peaks.
     write_bed(Rep_peaks_array, chrom_name, outpath)
     return
             
-Wrapper(Peaks_data, Threshold, Genome, Path_out)       
+Wrapper(Peaks_data, Threshold, Genome, Path_out, Pics_path_out)       
     

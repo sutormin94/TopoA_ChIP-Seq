@@ -11,25 +11,29 @@
 import numpy as np
 
 #Path to the file with IP data
-IP_path_dict={'1' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_82_S69_edt_for_rev_depth.wig",
-              '2' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_86_S73_edt_for_rev_depth.wig"}
+IP_path_dict={'1' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IP_Mu_10mkM_1\Microcin_IP_Mu_10mkM_1_edt_for_rev_depth.wig",
+              '2' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IP_Mu_10mkM_2\Microcin_IP_Mu_10mkM_2_edt_for_rev_depth.wig",
+              '3' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IP_50mkM_3\Microcin_IP_50mkM_3_edt_for_rev_depth.wig"}
 
 #Path to the file Mock control data
-Mock_path_dict={'1' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_81_S68_edt_for_rev_depth.wig",
-                '2' : "F:\Gyrase_stationary_Topo-Seq\WIG\DSu_85_S72_edt_for_rev_depth.wig"}
+Mock_path_dict={'1' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IN_Mu_10mkM_1\Microcin_IN_Mu_10mkM_1_edt_for_rev_depth.wig",
+                '2' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IN_Mu_10mkM_2\Microcin_IN_Mu_10mkM_2_edt_for_rev_depth.wig",
+                '3' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IN_50mkM_3\Microcin_IN_50mkM_3_edt_for_rev_depth.wig"}
 
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' : "Gyrase_Topo-Seq_Stationary_1_FE",
-           '2' : "Gyrase_Topo-Seq_Stationary_2_FE"}
+name_dict={'1' : "Gyrase_Topo-Seq_EP_Microcin_1_FE",
+           '2' : "Gyrase_Topo-Seq_EP_Microcin_2_FE",
+           '3' : "Gyrase_Topo-Seq_EP_Microcin_3_FE"}
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name_manual=''
 #Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
 Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path_dict={'1' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_1_FE.wig",
-                   '2' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_2_FE.wig"}
+FE_file_path_dict={'1' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Fold_enrichment\Gyrase_Topo-Seq_EP_Microcin_1_FE.wig",
+                   '2' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Fold_enrichment\Gyrase_Topo-Seq_EP_Microcin_2_FE.wig",
+                   '3' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Fold_enrichment\Gyrase_Topo-Seq_EP_Microcin_3_FE.wig"}
 
 
 #######
@@ -52,7 +56,7 @@ def wig_parsing(wigfile):
     for Chromosome_name, data in Dict_of_chromosomes_data.items():
         data_array=np.array(data)
         data_mean=np.mean(data_array)
-        print(f'Mean coverage of Chromosome_name: {data_mean}')
+        print(f'Mean coverage of {Chromosome_name}: {data_mean}')
         data_array_scaled=data_array/data_mean
         Dict_of_chromosomes_data[Chromosome_name]=data_array_scaled
     return Dict_of_chromosomes_data
@@ -76,8 +80,8 @@ def divide_write(IP_dict, Mock_dict, name_dict, Auto_or_manual, Chromosome_name_
         FE_out=open(FE_file_path_dict[sample_name], 'w')
         #Write file with fold enrichment data.
         for Chromosome_name, data in sample_data.items():
-            print(f'Average fold enrichment of IP: {np.mean(data)}')
-            print(f'Average fold enrichment of Mock: {np.mean(Mock_dict[sample_name][Chromosome_name])}')
+            print(f'Average normalized covarage of IP: {np.mean(data)}')
+            print(f'Average normalized covarage of Mock: {np.mean(Mock_dict[sample_name][Chromosome_name])}')
             if Auto_or_manual==0:
                 FE_out.write('track type=wiggle_0 name="'+name_dict[sample_name]+'" autoScale=off viewLimits=0.0:25.0\nfixedStep chrom='+Chromosome_name+' start=1 step=1\n')
             elif Auto_or_manual==1:

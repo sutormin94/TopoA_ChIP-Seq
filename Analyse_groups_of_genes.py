@@ -104,9 +104,9 @@ def plot_signal_dist(S1, S2, S3, S4, S1a, S2a, S3a, S4a, outpath):
         
     
     plt.tight_layout()
-    #plt.show()
-    plt.savefig(outpath+'Membrane_loc_promoter_complexity_and_TopoA_FE.png', dpi=300, figsize=(15, 10))
-    plt.close()     
+    plt.show()
+    #plt.savefig(outpath+'Membrane_loc_promoter_complexity_and_TopoA_FE.png', dpi=300, figsize=(15, 10))
+    #plt.close()     
     return
 
 #########
@@ -120,6 +120,7 @@ def Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_all, stat_method, F
     #Real data.
     bins=np.linspace(min(Data_frame_all[Feature]), max(Data_frame_all[Feature]), 100)
     ax.hist(Data_frame_all[Feature], bins, density=True, histtype='stepfilled', alpha=0.4, label='Real data distibution')
+    Prop_Expected=round(np.mean(Data_frame_all[Feature]),2)
     #Model distribution.
     if stat_method=='poisson':
         x=np.arange(poisson.ppf(0.01, Prop_Expected), poisson.ppf(0.99, Prop_Expected))
@@ -182,14 +183,13 @@ def Gene_prop_stat(Depth_of_sampling, Confidence, Data_frame_all, stat_method, F
         ax.plot(bins, mielke_pdf, 'r-', lw=3, alpha=0.5, label=f'Model distibution mielke\na={round(a,2)}, b={round(b,2)}, c={round(c,2)}, d={round(d,2)}')     
     ax.legend(loc='best')
     plt.show()    
-    plt.savefig(f'{outpath}\{Feature}_distribution_fitting_with_{stat_method}.png', dpi=300)
+    #plt.savefig(f'{outpath}\{Feature}_distribution_fitting_with_{stat_method}.png', dpi=300)
     
     
     
     #Store stat data.
     Window, Expected, Low, High, Top, Bot, Stat=[], [], [], [], [], [], []
     #Inint statistics.
-    Prop_Expected=round(np.mean(Data_frame_all[Feature]),2)
     if stat_method=='poisson':
         Prop_interval=poisson.interval(Confidence, Prop_Expected)
     elif stat_method=='norm':
@@ -273,8 +273,8 @@ def Mem_CP_among_Top_Bot(Window, Expected, Low, High, Top, Bot, confidence, char
     plot1.legend(fontsize=12)    
   
     plt.show()
-    plt.savefig(f'{outpath}Enrichment_of_{char}_genes_among_top_and_bot_{len(Window)}_of_+Rif_TopoA_signal_confidence_{confidence}.png', dpi=300, figsize=(10, 6))
-    plt.close()
+    #plt.savefig(f'{outpath}Enrichment_of_{char}_genes_among_top_and_bot_{len(Window)}_of_+Rif_TopoA_signal_confidence_{confidence}.png', dpi=300, figsize=(10, 6))
+    #plt.close()
     return
 
 
@@ -301,8 +301,8 @@ def Prop_among_Top_Bot(Window, Expected, Low, High, Top, Bot, Stat, confidence, 
     plot1.legend(loc='best', fontsize=12)    
   
     plt.show()
-    plt.savefig(f'{outpath}{char}_of_genes_top_and_bot_{len(Window)}_of_+Rif_TopoA_conf_{confidence}_with_{stat_method}.png', dpi=300, figsize=(10, 6))
-    plt.close()
+    #plt.savefig(f'{outpath}{char}_of_genes_top_and_bot_{len(Window)}_of_+Rif_TopoA_conf_{confidence}_with_{stat_method}.png', dpi=300, figsize=(10, 6))
+    #plt.close()
     return
 
 #######

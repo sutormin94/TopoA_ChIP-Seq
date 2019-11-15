@@ -19,18 +19,22 @@ from Bio import SeqIO
 from Bio.SeqUtils import GC as GC_count
 
 #Path to NarrowPeak file with peaks coordinates (MACS2 output).
-Peak_data="Path\Peaks.NarrowPeak",
+Peak_data="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_FC_nm_0.001_peaks.NarrowPeak"
+Peak_data_Rif="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_Rif_FC_nm_0.001_peaks.NarrowPeak"
+Peak_data_shared="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_min_Rif_plus_Rif_common_0.001_peaks.NarrowPeak"
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-Genome="Path\Genome.fasta"
+Genome="C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Path to the working directory.
-pwd="PWD\\"
+pwd="F:\TopoI_ChIP-Seq\Ec_TopoI_data\\"
 #Outpath.
-Path_out="PWD\\" + "Seq_under_peaks\\"
+Path_out=pwd + "Seq_under_peaks\\"
 if not os.path.exists(Path_out):
     os.makedirs(Path_out)
 
 #Name for output files (plot and mfa).
-Name=''
+Name="TopoA_rep12_FC_nm_0.001_peaks"
+Name_Rif="TopoA_rep12_Rif_FC_nm_0.001_peaks"
+Name_shared="TopoA_min_Rif_plus_Rif_common_0.001_peaks"
     
 
 #######
@@ -105,27 +109,27 @@ def plot_distrib(seq_dict, genome, pathout):
     #GC% genome
     plot0=plt.subplot2grid((1,3),(0,0), rowspan=1, colspan=1)     
     plot0.hist(genome_gc_values, color='#ff878b', edgecolor='black', alpha=0.8)
-    plot0.annotate(f'Mean genome GC%={round(np.mean(genome_gc_values),2)}%', xy=(0.10, 0.8), xycoords='axes fraction', size=15)
-    plot0.annotate(f'Bin width={mean_len}bp', xy=(0.10, 0.7), xycoords='axes fraction', size=15)
+    plot0.annotate(f'Mean genome GC%={round(np.mean(genome_gc_values),2)}%', xy=(0.03, 0.8), xycoords='axes fraction', size=15)
+    plot0.annotate(f'Bin width={mean_len}bp', xy=(0.03, 0.7), xycoords='axes fraction', size=15)
     plot0.set_xlabel('Genome bins GC%', size=17)
     plot0.set_ylabel('Number of bins', size=17)
     plot0.set_title('Genome GC%', size=18)
     #GC% peaks
     plot1=plt.subplot2grid((1,3),(0,1), rowspan=1, colspan=1)     
     plot1.hist(peaks_gc_values, color='#7FCE79', edgecolor='black', alpha=0.8)
-    plot1.annotate(f'Mean peaks GC%={round(np.mean(peaks_gc_values),2)}%', xy=(0.10, 0.8), xycoords='axes fraction', size=15)
-    plot1.annotate(f'Mean peaks width={mean_len}bp', xy=(0.10, 0.7), xycoords='axes fraction', size=15)
+    plot1.annotate(f'Mean peaks GC%={round(np.mean(peaks_gc_values),2)}%', xy=(0.03, 0.8), xycoords='axes fraction', size=15)
+    plot1.annotate(f'Mean peaks width={mean_len}bp', xy=(0.03, 0.7), xycoords='axes fraction', size=15)
     plot1.set_xlabel('Peaks GC%', size=17)
     plot1.set_ylabel('Number of peaks', size=17)
-    plot1.set_title('TopoA peaks GC%', size=18)
+    plot1.set_title('EcTopoI peaks GC%', size=18)
     #Peaks width
     plot2=plt.subplot2grid((1,3),(0,2), rowspan=1, colspan=1)     
     plot2.hist(peaks_width, color='#BAE85C', edgecolor='black', alpha=0.8)
-    plot2.annotate(f'Mean peaks width={mean_len}bp', xy=(0.10, 0.8), xycoords='axes fraction', size=15)
-    plot2.annotate(f'Total number of peaks={len(peaks_width)}', xy=(0.10, 0.7), xycoords='axes fraction', size=15)
+    plot2.annotate(f'Mean peaks width={mean_len}bp', xy=(0.25, 0.8), xycoords='axes fraction', size=15)
+    plot2.annotate(f'Total number of peaks={len(peaks_width)}', xy=(0.25, 0.7), xycoords='axes fraction', size=15)
     plot2.set_xlabel('Peaks width', size=17)
     plot2.set_ylabel('Number of peaks', size=17)
-    plot2.set_title('TopoA peaks width', size=18)    
+    plot2.set_title('EcTopoI peaks width', size=18)    
     plt.tight_layout()
     plt.show()
     plt.savefig(pathout, dpi=300, figsize=(10, 4))
@@ -147,3 +151,5 @@ def wrap_peaks(fasta_inpath, peaks_inpath, name, outpath):
 
 
 wrap_peaks(Genome, Peak_data, Name, Path_out)
+wrap_peaks(Genome, Peak_data_Rif, Name_Rif, Path_out)
+wrap_peaks(Genome, Peak_data_shared, Name_shared, Path_out)
