@@ -20,52 +20,78 @@ from Bio import SeqIO
 
 
 #Path to the directory with input files.
-Path_to_input_files='C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\\'
+Path_to_input_files='D:\Sutormin_data\D_Sutormin\Science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\\'
 #Path to the input annotation, type of annotation and name of TUs set.
 ##1##
-Path_to_annotation_1='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\DY330_genes\DY330_RNA-Seq_genes_EP_del_cor.txt'
+Path_to_annotation_1='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\DY330_genes\DY330_RNA-Seq_genes_EP_del_cor.txt'
 Type_of_annot_1='broadPeak'
 Genes_set_name_1='All_genes'
 ##2##
-Path_to_annotation_2='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\DY330_genes\DY330_RNA-Seq_genes_EP_del_cor_HEG_270.txt'
+Path_to_annotation_2='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\DY330_genes\DY330_RNA-Seq_genes_EP_del_cor_HEG_270.txt'
 Type_of_annot_2='broadPeak'
 Genes_set_name_2='HEG_270'
 ##3##
-Path_to_annotation_3='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\DY330_genes\DY330_RNA-Seq_genes_EP_del_cor_LEG_270.txt'
+Path_to_annotation_3='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\DY330_genes\DY330_RNA-Seq_genes_EP_del_cor_LEG_270.txt'
 Type_of_annot_3='broadPeak'
 Genes_set_name_3='LEG_270'
+
 ##4##
-Path_to_annotation_4='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_EP_del_cor.txt'
+Path_to_annotation_4='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_EP_del_cor.txt'
 Type_of_annot_4='broadPeak'
 Genes_set_name_4='All_operons'
 ##5##
-Path_to_annotation_5='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_EP_del_cor_HEO_186.txt'
+Path_to_annotation_5='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_EP_del_cor_HEO_186.txt'
 Type_of_annot_5='broadPeak'
 Genes_set_name_5='HEO_186'
 ##6##
-Path_to_annotation_6='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_EP_del_cor_LEO_186.txt'
+Path_to_annotation_6='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_EP_del_cor_LEO_186.txt'
 Type_of_annot_6='broadPeak'
 Genes_set_name_6='LEO_186'
 ##7##
-Path_to_annotation_7='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_no_dps_region_EP_del_cor.txt'
+Path_to_annotation_7='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_no_dps_region_EP_del_cor.txt'
 Type_of_annot_7='broadPeak'
 Genes_set_name_7='All_operons_no_dps'
 ##8##
-Path_to_annotation_8='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_no_dps_region_EP_del_cor_HEO_186.txt'
+Path_to_annotation_8='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_no_dps_region_EP_del_cor_HEO_186.txt'
 Type_of_annot_8='broadPeak'
 Genes_set_name_8='HEO_186_no_dps'
 ##9##
-Path_to_annotation_9='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_no_dps_region_EP_del_cor_LEO_186.txt'
+Path_to_annotation_9='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_operons\DY330_RNA-Seq_operons_no_dps_region_EP_del_cor_LEO_186.txt'
 Type_of_annot_9='broadPeak'
 Genes_set_name_9='LEO_186_no_dps'
+
 ##10##
-Path_to_annotation_10='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_no_ompX_EP_del_cor_HETU_321.txt'
+Path_to_annotation_10='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_no_ompX_EP_del_cor_HETU_321.txt'
 Type_of_annot_10='broadPeak'
 Genes_set_name_10='HE_TU_321_no_ompX'
 ##11##
-Path_to_annotation_11='F:\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_no_ybiI_EP_del_cor_LETU_244.txt'
+Path_to_annotation_11='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_no_ybiI_EP_del_cor_LETU_244.txt'
 Type_of_annot_11='broadPeak'
 Genes_set_name_11='LE_TU_244_no_ybiI'
+##12##
+Path_to_annotation_12='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_EP_del_cor.txt'
+Type_of_annot_12='broadPeak'
+Genes_set_name_12='All_TUs_2173'
+##13##
+Path_to_annotation_13='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_EP_del_cor_HETU_323.txt'
+Type_of_annot_13='broadPeak'
+Genes_set_name_13='HETU_323'
+##14##
+Path_to_annotation_14='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_EP_del_cor_LETU_245.txt'
+Type_of_annot_14='broadPeak'
+Genes_set_name_14='LETU_245'
+##15##
+Path_to_annotation_15='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_no_tRNA_rRNA_EP_del_cor.txt'
+Type_of_annot_15='broadPeak'
+Genes_set_name_15='All_TUs_no_tRNA_rRNA'
+##16##
+Path_to_annotation_16='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt'
+Type_of_annot_16='broadPeak'
+Genes_set_name_16='rRNA_7'
+##17##
+Path_to_annotation_17='D:\Sutormin_data\D_Sutormin\Science\E_coli_RNA-Seq\E_coli_DY330_RNA-Seq\Expression_data\\DY330_transcripts\DY330_RNA-Seq_transcripts_EP_del_cor_tRNA_49.txt'
+Type_of_annot_17='broadPeak'
+Genes_set_name_17='tRNA_49'
 
 #Path to the file with regions to be omitted (e.g. deletions).
 Deletions_inpath=Path_to_input_files+'Deletions_w3110_G_Mu_SGS.broadPeak'
@@ -89,9 +115,16 @@ Dict_of_wigs_path={'PolSofi' : Path_to_input_files+'Pol_Sofi_LB_w3110_for_Mu.wig
                    'RpoS' : Path_to_input_files+'RpoS_Peano_av.wig',
                    'Gyrase Cfx +Rif' : Path_to_input_files+'RifCfx_122mkM_10mkM_average_FE.wig'
                    }
-Dict_of_wigs_path_TopoI={'TopoA -Rif' : Path_to_input_files+'TopoA_average_Rep1_FE_Rep2_FE.wig',
-                         'TopoA +Rif' : Path_to_input_files+'TopoA_average_Rif_Rep1_FE_Rif_Rep2_FE.wig',
-                         }
+Dict_of_wigs_path_TopoI={'TopA_CTD-Rif-_av_1_2' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2.wig',
+                         'TopA_CTD-Rif-_av_1_2_3' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig',
+                         'TopA_CTD-Rif+_av_1_2' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_minus_Rif_plus_average_FE_1_2.wig',
+                         'TopA_CTD-Rif+_av_1_2_3' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_minus_Rif_plus_average_FE_1_2_3.wig',
+                         'TopA_CTD+Rif-_av_1_2_3' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_plus_Rif_minus_average_FE.wig',
+                         'TopA_CTD+Rif+_av_2_3' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_plus_Rif_plus_average_FE.wig',}
+
+Dict_of_wigs_path_TopoI_3={'TopA_CTD-Rif-_av_3' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_minus_Rif_minus_3_FE.wig',
+                         'TopA_CTD-Rif+_av_3' : 'D:\Sutormin_data\D_Sutormin\Science\TopoI_ChIP-Seq\Ec_TopoI_data\Fold_enrichment_all_Replicas\TopA_ChIP_CTD_minus_Rif_plus_3_FE.wig',}
+
 #######
 #Checks if directory exists and if not creates.
 #######
@@ -102,7 +135,7 @@ def Dir_check_create(some_path):
     return
 
 #Path to the output directory.
-Out_path='F:\Signal_over_TUs\\Transcript-based\\'
+Out_path='D:\Sutormin_data\D_Sutormin\Science\Signal_over_TUs\All_combinations_for_TopA\\'
 
 #Output path.
 def create_out_dirs(out_path, genes_set_name):
@@ -113,10 +146,14 @@ def create_out_dirs(out_path, genes_set_name):
     Dir_check_create(out_path+'\Signal_of_TUs_wig\\'+genes_set_name)    
     return
 
-create_out_dirs(Out_path, Genes_set_name_1)
-create_out_dirs(Out_path, Genes_set_name_2)
-create_out_dirs(Out_path, Genes_set_name_3)
-create_out_dirs(Out_path, Genes_set_name_4)
+create_out_dirs(Out_path, Genes_set_name_10)
+create_out_dirs(Out_path, Genes_set_name_11)
+create_out_dirs(Out_path, Genes_set_name_12)
+create_out_dirs(Out_path, Genes_set_name_13)
+create_out_dirs(Out_path, Genes_set_name_14)
+create_out_dirs(Out_path, Genes_set_name_15)
+create_out_dirs(Out_path, Genes_set_name_16)
+create_out_dirs(Out_path, Genes_set_name_17)
 
 
 
@@ -509,5 +546,15 @@ def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot
 #Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI, Path_to_annotation_7, Type_of_annot_7, Genes_set_name_7, Deletions_inpath, Win_width, Length, Out_path)
 #Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI, Path_to_annotation_8, Type_of_annot_8, Genes_set_name_8, Deletions_inpath, Win_width, Length, Out_path)
 #Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI, Path_to_annotation_9, Type_of_annot_9, Genes_set_name_9, Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Deletions_inpath, Win_width, Length, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_11, Type_of_annot_11, Genes_set_name_11, Deletions_inpath, Win_width, Length, Out_path)
+
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_11, Type_of_annot_11, Genes_set_name_11, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_12, Type_of_annot_12, Genes_set_name_12, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_13, Type_of_annot_13, Genes_set_name_13, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_14, Type_of_annot_14, Genes_set_name_14, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_15, Type_of_annot_15, Genes_set_name_15, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_16, Type_of_annot_16, Genes_set_name_16, Deletions_inpath, Win_width, Length, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_TopoI_3, Path_to_annotation_17, Type_of_annot_17, Genes_set_name_17, Deletions_inpath, Win_width, Length, Out_path)
+
+#Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Deletions_inpath, Win_width, Length, Out_path)
+#Wrapper_signal_over_TUs(Dict_of_wigs_path, Path_to_annotation_11, Type_of_annot_11, Genes_set_name_11, Deletions_inpath, Win_width, Length, Out_path)
