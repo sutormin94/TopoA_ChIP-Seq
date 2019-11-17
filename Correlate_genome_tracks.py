@@ -21,23 +21,33 @@ import scipy.cluster.hierarchy as sch
 
 #Dictionary of replicas 
 #'Track name' : 'Path to wig file'
-Dict_of_tracks={'ParC_1' : "F:\Sayyed_TopoIV_data\Cov_depth\ParC_1_FE.wig",
-                'ParE_1' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_1_FE.wig",
-                'ParE_2' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_2_FE.wig",
-                'ParE_G1' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_G1_FE.wig",
-                'ParE_S20min' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_S20min_FE.wig",
-                'ParE_S40min' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_S40min_FE.wig",  
-                'ParE_G2' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_G2_FE.wig", 
-                'NorflIP_ParC' : "F:\Sayyed_TopoIV_data\Cov_depth\\NorflIP_ParC_1_FE.wig", 
-                'NorflIP_ParE' : "F:\Sayyed_TopoIV_data\Cov_depth\\NorflIP_ParE_1_FE.wig",
-                'NorflIP_ParE' : "F:\Sayyed_TopoIV_data\Cov_depth\\NorflIP_ParE_2_FE.wig",
-                'Cfx_10mkM_2' : "F:\TopoIV_Topo-Seq\Fold_enrichment\Cfx_10mkM_2_FE.wig",
-                'S83L_Cfx_10mkM' : "F:\TopoIV_Topo-Seq\Fold_enrichment\S83L_Cfx_10mkM_FE.wig",
-                'S83L_Cfx_100mkM' : "F:\TopoIV_Topo-Seq\Fold_enrichment\S83L_Cfx_100mkM_FE.wig"}
-
+Dict_of_tracks_1={'ParC_1' : "F:\Sayyed_TopoIV_data\Cov_depth\ParC_1_FE.wig",
+                  'ParE_1' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_1_FE.wig",
+                  'ParE_2' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_2_FE.wig",
+                  'ParE_G1' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_G1_FE.wig",
+                  'ParE_S20min' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_S20min_FE.wig",
+                  'ParE_S40min' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_S40min_FE.wig",  
+                  'ParE_G2' : "F:\Sayyed_TopoIV_data\Cov_depth\ParE_G2_FE.wig", 
+                  'NorflIP_ParC' : "F:\Sayyed_TopoIV_data\Cov_depth\\NorflIP_ParC_1_FE.wig", 
+                  'NorflIP_ParE' : "F:\Sayyed_TopoIV_data\Cov_depth\\NorflIP_ParE_1_FE.wig",
+                  'NorflIP_ParE' : "F:\Sayyed_TopoIV_data\Cov_depth\\NorflIP_ParE_2_FE.wig",
+                  'Cfx_10mkM_2' : "F:\TopoIV_Topo-Seq\Fold_enrichment\Cfx_10mkM_2_FE.wig",
+                  'S83L_Cfx_10mkM' : "F:\TopoIV_Topo-Seq\Fold_enrichment\S83L_Cfx_10mkM_FE.wig",
+                  'S83L_Cfx_100mkM' : "F:\TopoIV_Topo-Seq\Fold_enrichment\S83L_Cfx_100mkM_FE.wig"}
+Dict_of_tracks={'TopA_CTD-Rif-_1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_1_FE.wig",
+                'TopA_CTD-Rif-_2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_2_FE.wig",
+                'TopA_CTD-Rif-_3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_3_FE.wig",
+                'TopA_CTD-Rif+_1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_plus_1_FE.wig",
+                'TopA_CTD-Rif+_2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_plus_2_FE.wig",
+                'TopA_CTD-Rif+_3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_plus_3_FE.wig",
+                'TopA_CTD+Rif-_1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_minus_1_FE.wig",
+                'TopA_CTD+Rif-_2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_minus_2_FE.wig",
+                'TopA_CTD+Rif-_3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_minus_3_FE.wig",
+                'TopA_CTD+Rif+_2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_plus_2_FE.wig",
+                'TopA_CTD+Rif+_3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_plus_3_FE.wig",}
 #Output path for the corralation matrix.
-Outpath="F:\Sayyed_TopoIV_data\Figures\TopoIV_Cfx_FE_TopoIV_Sayyed_correlation_matrix.png"
-Outpath_clusterized="F:\Sayyed_TopoIV_data\Figures\TopoIV_Cfx_FE_TopoIV_Sayyed_correlation_matrix_clusterized.png"
+Outpath="C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_all_conditions_replicas_FE_correlation_matrix.png"
+Outpath_clusterized="C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_all_conditions_replicas_FE_correlation_matrix_clusterized.png"
 
 
 #######

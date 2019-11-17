@@ -11,29 +11,45 @@
 import numpy as np
 
 #Path to the file with IP data
-IP_path_dict={'1' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IP_Mu_10mkM_1\Microcin_IP_Mu_10mkM_1_edt_for_rev_depth.wig",
-              '2' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IP_Mu_10mkM_2\Microcin_IP_Mu_10mkM_2_edt_for_rev_depth.wig",
-              '3' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IP_50mkM_3\Microcin_IP_50mkM_3_edt_for_rev_depth.wig"}
+IP_path_dict={'1' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRif-1_S55.wig",
+              '2' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRif-2_S53.wig",
+              '3' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRif-3_S51.wig",
+              '4' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRifplus2_S59.wig",
+              '5' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRifplus3_S57.wig",
+              '6' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTD-Rif-3_S47.wig",
+              '7' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTD-Rifplus3_S49.wig",}
 
 #Path to the file Mock control data
-Mock_path_dict={'1' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IN_Mu_10mkM_1\Microcin_IN_Mu_10mkM_1_edt_for_rev_depth.wig",
-                '2' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IN_Mu_10mkM_2\Microcin_IN_Mu_10mkM_2_edt_for_rev_depth.wig",
-                '3' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Microcin_IN_50mkM_3\Microcin_IN_50mkM_3_edt_for_rev_depth.wig"}
+Mock_path_dict={'1' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRif-1_S54.wig",
+                '2' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRif-2_S52.wig",
+                '3' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRif-3_S50.wig",
+                '4' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRifplus2_S58.wig",
+                '5' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRifplus3_S56.wig",
+                '6' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTD-Rif-3_S46.wig",
+                '7' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTD-Rifplus3_S48.wig",}
 
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' : "Gyrase_Topo-Seq_EP_Microcin_1_FE",
-           '2' : "Gyrase_Topo-Seq_EP_Microcin_2_FE",
-           '3' : "Gyrase_Topo-Seq_EP_Microcin_3_FE"}
+name_dict={'1' : "ChiP_CTD_plus_Rif_minus_1_FE",
+           '2' : "ChiP_CTD_plus_Rif_minus_2_FE",
+           '3' : "ChiP_CTD_plus_Rif_minus_3_FE",
+           '4' : "ChiP_CTD_plus_Rif_plus_2_FE",
+           '5' : "ChiP_CTD_plus_Rif_plus_3_FE",
+           '6' : "ChiP_CTD_minus_Rif_minus_3_FE",  
+           '7' : "ChiP_CTD_minus_Rif_plus_3_FE", }
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name_manual=''
 #Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
 Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path_dict={'1' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Fold_enrichment\Gyrase_Topo-Seq_EP_Microcin_1_FE.wig",
-                   '2' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Fold_enrichment\Gyrase_Topo-Seq_EP_Microcin_2_FE.wig",
-                   '3' : "F:\E_coli_Topo-Seqs\Gyrase_Topo-Seq_data_coverage_depth\Fold_enrichment\Gyrase_Topo-Seq_EP_Microcin_3_FE.wig"}
+FE_file_path_dict={'1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_minus_1_FE",
+                   '2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_minus_2_FE",
+                   '3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_minus_3_FE",
+                   '4' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_plus_2_FE",
+                   '5' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_plus_3_FE",
+                   '6' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_minus_Rif_minus_3_FE",  
+                   '7' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_minus_Rif_plus_3_FE",}
 
 
 #######

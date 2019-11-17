@@ -19,17 +19,18 @@ from matplotlib import cm as cm
 
 #Dictionary of replicas 
 #'Replica name' : 'Path to wig file'
-Dict_of_replicas={'Replic 1' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_1_FE.wig",
-                  'Replic 2' : "F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_2_FE.wig"}
+Dict_of_replicas={'Replic 1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_1_FE.wig",
+                  'Replic 2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_2_FE.wig",
+                  'Replic 3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_3_FE.wig",}
 
 #ID or short description of the track (will be the name of a track in IGV).
-name='Gyrase_Topo-Seq_Stationary_average_FE'
+name='TopA_ChiP_CTD_plus_Rif_plus_average_FE'
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name='NC_007779.1_w3110_Mu'
 #Output path for the final file.
-average_file_path="F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_average_FE.wig"
+average_file_path="C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig"
 #Output path for the corralation matrix.
-Outpath="F:\Gyrase_stationary_Topo-Seq\Fold_enrichment\Gyrase_Topo-Seq_Stationary_FE_correlation_matrix.png"
+Outpath="C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3_correlation_matrix.png"
 
 
 #######
