@@ -19,22 +19,22 @@ from Bio import SeqIO
 from Bio.SeqUtils import GC as GC_count
 
 #Path to NarrowPeak file with peaks coordinates (MACS2 output).
-Peak_data="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_FC_nm_0.001_peaks.NarrowPeak"
-Peak_data_Rif="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_Rif_FC_nm_0.001_peaks.NarrowPeak"
-Peak_data_shared="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_min_Rif_plus_Rif_common_0.001_peaks.NarrowPeak"
+Peak_data="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak"
+Peak_data_Rif="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak"
+Peak_data_shared="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_Rif_noRif_shared_rep123_thr_2_nm_0.001_peaks.narrowPeak"
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-Genome="C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome="C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Path to the working directory.
-pwd="F:\TopoI_ChIP-Seq\Ec_TopoI_data\\"
+pwd="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
 #Outpath.
 Path_out=pwd + "Seq_under_peaks\\"
 if not os.path.exists(Path_out):
     os.makedirs(Path_out)
 
 #Name for output files (plot and mfa).
-Name="TopoA_rep12_FC_nm_0.001_peaks"
-Name_Rif="TopoA_rep12_Rif_FC_nm_0.001_peaks"
-Name_shared="TopoA_min_Rif_plus_Rif_common_0.001_peaks"
+Name="EcTopoI_noCTD_noRif_rep123_nm_0.001_peaks"
+Name_Rif="EcTopoI_noCTD_Rif_rep123_nm_0.001_peaks"
+Name_shared="EcTopoI_noCTD_noRif_Rif_rep123_shared_nm_0.001_peaks"
     
 
 #######

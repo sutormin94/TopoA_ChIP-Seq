@@ -75,6 +75,19 @@ Identifies reproducible regions and writes them as a broadPeak file.
 **Output:** Reproducible peaks coordinates (broadPeak)
 
 
+## Enrichment_of_regions_comparision.py
+
+The script tests sets of genomic intervals (Peaks, TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)
+for the enrichment with some continously distributed character CDC (RNApol fold enrichment, score, GC%, etc.) (t-test). 
+Plots CDC1 vs CDC2 determind for intervals. Computes correlation of CDCs in intervals. Make violin-plots of CDS in intervals vs other sites.
+
+**Requirements:** Python 2 or 3
+
+**Input:** Peaks coordinates (NarrowPeaks), continously distributed character (WIG)
+
+**Output:** Pearson correlation, plots CDS1 vs CDS2, violin plots
+
+
 ## FE_over_US_GB_DS.py
 
 Takes wig tracks of different genome features (GC%, MukB ChiP-Seq, etc.). Computes signal over TUs upstream (US),

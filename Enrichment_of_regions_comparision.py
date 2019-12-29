@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2018##
-##Topo-Seq analysis##
+##Dmitry Sutormin, 2019##
+##TopoI ChIP-Seq analysis##
 
 #The script tests sets of genomic intervals (Peaks, TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)
 #for the enrichment with some continously distributed character (RNApol fold enrichment, score, GC%, etc.) (t-test).
@@ -23,19 +23,19 @@ from scipy.stats import binom
 #######
 
 #Input: Intervals (e.g. EcTopoI peaks) (BroadPeak or NarrowPeaks).
-path_to_intervals_sets={'RNApol': "F:\TopoI_ChIP-Seq\Ec_TopoI_data\EcTopoI_vs_RNApol\RNApol_peaks\RNApol_peaks_threshold_3.BroadPeak",
-                        'EcTopoI': "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Peak_calling\Reproducible_peaks\TopoA_rep12_FC_nm_0.001_peaks.narrowPeak"
+path_to_intervals_sets={'RNApol': "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol\RNApol_peaks\RNApol_peaks_threshold_3.BroadPeak",
+                        'EcTopoI': "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_2_nm_0.001_peaks.narrowPeak"
                         }
 
 #Input: Continously distributed value (e.g. RNApol distribution or EcTopoI distribution) (WIG).
-cont_characters_dict={'RNApol' : "C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\Pol_Sofi_LB_w3110_for_Mu.wig",
-                      'EcTopoI' : "C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\TopoA_average_Rep1_FE_Rep2_FE.wig",
-                      'GC%': "C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig",
-                      'EcTopoI ms' : "F:\TopoI_ChIP-Seq\Ec_TopoI_data\Motif_scanning\ChIP-Munk\Rep12_thr_0.001\EcTopoI_motif_w3110_scanned_both.wig"                      
+cont_characters_dict={'RNApol' : "C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\Pol_Sofi_LB_w3110_for_Mu.wig",
+                      'EcTopoI' : "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig",
+                      'GC%': "C:\Sutor\Science\Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig",
+                      'EcTopoI ms' : "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Motif_scanning\ChIP-Munk\Rep12_thr_0.001\EcTopoI_motif_w3110_scanned_both.wig"                      
                       }
 
 #Output: path to the dir to store output
-Outputpath="F:\TopoI_ChIP-Seq\Ec_TopoI_data\EcTopoI_vs_RNApol\\"
+Outputpath="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol\\Nov_data\\"
 if not os.path.exists(Outputpath):
     os.makedirs(Outputpath)
     
@@ -143,17 +143,17 @@ def set_axis_style(ax, labels):
     ax.set_xlim(0.25, len(labels)+0.75)
     return
 
-def Intervals_occupation(intervals_param_ar, cont_char_masked, name_of_intervals, name_of_cont_char, outpath):
+def Intervals_occupation(intervals_param_ar, cont_char_masked, name_of_intervals, name_of_cont_char, params, outpath):
     #Plot it.
     pos=[1,2]
     dataset=[intervals_param_ar, cont_char_masked]
-    print(len(pos))
-    print(len(dataset))
+    #print(len(pos))
+    #print(len(dataset))
     #Violin plots for whole-genome signal vs signal of intervals (e.g. peaks).
-    fig=plt.figure(figsize=(6.5,10), dpi=100)
+    fig=plt.figure(figsize=(5.5,10), dpi=100)
     plt1=fig.add_subplot(1,1,1) 
     violins=plt1.violinplot(dataset, positions=pos, widths=0.9, showmeans=True, showmedians=True, points=200)
-    print(violins)
+    #print(violins)
     for vio in violins['bodies']:
         vio.set_facecolor('#ff7762')
         vio.set_edgecolor('black')
@@ -176,18 +176,18 @@ def Intervals_occupation(intervals_param_ar, cont_char_masked, name_of_intervals
     vbars.set_alpha(0.7)
     labels=[f'{name_of_intervals}\nsites', 'Other\nsites']
     set_axis_style(plt1, labels)
-    yticknames1=np.arange(-40, 20, 5) #EcTopoI 0, 35, 1, GC% 0, 100, 10
+    yticknames1=np.arange(params[0], params[1], params[2]) #EcTopoI 0, 35, 1, GC% 0, 100, 10, RNApol 0, 21, 2
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
-    plt1.set_ylim(-34, 14) #EcTopoI -0.2, 4, GC% 10, 77
+    plt1.set_ylim(params[3], params[4]) #EcTopoI -0.2, 4, GC% 10, 77 RNApol -1, 21
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=35)   
-    plt1.annotate(f'Mean {name_of_cont_char}\nsignal={round(np.mean(intervals_param_ar),2)}', xy=(0.3, -12), xycoords='data', size=35, rotation=90) #EcTopoI 0.4, 3.8, GC% 0.3, 35
-    plt1.annotate(f'Mean {name_of_cont_char}\nsignal={round(np.mean(cont_char_masked),2)}', xy=(1.3, -12), xycoords='data', size=35, rotation=90) #EcTopoI 1.4, 3.8, GC% 1.3, 35
+    plt1.annotate(f'Mean {name_of_cont_char}\nsignal={round(np.mean(intervals_param_ar),2)}', xy=(params[5], params[6]), xycoords='data', size=35, rotation=90) #EcTopoI 0.4, 3.8, GC% 0.3, 35, RNApol 0.4, 11
+    plt1.annotate(f'Mean {name_of_cont_char}\nsignal={round(np.mean(cont_char_masked),2)}', xy=(params[7], params[6]), xycoords='data', size=35, rotation=90) #EcTopoI 1.4, 3.8, GC% 1.3, 35, RNApol 1.4, 11
     
     Intervals_stat=stats.ttest_ind(cont_char_masked, intervals_param_ar)
     print(f'\nT-test for all genome sites vs {name_of_intervals} sites {name_of_cont_char} FE means\n' + 'p-value=' + str(Intervals_stat[1]) +'\n' + 't-statistic=' + str(Intervals_stat[0]) + '\n')    
     #plt.show()
-    plt.savefig(f'{outpath}{name_of_cont_char}_signal_of_{name_of_intervals}_sites_and_genome.png', dpi=400, figsize=(6.5, 10)) 
+    plt.savefig(f'{outpath}{name_of_cont_char}_signal_of_{name_of_intervals}_sites_and_genome.png', dpi=400, figsize=(5.5, 10)) 
     plt.close()    
     return
 
@@ -195,26 +195,35 @@ def Intervals_occupation(intervals_param_ar, cont_char_masked, name_of_intervals
 #2D plot.
 #######
 
-def plot_2D(intervals_char_1, intervals_char_2, char_name_1, char_name_2, intervals_name, outpath):
-    #Linear fitting.
-    #fit=np.polyfit(intervals_char_1, intervals_char_2, 1)
-    #print(fit)
-    #fit_fn=np.poly1d(fit)  
-    #Linnear fitting log.
-    fit=np.polyfit(intervals_char_1, np.log10(intervals_char_2), 1)
-    print(fit)
-    fit_fn=np.poly1d(fit)     
+def plot_2D(intervals_char_1, intervals_char_2, char_name_1, char_name_2, intervals_name, method, outpath):
+    ##Fitting.
+    if method=='lin':
+        #Linear fitting of linear data.
+        fit=np.polyfit(intervals_char_1, intervals_char_2, 1)
+        print(fit)
+        fit_fn=np.poly1d(fit)  
+    elif method=='log':
+        #Linnear fitting of log data.
+        fit=np.polyfit(intervals_char_1, np.log10(intervals_char_2), 1)
+        print(fit)
+        fit_fn=np.poly1d(fit)     
     
-    #Pearson correlation.
-    #pearson_cor=scipy.stats.pearsonr(intervals_char_1, intervals_char_2)
-    #print(f'Paerson correlation ({char_name_1}, {char_name_2}) for {intervals_name} {pearson_cor}')
-    #Pearson log.
-    pearson_cor=scipy.stats.pearsonr(intervals_char_1, np.log10(intervals_char_2))
-    print(f'Paerson correlation ({char_name_1}, {char_name_2}) log for {intervals_name} {pearson_cor}')    
+    ##Pearson correlation.
+    if method=='lin':
+        #Pearson linear data.
+        pearson_cor=scipy.stats.pearsonr(intervals_char_1, intervals_char_2)
+        print(f'Paerson correlation ({char_name_1}, {char_name_2}) for {intervals_name} {pearson_cor}')
+    elif method=='log':
+        #Pearson log data.
+        pearson_cor=scipy.stats.pearsonr(intervals_char_1, np.log10(intervals_char_2))
+        print(f'Paerson correlation ({char_name_1}, {char_name_2}) log for {intervals_name} {pearson_cor}')    
       
     #Plot data.
     fig, ax = plt.subplots()
-    ax.plot(intervals_char_1, np.log10(intervals_char_2), 'bo')
+    if method=='lin':
+        ax.plot(intervals_char_1, intervals_char_2, 'ro')
+    elif method=='log':
+        ax.plot(intervals_char_1, np.log10(intervals_char_2), 'bo')
     ax.plot(intervals_char_1, fit_fn(intervals_char_1), '--k', label='y='+str(round(fit[0], 3))+'x+'+str(round(fit[1], 3))) 
     ax.annotate(f'Pearson correlation=\n{round(pearson_cor[0], 3)}', xy=(0.7, 0.2), xycoords='axes fraction', size=9)
     ax.set_xlabel(char_name_1)
@@ -222,8 +231,11 @@ def plot_2D(intervals_char_1, intervals_char_2, char_name_1, char_name_2, interv
     #ax.set_yscale('log')
     #ax.set_xscale('log')
     ax.set_title(f'{char_name_1} vs {char_name_2} for {intervals_name} peaks')
-    plt.show()
-    plt.savefig(f'{outpath}\{char_name_1}_vs_{char_name_2}_log_for_{intervals_name}_peaks.png')
+    #plt.show()
+    if method=='lin':
+        plt.savefig(f'{outpath}\{char_name_1}_vs_{char_name_2}_for_{intervals_name}_peaks.png')
+    elif method=='log':
+        plt.savefig(f'{outpath}\{char_name_1}_vs_{char_name_2}_log_for_{intervals_name}_peaks.png')
     return
 
 #######
@@ -236,28 +248,51 @@ def func_wrapper(intervals_sets_path_dict, cont_char_path_dict, outpath):
     #Process intervals.
     name_of_intervals_1='EcTopoI'
     intervals_width_1=width_of_intervals(intervals_sets_dict, name_of_intervals_1)
+    name_of_intervals_2='RNApol'
+    intervals_width_2=width_of_intervals(intervals_sets_dict, name_of_intervals_2)    
     #Process continuos data.
     name_of_cont_char_1='EcTopoI ms'
     name_of_cont_char_2='RNApol'
     name_of_cont_char_3='EcTopoI'
     name_of_cont_char_4='GC%'
+    #EcTopoI intervals.
     intervals_param_ar_tg_1, cont_char_masked_1, intervals_param_ar_sp_1=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_1) 
     intervals_param_ar_tg_2, cont_char_masked_2, intervals_param_ar_sp_2=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_2)
     intervals_param_ar_tg_3, cont_char_masked_3, intervals_param_ar_sp_3=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_3)
     intervals_param_ar_tg_4, cont_char_masked_4, intervals_param_ar_sp_4=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_4)
+    #RNApol intervals.
+    intervals_param_ar_tg_2_1, cont_char_masked_2_1, intervals_param_ar_sp_2_1=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_1) 
+    intervals_param_ar_tg_2_2, cont_char_masked_2_2, intervals_param_ar_sp_2_2=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_2)
+    intervals_param_ar_tg_2_3, cont_char_masked_2_3, intervals_param_ar_sp_2_3=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_3)
+    intervals_param_ar_tg_2_4, cont_char_masked_2_4, intervals_param_ar_sp_2_4=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_4)    
     ##2D plots.
+    #EcTopoI intervals.
     #EcTopoI ms vs GC%
-    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_4, name_of_cont_char_1, name_of_cont_char_4, name_of_intervals_1, outpath+'GC_vs_EcTopoI_vs_RNApol\\')
+    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_4, name_of_cont_char_1, name_of_cont_char_4, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\')
     #EcTopoI ms vs RNApol
-    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_2, name_of_cont_char_1, name_of_cont_char_2, name_of_intervals_1, outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
+    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_2, name_of_cont_char_1, name_of_cont_char_2, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
     #EcTopoI ms vs EcTopoI
-    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_3, name_of_cont_char_1, name_of_cont_char_3, name_of_intervals_1, outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
+    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_3, name_of_cont_char_1, name_of_cont_char_3, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
     #EcTopoI vs RNApol
-    plot_2D(intervals_param_ar_sp_3, intervals_param_ar_sp_2, name_of_cont_char_3, name_of_cont_char_2, name_of_intervals_1, outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
+    plot_2D(intervals_param_ar_sp_3, intervals_param_ar_sp_2, name_of_cont_char_3, name_of_cont_char_2, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
     #EcTopoI vs EcTopoI peaks width.
-    plot_2D(intervals_param_ar_sp_3, intervals_width_1, name_of_cont_char_3, 'Peaks width', name_of_intervals_1, outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
+    plot_2D(intervals_param_ar_sp_3, intervals_width_1, name_of_cont_char_3, 'Peaks width', name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
+    #RNApol intervals.
+    #EcTopoI ms vs GC%
+    plot_2D(intervals_param_ar_sp_2_1, intervals_param_ar_sp_2_4, name_of_cont_char_1, name_of_cont_char_4, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\')
+    #EcTopoI ms vs RNApol
+    plot_2D(intervals_param_ar_sp_2_1, intervals_param_ar_sp_2_2, name_of_cont_char_1, name_of_cont_char_2, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
+    #EcTopoI ms vs EcTopoI
+    plot_2D(intervals_param_ar_sp_2_1, intervals_param_ar_sp_2_3, name_of_cont_char_1, name_of_cont_char_3, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
+    #EcTopoI vs RNApol
+    plot_2D(intervals_param_ar_sp_2_3, intervals_param_ar_sp_2_2, name_of_cont_char_3, name_of_cont_char_2, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
+    #EcTopoI vs EcTopoI peaks width.
+    plot_2D(intervals_param_ar_sp_2_3, intervals_width_2, name_of_cont_char_3, 'Peaks width', name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\')         
     ##Violin plots.
-    #Intervals_occupation(intervals_param_ar_tg_1, cont_char_masked_1, name_of_intervals_1, name_of_cont_char_1, outpath)   
+    #EcTopoI intervals.
+    Intervals_occupation(intervals_param_ar_tg_2, cont_char_masked_2, name_of_intervals_1, name_of_cont_char_2, [0, 21, 2, -1, 21, 0.35, 11, 1.35], outpath)   
+    #RNApol intervals.
+    Intervals_occupation(intervals_param_ar_tg_2_3, cont_char_masked_2_3, name_of_intervals_2, name_of_cont_char_3, [0, 5, 1, -0.2, 4.5, 0.35, 2.1, 1.35], outpath)
     return
 
 func_wrapper(path_to_intervals_sets, cont_characters_dict, Outputpath)

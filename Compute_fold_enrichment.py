@@ -11,45 +11,49 @@
 import numpy as np
 
 #Path to the file with IP data
-IP_path_dict={'1' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRif-1_S55.wig",
-              '2' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRif-2_S53.wig",
-              '3' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRif-3_S51.wig",
-              '4' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRifplus2_S59.wig",
-              '5' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTDplusRifplus3_S57.wig",
-              '6' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTD-Rif-3_S47.wig",
-              '7' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\ChiP_CTD-Rifplus3_S49.wig",}
+IP_path_dict={'1' : "C:\Sutor\Science\BREX\WIG_nodup\EMit2_S16_nodup.wig",
+              '2' : "C:\Sutor\Science\BREX\WIG_nodup\EMit4_S18_nodup.wig",
+              '3' : "C:\Sutor\Science\BREX\WIG_nodup\EMit6_S20_nodup.wig",
+              '4' : "C:\Sutor\Science\BREX\WIG_nodup\EMit8_S22_nodup.wig",
+              '5' : "C:\Sutor\Science\BREX\WIG_nodup\EMit9_S97_nodup.wig",
+              '6' : "C:\Sutor\Science\BREX\WIG_nodup\EMit10_S98_nodup.wig",
+              '7' : "C:\Sutor\Science\BREX\WIG_nodup\EMit11_S99_nodup.wig",
+              '8' : "C:\Sutor\Science\BREX\WIG_nodup\EMit12_S100_nodup.wig",}
 
 #Path to the file Mock control data
-Mock_path_dict={'1' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRif-1_S54.wig",
-                '2' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRif-2_S52.wig",
-                '3' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRif-3_S50.wig",
-                '4' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRifplus2_S58.wig",
-                '5' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTDplusRifplus3_S56.wig",
-                '6' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTD-Rif-3_S46.wig",
-                '7' : "C:\Sutor\Science\TopoI-ChIP-Seq\WIG\Mock_CTD-Rifplus3_S48.wig",}
+Mock_path_dict={'1' : "C:\Sutor\Science\BREX\WIG_nodup\EMit1_S15_nodup.wig",
+                '2' : "C:\Sutor\Science\BREX\WIG_nodup\EMit3_S17_nodup.wig",
+                '3' : "C:\Sutor\Science\BREX\WIG_nodup\EMit5_S19_nodup.wig",
+                '4' : "C:\Sutor\Science\BREX\WIG_nodup\EMit7_S21_nodup.wig",
+                '5' : "C:\Sutor\Science\BREX\WIG_nodup\EMit13_S101_nodup.wig",
+                '6' : "C:\Sutor\Science\BREX\WIG_nodup\EMit14_S102_nodup.wig",
+                '7' : "C:\Sutor\Science\BREX\WIG_nodup\EMit15_S103_nodup.wig",
+                '8' : "C:\Sutor\Science\BREX\WIG_nodup\EMit16_S104_nodup.wig",}
 
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' : "ChiP_CTD_plus_Rif_minus_1_FE",
-           '2' : "ChiP_CTD_plus_Rif_minus_2_FE",
-           '3' : "ChiP_CTD_plus_Rif_minus_3_FE",
-           '4' : "ChiP_CTD_plus_Rif_plus_2_FE",
-           '5' : "ChiP_CTD_plus_Rif_plus_3_FE",
-           '6' : "ChiP_CTD_minus_Rif_minus_3_FE",  
-           '7' : "ChiP_CTD_minus_Rif_plus_3_FE", }
+name_dict={'1' : "EMit2_S16_nodup/EMit1_S15_nodup",
+           '2' : "EMit4_S18_nodup/EMit3_S17_nodup",
+           '3' : "EMit6_S20_nodup/EMit5_S19_nodup",
+           '4' : "EMit8_S22_nodup/EMit7_S21_nodup",
+           '5' : "EMit9_S97_nodup/EMit13_S101_nodup",
+           '6' : "EMit10_S98_nodup/EMit14_S102_nodup",  
+           '7' : "EMit11_S99_nodup/EMit15_S103_nodup",
+           '8' : "EMit12_S100_nodup/EMit16_S104_nodup",}
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name_manual=''
 #Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
 Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path_dict={'1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_minus_1_FE",
-                   '2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_minus_2_FE",
-                   '3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_minus_3_FE",
-                   '4' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_plus_2_FE",
-                   '5' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_plus_Rif_plus_3_FE",
-                   '6' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_minus_Rif_minus_3_FE",  
-                   '7' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\ChiP_CTD_minus_Rif_plus_3_FE",}
+FE_file_path_dict={'1' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit2_1_nodup.wig",
+                   '2' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit4_3_nodup.wig",
+                   '3' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit6_5_nodup.wig",
+                   '4' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit8_7_nodup.wig",
+                   '5' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit9_13_nodup.wig",
+                   '6' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit10_14_nodup.wig",  
+                   '7' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit11_15_nodup.wig",
+                   '8' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit12_16_nodup.wig",}
 
 
 #######
