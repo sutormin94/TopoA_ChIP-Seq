@@ -13,123 +13,30 @@
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import scipy
 from scipy import stats
 from scipy.stats import pearsonr
 from scipy.stats import binom
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 #######
 #Variables to be defined.
 #######
 
-#Input: Intervals (e.g. EcTopoI peaks) (BroadPeak or NarrowPeaks).
-path_to_intervals_sets={'RNApol': "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol\RNApol_peaks\RNApol_peaks_threshold_3.BroadPeak",
-                        'EcTopoI': "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_2_nm_0.001_peaks.narrowPeak"
-                        }
+#Path to the working directory.
+PWD="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peaks_info\\"
 
-#Input: Continously distributed value (e.g. RNApol distribution or EcTopoI distribution) (WIG).
-cont_characters_dict={'RNApol' : "C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\Pol_Sofi_LB_w3110_for_Mu.wig",
-                      'EcTopoI' : "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig",
-                      'GC%': "C:\Sutor\Science\Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig",
-                      'EcTopoI ms' : "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Motif_scanning\ChIP-Munk\Rep12_thr_0.001\EcTopoI_motif_w3110_scanned_both.wig"                      
-                      }
+#Input: Intervals (e.g. EcTopoI peaks) with additional info (FE, GC%, width, etc.).
+path_to_intervals_data=PWD + "EcTopoI_noCTD_noRif_nm_0.001_peaks_more_info.csv"
 
 #Output: path to the dir to store output
-Outputpath="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol\\Nov_data\\"
+Outputpath=PWD + "EcTopoI_noCTD_noRif_nm_0.001_peaks\\"
 if not os.path.exists(Outputpath):
     os.makedirs(Outputpath)
     
-
-#######
-#BroadPeak-formalized intervals parsing (NAPs sites or BIMEs, etc) and filtering intervals that are not deleted.
-#######
-
-def broadpeak_pars(intervals_sets_path):
-    deletions=[[274500, 372148], [793800, 807500], [1199000, 1214000]] #Deletions in E. coli w3110 strain that corresponds to DY330 strain.
-    intervals_sets_dict={}
-    for k, v in intervals_sets_path.items():
-        filein=open(v, 'r')
-        ar=[]        
-        for line in filein:
-            line=line.rstrip().split('\t')
-            int_start=int(line[1])
-            int_end=int(line[2])
-            del_check=0
-            for j in range(len(deletions)):
-                if deletions[j][1]>int_start>deletions[j][0] or deletions[j][1]>int_end>deletions[j][0]:
-                    del_check=1
-            if del_check==0:
-                ar.append([int_start, int_end]) #Interval start, interval end        
-        intervals_sets_dict[k]=ar
-        print("Number of " + str(k) + " regions: " + str(len(ar)))
-        filein.close()
-    return intervals_sets_dict
-
-
-#######
-#Parsing WIG file.
-#######
-
-def score_data_parser(inpath_dict):
-    cont_char_dict={}
-    for param_name, inpath in inpath_dict.items():
-        param_file=open(inpath, 'r')
-        ar=[]
-        for line in param_file:
-            line=line.rstrip().split(' ')
-            if line[0] not in ['track', 'fixedStep']:
-                ar.append(float(line[0]))
-        param_file.close()
-        print('Whole genome average ' + str(param_name) + ' : ' + str(sum(ar)/len(ar)))
-        cont_char_dict[param_name]=ar 
-    return cont_char_dict
-
-#######
-#Mask deletions.
-#######
-
-def mask_array(ar, regions_to_mask):
-    #Mask deletions or smth in FE array.
-    maska=[0]*len(ar)
-    for deletion in regions_to_mask:
-        del_len=deletion[1]-deletion[0]
-        for i in range(del_len):
-            maska[deletion[0]+i]=1
-    ar_masked=np.ma.masked_array(ar, mask=maska)  
-    ar_non_del_only=list(ar_masked[~ar_masked.mask])
-    print(len(ar), len(ar_non_del_only))
-    return ar_non_del_only
-
-#######
-#Return lengths of intervals.
-#######
-
-def width_of_intervals(intervals_sets_dict, name_of_intervals):
-    intervals=intervals_sets_dict[name_of_intervals]
-    intervals_len=[]
-    for interval in intervals:
-        intervals_len.append(interval[1]-interval[0])
-    return intervals_len
-
-#######
-#Return continous characteristics of intervals, mask deletions and intervals regions.
-#######
-
-def cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals, name_of_cont_char):
-    intervals=intervals_sets_dict[name_of_intervals]
-    cont_char=cont_char_dict[name_of_cont_char]
-    #Return enrichment of intervals.
-    intervals_param_ar_tg=[]
-    intervals_param_ar_sp=[]
-    for interval in intervals:
-        intervals_param_ar_tg+=cont_char[interval[0]:interval[1]]   
-        intervals_param_ar_sp.append(np.mean(cont_char[interval[0]:interval[1]]))
-    
-    #Prepare continuos character without deleted regions and regions defined by intervals. 
-    deletions=[[274500, 372148], [793800, 807500], [1199000, 1214000]] #Deletions in E. coli w3110 strain that corresponds to DY330 strain.
-    regions_to_mask=deletions+intervals
-    cont_char_masked=mask_array(cont_char, regions_to_mask)
-    return intervals_param_ar_tg, cont_char_masked, intervals_param_ar_sp
 
 #######
 #Compare RNApol occupation of BIMEs and overall RNApol occupation.
@@ -195,106 +102,236 @@ def Intervals_occupation(intervals_param_ar, cont_char_masked, name_of_intervals
 #2D plot.
 #######
 
-def plot_2D(intervals_char_1, intervals_char_2, char_name_1, char_name_2, intervals_name, method, outpath):
+def plot_2D(intervals_char_1_orig, intervals_char_2_orig, char_name_1, char_name_2, intervals_name, method, limit_1, outpath):
+    ##Filtering.
+    intervals_char_1=intervals_char_1_orig[intervals_char_1_orig<limit_1]
+    intervals_char_2=intervals_char_2_orig[intervals_char_1_orig<limit_1]
+    
     ##Fitting.
     if method=='lin':
         #Linear fitting of linear data.
         fit=np.polyfit(intervals_char_1, intervals_char_2, 1)
         print(fit)
         fit_fn=np.poly1d(fit)  
+        ##Pearson correlation.
+        pearson_cor=scipy.stats.pearsonr(intervals_char_1, intervals_char_2)
+        print(f'Paerson correlation ({char_name_1}, {char_name_2}) for {intervals_name} {pearson_cor}')  
+        ##Plot data.
+        fig=plt.figure(figsize=(5,4), dpi=100)
+        ax=fig.add_subplot(111)
+        ax.plot(intervals_char_1, intervals_char_2, 'ro')
+        ax.plot(intervals_char_1, fit_fn(intervals_char_1), '--k', label='y='+str(round(fit[0], 3))+'x+'+str(round(fit[1], 3))) 
+        ax.annotate(f'Pearson correlation=\n{round(pearson_cor[0], 3)}', xy=(0.6, 0.2), xycoords='axes fraction', size=9)
+        ax.set_xlabel(char_name_1, fontsize=12)
+        ax.set_ylabel(char_name_2, fontsize=12)
+        ax.set_title(f'{char_name_1} vs {char_name_2} for\n {intervals_name} peaks', fontsize=12)
+        plt.tight_layout()        
+        char_name_1=char_name_1.replace("/", '_')
+        plt.savefig(f'{outpath}\{char_name_1}_lin_vs_{char_name_2}_lin_for_{intervals_name}_peaks.png', dpi=300, figsize=(5,4))   
+        
+    if method=='semilogx':
+        #Linear fitting of linear data.
+        fit=np.polyfit(np.log10(intervals_char_1), intervals_char_2, 1)
+        print(fit)
+        fit_fn=np.poly1d(fit)  
+        ##Pearson correlation.
+        pearson_cor=scipy.stats.pearsonr(np.log10(intervals_char_1), intervals_char_2)
+        print(f'Paerson correlation ({char_name_1} log, {char_name_2}) for {intervals_name} {pearson_cor}')  
+        ##Plot data.
+        fig=plt.figure(figsize=(5,4), dpi=100)
+        ax=fig.add_subplot(111)
+        ax.plot(np.log10(intervals_char_1), intervals_char_2, 'go')
+        ax.plot(np.log10(intervals_char_1), fit_fn(np.log10(intervals_char_1)), '--k', label='y='+str(round(fit[0], 3))+'x+'+str(round(fit[1], 3))) 
+        ax.annotate(f'Pearson correlation=\n{round(pearson_cor[0], 3)}', xy=(0.6, 0.2), xycoords='axes fraction', size=9)
+        ax.set_xlabel(f'log({char_name_1})', fontsize=12)
+        ax.set_ylabel(char_name_2, fontsize=12)
+        ax.set_title(f'log({char_name_1}) vs {char_name_2} for\n {intervals_name} peaks', fontsize=12)
+        plt.tight_layout()        
+        char_name_1=char_name_1.replace("/", '_')
+        plt.savefig(f'{outpath}\{char_name_1}_log_vs_{char_name_2}_lin_for_{intervals_name}_peaks.png', dpi=300, figsize=(5,4))  
+        
     elif method=='log':
         #Linnear fitting of log data.
-        fit=np.polyfit(intervals_char_1, np.log10(intervals_char_2), 1)
+        fit=np.polyfit(np.log10(intervals_char_1), np.log10(intervals_char_2), 1)
         print(fit)
-        fit_fn=np.poly1d(fit)     
-    
-    ##Pearson correlation.
-    if method=='lin':
-        #Pearson linear data.
-        pearson_cor=scipy.stats.pearsonr(intervals_char_1, intervals_char_2)
-        print(f'Paerson correlation ({char_name_1}, {char_name_2}) for {intervals_name} {pearson_cor}')
-    elif method=='log':
-        #Pearson log data.
-        pearson_cor=scipy.stats.pearsonr(intervals_char_1, np.log10(intervals_char_2))
-        print(f'Paerson correlation ({char_name_1}, {char_name_2}) log for {intervals_name} {pearson_cor}')    
-      
-    #Plot data.
-    fig, ax = plt.subplots()
-    if method=='lin':
-        ax.plot(intervals_char_1, intervals_char_2, 'ro')
-    elif method=='log':
-        ax.plot(intervals_char_1, np.log10(intervals_char_2), 'bo')
-    ax.plot(intervals_char_1, fit_fn(intervals_char_1), '--k', label='y='+str(round(fit[0], 3))+'x+'+str(round(fit[1], 3))) 
-    ax.annotate(f'Pearson correlation=\n{round(pearson_cor[0], 3)}', xy=(0.7, 0.2), xycoords='axes fraction', size=9)
-    ax.set_xlabel(char_name_1)
-    ax.set_ylabel(char_name_2)
-    #ax.set_yscale('log')
-    #ax.set_xscale('log')
-    ax.set_title(f'{char_name_1} vs {char_name_2} for {intervals_name} peaks')
-    #plt.show()
-    if method=='lin':
-        plt.savefig(f'{outpath}\{char_name_1}_vs_{char_name_2}_for_{intervals_name}_peaks.png')
-    elif method=='log':
-        plt.savefig(f'{outpath}\{char_name_1}_vs_{char_name_2}_log_for_{intervals_name}_peaks.png')
+        fit_fn=np.poly1d(fit) 
+        ##Pearson correlation.
+        pearson_cor=scipy.stats.pearsonr(np.log10(intervals_char_1), np.log10(intervals_char_2))
+        print(f'Paerson correlation ({char_name_1} log, {char_name_2}) log for {intervals_name} {pearson_cor}')       
+        ##Plot data.
+        fig=plt.figure(figsize=(5,4), dpi=100)
+        ax=fig.add_subplot(111)       
+        ax.plot(np.log10(intervals_char_1), np.log10(intervals_char_2), 'bo')
+        ax.plot(np.log10(intervals_char_1), fit_fn(np.log10(intervals_char_1)), '--k', label='y='+str(round(fit[0], 3))+'x+'+str(round(fit[1], 3)))   
+        ax.annotate(f'Pearson correlation=\n{round(pearson_cor[0], 3)}', xy=(0.6, 0.2), xycoords='axes fraction', size=9)
+        ax.set_xlabel(f'log({char_name_1})', fontsize=12)
+        ax.set_ylabel(f'log({char_name_2})', fontsize=12)
+        ax.set_title(f'log({char_name_1}) vs log({char_name_2}) for\n {intervals_name} peaks', fontsize=12)
+        plt.tight_layout()        
+        char_name_1=char_name_1.replace("/", '_')
+        plt.savefig(f'{outpath}\{char_name_1}_log_vs_{char_name_2}_log_for_{intervals_name}_peaks.png', dpi=300, figsize=(5,4))        
+    plt.close()
     return
+
+#######
+#Linear regression.
+#######
+
+def run_regression(Intervals_data_orig, limit):
+    ##Filtering.
+    Intervals_data=Intervals_data_orig[Intervals_data_orig['EcTopoI CTD-/Rif-']<limit]
+    
+    #Based on https://realpython.com/linear-regression-in-python/
+    model = LinearRegression(fit_intercept=True, normalize=True, n_jobs=-1)
+    
+    features_list=['CsiR Aquino', 'Nac Aquino', 'NtrC Aquino', 'OmpR Aquino', 'Fur Beauchene', 'BolA Dressaire', 'NsrR Mehta', 'FNR Myers', 'Lrp Kroner',                    
+                   'EcTopoI score', 'CRP Singh', 'RpoS Peano', 'HNS Kahramanoglou', 'EcTopoI CTD-/Rif+', 'EcTopoI CTD+/Rif-', 'EcTopoI CTD+/Rif+', 'EcTopoI CTD-/Rif-',
+                   'Cra Kim', 'ArcA Park', 'GadE Seo', 'GadW Seo', 'OxyR Seq', 'RpoS Seo', 'SoxR Seo', 'SoxS Seo', 'GadX Seo', 'RpoD Myers', 'Dps Antipov',         
+                   'RpoB Borukhov', 'RpoB Kahramanoglou', 'Fis Kahramanoglou', 'MatP Nolivos', 'MukB Nolivos', 'RNA-Seq Sutormin', 'TopoIV Sayyed',       
+                   'TopoIV Sutormin', 'Gyrase Sutormin', 'Gyrase Rif Sutormin', 'GC']
+    model.fit(Intervals_data[features_list], np.log(Intervals_data['EcTopoI CTD-/Rif-']))
+    r_sq = model.score(Intervals_data[features_list], np.log(Intervals_data['EcTopoI CTD-/Rif-']))          
+    
+    
+    #model.fit(Intervals_data[['GC', 'RpoB Borukhov', 'RpoD Myers', 'RNA-Seq Sutormin', 'Gyrase Sutormin', 'EcTopoI score']], np.log(Intervals_data['EcTopoI CTD-/Rif-']))
+    #r_sq = model.score(Intervals_data[['GC', 'RpoB Borukhov', 'RpoD Myers', 'RNA-Seq Sutormin', 'Gyrase Sutormin', 'EcTopoI score']], np.log(Intervals_data['EcTopoI CTD-/Rif-']))      
+    #model.fit(Intervals_data[['GC', 'RpoB Borukhov', 'RpoD Myers', 'Fis Kahramanoglou', 'HNS Kahramanoglou', 
+    #                          'RNA-Seq Sutormin', 'Gyrase Sutormin', 'EcTopoI score']], np.log(Intervals_data['EcTopoI CTD-/Rif-']))
+    #r_sq = model.score(Intervals_data[['GC', 'RpoB Borukhov', 'RpoD Myers', 'Fis Kahramanoglou', 'HNS Kahramanoglou', 
+    #                                   'RNA-Seq Sutormin', 'Gyrase Sutormin', 'EcTopoI score']], np.log(Intervals_data['EcTopoI CTD-/Rif-']))    
+    #model.fit(Intervals_data[['GC', 'RpoB Borukhov', 'RpoD Myers', 'Fis Kahramanoglou', 'HNS Kahramanoglou', 'MatP Nolivos',
+    #                          'MukB Nolivos', 'RNA-Seq Sutormin', 'Gyrase Sutormin', 'EcTopoI score', 'TopoIV Sayyed']], np.log(Intervals_data['EcTopoI CTD-/Rif-']))
+    #r_sq = model.score(Intervals_data[['GC', 'RpoB Borukhov', 'RpoD Myers', 'Fis Kahramanoglou', 'HNS Kahramanoglou', 'MatP Nolivos',
+    #                                   'MukB Nolivos', 'RNA-Seq Sutormin', 'Gyrase Sutormin', 'EcTopoI score', 'TopoIV Sayyed']], np.log(Intervals_data['EcTopoI CTD-/Rif-']))
+    print('Coefficient of determination:', r_sq)
+    print('Intercept:', model.intercept_)
+    print('Slope:', model.coef_)    
+    return
+
+
+#######
+#Principal component analysis.
+#######
+
+def PCA_analysis(Intervals_info, outpath, dataset_name):
+    #Based on this example: https://towardsdatascience.com/pca-using-python-scikit-learn-e653f8989e60
+    features=['CsiR Aquino', 'Nac Aquino', 'NtrC Aquino', 'OmpR Aquino', 'Fur Beauchene', 'BolA Dressaire', 'NsrR Mehta', 'FNR Myers', 'Lrp Kroner',                    
+              'CRP Singh', 'RpoS Peano', 'HNS Kahramanoglou', 
+              'Cra Kim', 'ArcA Park', 'GadE Seo', 'GadW Seo', 'OxyR Seq', 'RpoS Seo', 'SoxR Seo', 'SoxS Seo', 'GadX Seo', 'RpoD Myers', 'Dps Antipov',         
+              'RpoB Borukhov', 'RpoB Kahramanoglou', 'Fis Kahramanoglou', 'MatP Nolivos', 'MukB Nolivos', 'RNA-Seq Sutormin', 'TopoIV Sayyed',       
+              'TopoIV Sutormin', 'Gyrase Sutormin', 'Gyrase Rif Sutormin', 'GC']
+    #Features.
+    x=Intervals_info.loc[:, features].values
+    #Standardizing the features.
+    x=StandardScaler().fit_transform(x)
+    #PCA model.
+    pca=PCA(n_components=3)
+    #PCA transformation.
+    principalComponents=pca.fit_transform(x)   
+    #Keep PCA data as dataframe.
+    PCA_dataframe=pd.DataFrame(data = principalComponents, columns = ['principal component 1', 'principal component 2', 'principal component 3']) 
+    #Add regions coordinates.
+    PCA_dataframe_coord=pd.concat([PCA_dataframe, Intervals_info[['Start']]], axis = 1)
+    PCA_dataframe_coord.to_csv(outpath+dataset_name+'_PCA_analysis.csv', sep='\t', header=True, index=True)
+    
+    #Performance of PCA.
+    pca_expl=np.round(pca.explained_variance_ratio_, 3)
+    print(pca_expl)    
+    
+    #Plot PCA results.
+    fig = plt.figure(figsize = (12,4))
+    ax = fig.add_subplot(1,3,1) 
+    ax.set_xlabel(f'Principal Component 1 ({pca_expl[0]})', fontsize = 15)
+    ax.set_ylabel(f'Principal Component 2 ({pca_expl[1]})', fontsize = 15)
+    ax.set_title('3 component PCA: 1 vs 2', fontsize = 15)
+    ax.scatter(PCA_dataframe['principal component 1'], PCA_dataframe['principal component 2'], c='red' , s=50)
+    for index_num in PCA_dataframe_coord.index:
+        coordinate=PCA_dataframe_coord.loc[index_num, 'Start']
+        x_coord=PCA_dataframe_coord.loc[index_num, 'principal component 1']
+        y_coord=PCA_dataframe_coord.loc[index_num, 'principal component 2']
+        ax.annotate(coordinate, xy=(x_coord, y_coord), xycoords='data', size=4)
+    ax.grid()    
+    
+    ax = fig.add_subplot(1,3,2) 
+    ax.set_xlabel(f'Principal Component 1 ({pca_expl[0]})', fontsize = 15)
+    ax.set_ylabel(f'Principal Component 3 ({pca_expl[2]})', fontsize = 15)
+    ax.set_title('3 component PCA: 1 vs 3', fontsize = 15)
+    ax.scatter(PCA_dataframe['principal component 1'], PCA_dataframe['principal component 3'], c='blue' , s=50)
+    for index_num in PCA_dataframe_coord.index:
+        coordinate=PCA_dataframe_coord.loc[index_num, 'Start']
+        x_coord=PCA_dataframe_coord.loc[index_num, 'principal component 1']
+        y_coord=PCA_dataframe_coord.loc[index_num, 'principal component 3']
+        ax.annotate(coordinate, xy=(x_coord, y_coord), xycoords='data', size=4)    
+    ax.grid() 
+    
+    ax = fig.add_subplot(1,3,3) 
+    ax.set_xlabel(f'Principal Component 2 ({pca_expl[1]})', fontsize = 15)
+    ax.set_ylabel(f'Principal Component 3 ({pca_expl[2]})', fontsize = 15)
+    ax.set_title('3 component PCA: 2 vs 3', fontsize = 15)
+    ax.scatter(PCA_dataframe['principal component 2'], PCA_dataframe['principal component 3'], c='green' , s=50)
+    for index_num in PCA_dataframe_coord.index:
+        coordinate=PCA_dataframe_coord.loc[index_num, 'Start']
+        x_coord=PCA_dataframe_coord.loc[index_num, 'principal component 2']
+        y_coord=PCA_dataframe_coord.loc[index_num, 'principal component 3']
+        ax.annotate(coordinate, xy=(x_coord, y_coord), xycoords='data', size=4)    
+    ax.grid()    
+    
+    plt.tight_layout()
+    plt.savefig(outpath+dataset_name+'_PCA_analysis_annotated.png', dpi=300)
+    
+    
+    #Plot dependences of features with PC.
+    #plt.figure(figsize = (20,10))
+    plt.matshow(pca.components_,cmap='viridis')
+    plt.colorbar()
+    plt.yticks([0,1,2], ['1st Comp','2nd Comp','3rd Comp'], fontsize=12, rotation=0)
+    plt.ylim([-0.5, 2.5]) #Solves a bug in matplotlib 3.1.1 discussed here: https://stackoverflow.com/questions/56942670/matplotlib-seaborn-first-and-last-row-cut-in-half-of-heatmap-plot
+    plt.xticks(range(len(features)), features, rotation=65, ha='left')
+    plt.tight_layout()
+    plt.show()    
+    plt.savefig(outpath+dataset_name+'_PCA_analysis_features_impact.png', bbox_inches = "tight", dpi=300, figsize=(20,10))    
+    
+    return
+
 
 #######
 #Functions wrapper.
 #######
 
-def func_wrapper(intervals_sets_path_dict, cont_char_path_dict, outpath):
-    intervals_sets_dict=broadpeak_pars(intervals_sets_path_dict)
-    cont_char_dict=score_data_parser(cont_char_path_dict)
-    #Process intervals.
-    name_of_intervals_1='EcTopoI'
-    intervals_width_1=width_of_intervals(intervals_sets_dict, name_of_intervals_1)
-    name_of_intervals_2='RNApol'
-    intervals_width_2=width_of_intervals(intervals_sets_dict, name_of_intervals_2)    
-    #Process continuos data.
-    name_of_cont_char_1='EcTopoI ms'
-    name_of_cont_char_2='RNApol'
-    name_of_cont_char_3='EcTopoI'
-    name_of_cont_char_4='GC%'
-    #EcTopoI intervals.
-    intervals_param_ar_tg_1, cont_char_masked_1, intervals_param_ar_sp_1=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_1) 
-    intervals_param_ar_tg_2, cont_char_masked_2, intervals_param_ar_sp_2=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_2)
-    intervals_param_ar_tg_3, cont_char_masked_3, intervals_param_ar_sp_3=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_3)
-    intervals_param_ar_tg_4, cont_char_masked_4, intervals_param_ar_sp_4=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_1, name_of_cont_char_4)
-    #RNApol intervals.
-    intervals_param_ar_tg_2_1, cont_char_masked_2_1, intervals_param_ar_sp_2_1=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_1) 
-    intervals_param_ar_tg_2_2, cont_char_masked_2_2, intervals_param_ar_sp_2_2=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_2)
-    intervals_param_ar_tg_2_3, cont_char_masked_2_3, intervals_param_ar_sp_2_3=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_3)
-    intervals_param_ar_tg_2_4, cont_char_masked_2_4, intervals_param_ar_sp_2_4=cont_char_of_intervals(intervals_sets_dict, cont_char_dict, name_of_intervals_2, name_of_cont_char_4)    
+def func_wrapper(intervals_sets_path, outpath):
+    #Read data
+    Intervals_info=pd.read_csv(intervals_sets_path, sep='\t', header=0, index_col=False, dtype={'Start' : np.int64, 'End' : np.int64})
+
     ##2D plots.
-    #EcTopoI intervals.
-    #EcTopoI ms vs GC%
-    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_4, name_of_cont_char_1, name_of_cont_char_4, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\')
-    #EcTopoI ms vs RNApol
-    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_2, name_of_cont_char_1, name_of_cont_char_2, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
-    #EcTopoI ms vs EcTopoI
-    plot_2D(intervals_param_ar_sp_1, intervals_param_ar_sp_3, name_of_cont_char_1, name_of_cont_char_3, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
-    #EcTopoI vs RNApol
-    plot_2D(intervals_param_ar_sp_3, intervals_param_ar_sp_2, name_of_cont_char_3, name_of_cont_char_2, name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
-    #EcTopoI vs EcTopoI peaks width.
-    plot_2D(intervals_param_ar_sp_3, intervals_width_1, name_of_cont_char_3, 'Peaks width', name_of_intervals_1, 'log', outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
-    #RNApol intervals.
-    #EcTopoI ms vs GC%
-    plot_2D(intervals_param_ar_sp_2_1, intervals_param_ar_sp_2_4, name_of_cont_char_1, name_of_cont_char_4, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\')
-    #EcTopoI ms vs RNApol
-    plot_2D(intervals_param_ar_sp_2_1, intervals_param_ar_sp_2_2, name_of_cont_char_1, name_of_cont_char_2, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
-    #EcTopoI ms vs EcTopoI
-    plot_2D(intervals_param_ar_sp_2_1, intervals_param_ar_sp_2_3, name_of_cont_char_1, name_of_cont_char_3, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\')     
-    #EcTopoI vs RNApol
-    plot_2D(intervals_param_ar_sp_2_3, intervals_param_ar_sp_2_2, name_of_cont_char_3, name_of_cont_char_2, name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\') 
-    #EcTopoI vs EcTopoI peaks width.
-    plot_2D(intervals_param_ar_sp_2_3, intervals_width_2, name_of_cont_char_3, 'Peaks width', name_of_intervals_2, 'lin', outpath+'GC_vs_EcTopoI_vs_RNApol\\')         
+    limit_1=1000
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['GC'], 'EcTopoI CTD-/Rif-', 'GC', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['Width'], 'EcTopoI CTD-/Rif-', 'Width', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['RpoB Borukhov'], 'EcTopoI CTD-/Rif-', 'RpoB Borukhov', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['RpoD Myers'], 'EcTopoI CTD-/Rif-', 'RpoD Myers', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['RpoB Kahramanoglou'], 'EcTopoI CTD-/Rif-', 'RpoB Kahramanoglou', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['Fis Kahramanoglou'], 'EcTopoI CTD-/Rif-', 'Fis Kahramanoglou', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['HNS Kahramanoglou'], 'EcTopoI CTD-/Rif-', 'HNS Kahramanoglou', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['MatP Nolivos'], 'EcTopoI CTD-/Rif-', 'MatP Nolivos', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['MukB Nolivos'], 'EcTopoI CTD-/Rif-', 'MukB Nolivos', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['RNA-Seq Sutormin'], 'EcTopoI CTD-/Rif-', 'RNA-Seq Sutormin', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['Gyrase Sutormin'], 'EcTopoI CTD-/Rif-', 'Gyrase Sutormin', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['EcTopoI score'], 'EcTopoI CTD-/Rif-', 'EcTopoI score', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
+    #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['TopoIV Sayyed'], 'EcTopoI CTD-/Rif-', 'TopoIV Sayyed', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
+    
+    #Run linear regression.
+    run_regression(Intervals_info, limit_1)
+    #Run PCA analysis.
+    PCA_analysis(Intervals_info, outpath, 'EcTopoI_noCTD_Rif_nm_0.001_peaks')
+    
+    
+    
     ##Violin plots.
     #EcTopoI intervals.
-    Intervals_occupation(intervals_param_ar_tg_2, cont_char_masked_2, name_of_intervals_1, name_of_cont_char_2, [0, 21, 2, -1, 21, 0.35, 11, 1.35], outpath)   
+    #Intervals_occupation(intervals_param_ar_tg_2, cont_char_masked_2, name_of_intervals_1, name_of_cont_char_2, [0, 21, 2, -1, 21, 0.35, 11, 1.35], outpath)   
     #RNApol intervals.
-    Intervals_occupation(intervals_param_ar_tg_2_3, cont_char_masked_2_3, name_of_intervals_2, name_of_cont_char_3, [0, 5, 1, -0.2, 4.5, 0.35, 2.1, 1.35], outpath)
+    #Intervals_occupation(intervals_param_ar_tg_2_3, cont_char_masked_2_3, name_of_intervals_2, name_of_cont_char_3, [0, 5, 1, -0.2, 4.5, 0.35, 2.1, 1.35], outpath)
     return
 
-func_wrapper(path_to_intervals_sets, cont_characters_dict, Outputpath)
+func_wrapper(path_to_intervals_data, Outputpath)
 
 print('Script ended its work succesfully!') 

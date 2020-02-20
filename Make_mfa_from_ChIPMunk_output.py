@@ -18,10 +18,10 @@ from Bio.Alphabet import generic_dna
 #######
 
 #Path to ChIP-Munk output.
-Munk_input="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Motif_identification\ChIP-Munk\\Rif_Rep12_thr_0.001\\results.txt"
+Munk_input="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Motif_identification\\EcTopoI_noCTD_noRif_rep123_nm_0.001_peaks_motifs_2.txt"
 
 #Path to multi-fasta output.
-Munk_output="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Motif_identification\ChIP-Munk\\Rif_Rep12_thr_0.001\Final_motif_seqs_rc.mfa"
+Munk_output="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Motif_identification\\EcTopoI_noCTD_noRif_rep123_nm_0.001_peaks_motifs_2.fasta"
 
 def read_convert(input_path, output_path, reversecomplement):
     filein=open(input_path, 'r')

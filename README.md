@@ -75,6 +75,18 @@ Identifies reproducible regions and writes them as a broadPeak file.
 **Output:** Reproducible peaks coordinates (broadPeak)
 
 
+## FE_for_peaks.py
+
+Takes a dictionary of narrowPeak files with peaks called by MACS2 for different biological replicas or experimental conditions.
+Returns average fold enrichment of regions as computed by Compute_fold_enrichment.py and Average_wig_files.py in broadPeak file format.
+
+**Requirements:** Python 2 or 3
+
+**Input:** Peaks coordinates (NarrowPeaks), reference genome (FASTA), WIG files with FE info
+
+**Output:** Peaks with fold enrichment (broadPeak)
+
+
 ## Enrichment_of_regions_comparision.py
 
 The script tests sets of genomic intervals (Peaks, TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)

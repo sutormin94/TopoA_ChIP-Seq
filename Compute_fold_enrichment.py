@@ -10,50 +10,56 @@
 
 import numpy as np
 
+#Path to the working directory.
+PWD="C:\Sutor\Science\E_coli_ChIP-Seqs\\"
 #Path to the file with IP data
-IP_path_dict={'1' : "C:\Sutor\Science\BREX\WIG_nodup\EMit2_S16_nodup.wig",
-              '2' : "C:\Sutor\Science\BREX\WIG_nodup\EMit4_S18_nodup.wig",
-              '3' : "C:\Sutor\Science\BREX\WIG_nodup\EMit6_S20_nodup.wig",
-              '4' : "C:\Sutor\Science\BREX\WIG_nodup\EMit8_S22_nodup.wig",
-              '5' : "C:\Sutor\Science\BREX\WIG_nodup\EMit9_S97_nodup.wig",
-              '6' : "C:\Sutor\Science\BREX\WIG_nodup\EMit10_S98_nodup.wig",
-              '7' : "C:\Sutor\Science\BREX\WIG_nodup\EMit11_S99_nodup.wig",
-              '8' : "C:\Sutor\Science\BREX\WIG_nodup\EMit12_S100_nodup.wig",}
+IP_path_dict={'1' :  PWD +        "Singh_CRP\WIG\Singh_CRP_EE_IP_Rep1_SRR5099114.wig",
+              '2' :  PWD +        "Singh_CRP\WIG\Singh_CRP_EE_IP_Rep2_SRR5099115.wig",  
+              '3' :  PWD +        "Singh_CRP\WIG\Singh_CRP_ME_IP_Rep1_SRR5099118.wig",
+              '4' :  PWD +        "Singh_CRP\WIG\Singh_CRP_ME_IP_Rep2_SRR5099119.wig", 
+              '5' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_EE_IP_Rep1_SRR5099114_nodup.wig",
+              '6' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_EE_IP_Rep2_SRR5099115_nodup.wig",
+              '7' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_ME_IP_Rep1_SRR5099118_nodup.wig",
+              '8' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_ME_IP_Rep2_SRR5099119_nodup.wig",              
+              }
 
 #Path to the file Mock control data
-Mock_path_dict={'1' : "C:\Sutor\Science\BREX\WIG_nodup\EMit1_S15_nodup.wig",
-                '2' : "C:\Sutor\Science\BREX\WIG_nodup\EMit3_S17_nodup.wig",
-                '3' : "C:\Sutor\Science\BREX\WIG_nodup\EMit5_S19_nodup.wig",
-                '4' : "C:\Sutor\Science\BREX\WIG_nodup\EMit7_S21_nodup.wig",
-                '5' : "C:\Sutor\Science\BREX\WIG_nodup\EMit13_S101_nodup.wig",
-                '6' : "C:\Sutor\Science\BREX\WIG_nodup\EMit14_S102_nodup.wig",
-                '7' : "C:\Sutor\Science\BREX\WIG_nodup\EMit15_S103_nodup.wig",
-                '8' : "C:\Sutor\Science\BREX\WIG_nodup\EMit16_S104_nodup.wig",}
+Mock_path_dict={'1' :  PWD +           "Singh_CRP\WIG\Singh_CRP_EE_Mock_Rep1_SRR5099116.wig",
+                '2' :  PWD +           "Singh_CRP\WIG\Singh_CRP_EE_Mock_Rep2_SRR5099117.wig",
+                '3' :  PWD +           "Singh_CRP\WIG\Singh_CRP_ME_Mock_Rep1_SRR5099120.wig",
+                '4' :  PWD +           "Singh_CRP\WIG\Singh_CRP_ME_Mock_Rep2_SRR5099121.wig",   
+                '5' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_EE_Mock_Rep1_SRR5099116_nodup.wig",
+                '6' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_EE_Mock_Rep2_SRR5099117_nodup.wig",
+                '7' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_ME_Mock_Rep1_SRR5099120_nodup.wig",
+                '8' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_ME_Mock_Rep2_SRR5099121_nodup.wig",                
+                }
 
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' : "EMit2_S16_nodup/EMit1_S15_nodup",
-           '2' : "EMit4_S18_nodup/EMit3_S17_nodup",
-           '3' : "EMit6_S20_nodup/EMit5_S19_nodup",
-           '4' : "EMit8_S22_nodup/EMit7_S21_nodup",
-           '5' : "EMit9_S97_nodup/EMit13_S101_nodup",
-           '6' : "EMit10_S98_nodup/EMit14_S102_nodup",  
-           '7' : "EMit11_S99_nodup/EMit15_S103_nodup",
-           '8' : "EMit12_S100_nodup/EMit16_S104_nodup",}
+name_dict={'1' :  "Singh_CRP_EE_IP_Rep1/Singh_CRP_EE_Mock_Rep1",
+           '2' :  "Singh_CRP_EE_IP_Rep2/Singh_CRP_EE_Mock_Rep2", 
+           '3' :  "Singh_CRP_ME_IP_Rep1/Singh_CRP_ME_Mock_Rep1",
+           '4' :  "Singh_CRP_ME_IP_Rep2/Singh_CRP_ME_Mock_Rep2", 
+           '5' :  "Singh_CRP_EE_IP_Rep1_nodup/Singh_CRP_EE_Mock_Rep1_nodup",
+           '6' :  "Singh_CRP_EE_IP_Rep2_nodup/Singh_CRP_EE_Mock_Rep2_nodup",
+           '7' :  "Singh_CRP_ME_IP_Rep1_nodup/Singh_CRP_ME_Mock_Rep1_nodup",
+           '8' :  "Singh_CRP_ME_IP_Rep2_nodup/Singh_CRP_ME_Mock_Rep2_nodup",            
+           }
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name_manual=''
 #Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
 Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path_dict={'1' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit2_1_nodup.wig",
-                   '2' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit4_3_nodup.wig",
-                   '3' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit6_5_nodup.wig",
-                   '4' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit8_7_nodup.wig",
-                   '5' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit9_13_nodup.wig",
-                   '6' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit10_14_nodup.wig",  
-                   '7' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit11_15_nodup.wig",
-                   '8' : "C:\Sutor\Science\BREX\Fold_enrichment_nodup\EMit12_16_nodup.wig",}
+FE_file_path_dict={'1' :  PWD +           "Singh_CRP\FE\Singh_CRP_EE_FE_Rep1.wig",
+                   '2' :  PWD +           "Singh_CRP\FE\Singh_CRP_EE_FE_Rep2.wig",
+                   '3' :  PWD +           "Singh_CRP\FE\Singh_CRP_ME_FE_Rep1.wig",
+                   '4' :  PWD +           "Singh_CRP\FE\Singh_CRP_ME_FE_Rep2.wig",
+                   '5' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_EE_FE_Rep1_nodup.wig",
+                   '6' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_EE_FE_Rep2_nodup.wig",
+                   '7' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_ME_FE_Rep1_nodup.wig",
+                   '8' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_ME_FE_Rep2_nodup.wig",                   
+                   }
 
 
 #######

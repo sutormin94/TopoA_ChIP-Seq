@@ -17,20 +17,23 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import cm as cm
 
+
+#Path to the working directory.
+PWD="C:\Sutor\Science\E_coli_ChIP-Seqs\Lal_Psoralen_chip\WIG\\"
+
 #Dictionary of replicas 
 #'Replica name' : 'Path to wig file'
-Dict_of_replicas={'Replic 1' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_1_FE.wig",
-                  'Replic 2' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_2_FE.wig",
-                  'Replic 3' : "C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_3_FE.wig",}
+Dict_of_replicas={'Replic 1' : PWD + "GSE77687_exp_1_norm_signal.wig",
+                  'Replic 2' : PWD + "GSE77687_exp_2_norm_signal.wig",}
 
 #ID or short description of the track (will be the name of a track in IGV).
-name='TopA_ChiP_CTD_plus_Rif_plus_average_FE'
+name='Lal_psoralen_chip_av'
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name='NC_007779.1_w3110_Mu'
 #Output path for the final file.
-average_file_path="C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig"
+average_file_path=PWD + "Lal_psoralen_chip_av.wig"
 #Output path for the corralation matrix.
-Outpath="C:\Sutor\Science\TopoI-ChIP-Seq\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3_correlation_matrix.png"
+Outpath=PWD + "Lal_psoralen_chip_av_correlation_matrix.png"
 
 
 #######
@@ -70,6 +73,7 @@ def correlation_matrix(df, cor_method, title, outpath):
     ax1.set_yticks(np.arange(len(labels)))    
     ax1.set_xticklabels(labels, fontsize=12, rotation=90)
     ax1.set_yticklabels(labels, fontsize=12)
+    ax1.set_ylim(sorted(ax1.get_xlim(), reverse=True)) #Solves a bug in matplotlib 3.1.1 discussed here: https://stackoverflow.com/questions/56942670/matplotlib-seaborn-first-and-last-row-cut-in-half-of-heatmap-plot
     #Add colorbar, make sure to specify tick locations to match desired ticklabels.
     #Full scale:[-1.00, -0.95, -0.90, -0.85, -0.80, -0.75, -0.70, -0.65, -0.60, -0.55, -0.50, -0.45, -0.40, -0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, 0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00])
     fig.colorbar(cax, ticks=[-1.00, -0.90, -0.80, -0.70, -0.60, -0.50, -0.40, -0.30, -0.20, -0.10, 0.00, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00], shrink=0.7)
