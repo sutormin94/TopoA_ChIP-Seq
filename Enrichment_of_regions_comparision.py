@@ -319,17 +319,17 @@ def func_wrapper(intervals_sets_path, outpath):
     #plot_2D(Intervals_info['EcTopoI CTD-/Rif-'], Intervals_info['TopoIV Sayyed'], 'EcTopoI CTD-/Rif-', 'TopoIV Sayyed', 'EcTopoI_noCTD_noRif_nm_0.001_peaks', 'lin', limit_1, outpath)    
     
     #Run linear regression.
-    run_regression(Intervals_info, limit_1)
+    #run_regression(Intervals_info, limit_1)
     #Run PCA analysis.
-    PCA_analysis(Intervals_info, outpath, 'EcTopoI_noCTD_Rif_nm_0.001_peaks')
+    #PCA_analysis(Intervals_info, outpath, 'EcTopoI_noCTD_Rif_nm_0.001_peaks')
     
     
     
     ##Violin plots.
     #EcTopoI intervals.
-    #Intervals_occupation(intervals_param_ar_tg_2, cont_char_masked_2, name_of_intervals_1, name_of_cont_char_2, [0, 21, 2, -1, 21, 0.35, 11, 1.35], outpath)   
+    Intervals_occupation(intervals_param_ar_tg_2, cont_char_masked_2, name_of_intervals_1, name_of_cont_char_2, [0, 21, 2, -1, 21, 0.35, 11, 1.35], outpath)   
     #RNApol intervals.
-    #Intervals_occupation(intervals_param_ar_tg_2_3, cont_char_masked_2_3, name_of_intervals_2, name_of_cont_char_3, [0, 5, 1, -0.2, 4.5, 0.35, 2.1, 1.35], outpath)
+    Intervals_occupation(intervals_param_ar_tg_2_3, cont_char_masked_2_3, name_of_intervals_2, name_of_cont_char_3, [0, 5, 1, -0.2, 4.5, 0.35, 2.1, 1.35], outpath)
     return
 
 func_wrapper(path_to_intervals_data, Outputpath)

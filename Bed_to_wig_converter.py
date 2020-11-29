@@ -11,63 +11,45 @@
 
 
 #Path to the working directory.
-PWD="C:\Sutor\Science\E_coli_ChIP-Seqs\Singh_CRP\\"
+PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\BW25113_topA_mutants\Set3\\"
 #Path to the input file
-filein_path_dict={'1' :  PWD + "Cov_depth\SRR5099114.bed",
-                  '2' :  PWD + "Cov_depth\SRR5099115.bed",   
-                  '3' :  PWD + "Cov_depth\SRR5099116.bed",
-                  '4' :  PWD + "Cov_depth\SRR5099117.bed",    
-                  '5' :  PWD + "Cov_depth\SRR5099118.bed",
-                  '6' :  PWD + "Cov_depth\SRR5099119.bed",  
-                  '7' :  PWD + "Cov_depth\SRR5099120.bed",
-                  '8' :  PWD + "Cov_depth\SRR5099121.bed",  
-                  '9' :   PWD + "Cov_depth_nodup\SRR5099114_name_sorted_fm_ps_nd.bed",
-                  '10' :  PWD + "Cov_depth_nodup\SRR5099115_name_sorted_fm_ps_nd.bed",   
-                  '11' :  PWD + "Cov_depth_nodup\SRR5099116_name_sorted_fm_ps_nd.bed",
-                  '12' :  PWD + "Cov_depth_nodup\SRR5099117_name_sorted_fm_ps_nd.bed",    
-                  '13' :  PWD + "Cov_depth_nodup\SRR5099118_name_sorted_fm_ps_nd.bed",
-                  '14' :  PWD + "Cov_depth_nodup\SRR5099119_name_sorted_fm_ps_nd.bed",  
-                  '15' :  PWD + "Cov_depth_nodup\SRR5099120_name_sorted_fm_ps_nd.bed",
-                  '16' :  PWD + "Cov_depth_nodup\SRR5099121_name_sorted_fm_ps_nd.bed",                  
+filein_path_dict={'1' :  PWD + "Cov_depth\\D10_S1_L001.bed",
+                  '2' :  PWD + "Cov_depth\\D11_S2_L001.bed",
+                  '3' :  PWD + "Cov_depth\\D12_S3_L001.bed",
+                  '4' :  PWD + "Cov_depth\\D13_S4_L001.bed",
+                  '5' :  PWD + "Cov_depth\\D14_S5_L001.bed",
+                  '6' :  PWD + "Cov_depth\\D15_S6_L001.bed",
+                  '7' :  PWD + "Cov_depth\\D16_S7_L001.bed",
+                  '8' :  PWD + "Cov_depth\\D17_S8_L001.bed",  
+                  '9' :  PWD + "Cov_depth\\D18_S9_L001.bed",
+                  '10' :  PWD + "Cov_depth\\D19_S10_L001.bed",                
                   }
 
 #Path to the output file.
-fileout_path_dict={'1' :  PWD + "WIG\Singh_CRP_EE_IP_Rep1_SRR5099114.wig",
-                   '2' :  PWD + "WIG\Singh_CRP_EE_IP_Rep2_SRR5099115.wig",   
-                   '3' :  PWD + "WIG\Singh_CRP_EE_Mock_Rep1_SRR5099116.wig",
-                   '4' :  PWD + "WIG\Singh_CRP_EE_Mock_Rep2_SRR5099117.wig",   
-                   '5' :  PWD + "WIG\Singh_CRP_ME_IP_Rep1_SRR5099118.wig",
-                   '6' :  PWD + "WIG\Singh_CRP_ME_IP_Rep2_SRR5099119.wig",   
-                   '7' :  PWD + "WIG\Singh_CRP_ME_Mock_Rep1_SRR5099120.wig",
-                   '8' :  PWD + "WIG\Singh_CRP_ME_Mock_Rep2_SRR5099121.wig",
-                   '9' :   PWD + "WIG_nodup\Singh_CRP_EE_IP_Rep1_SRR5099114_nodup.wig",
-                   '10' :  PWD + "WIG_nodup\Singh_CRP_EE_IP_Rep2_SRR5099115_nodup.wig",   
-                   '11' :  PWD + "WIG_nodup\Singh_CRP_EE_Mock_Rep1_SRR5099116_nodup.wig",
-                   '12' :  PWD + "WIG_nodup\Singh_CRP_EE_Mock_Rep2_SRR5099117_nodup.wig",   
-                   '13' :  PWD + "WIG_nodup\Singh_CRP_ME_IP_Rep1_SRR5099118_nodup.wig",
-                   '14' :  PWD + "WIG_nodup\Singh_CRP_ME_IP_Rep2_SRR5099119_nodup.wig",   
-                   '15' :  PWD + "WIG_nodup\Singh_CRP_ME_Mock_Rep1_SRR5099120_nodup.wig",
-                   '16' :  PWD + "WIG_nodup\Singh_CRP_ME_Mock_Rep2_SRR5099121_nodup.wig",                     
+fileout_path_dict={'1' :  PWD + "Cov_depth\\D10_S1_L001.wig",
+                   '2' :  PWD + "Cov_depth\\D11_S2_L001.wig",
+                   '3' :  PWD + "Cov_depth\\D12_S3_L001.wig",
+                   '4' :  PWD + "Cov_depth\\D13_S4_L001.wig",
+                   '5' :  PWD + "Cov_depth\\D14_S5_L001.wig",
+                   '6' :  PWD + "Cov_depth\\D15_S6_L001.wig",
+                   '7' :  PWD + "Cov_depth\\D16_S7_L001.wig",
+                   '8' :  PWD + "Cov_depth\\D17_S8_L001.wig",  
+                   '9' :  PWD + "Cov_depth\\D18_S9_L001.wig",
+                   '10' :  PWD + "Cov_depth\\D19_S10_L001.wig",                 
                     }
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' :  "Singh_CRP_EE_IP_Rep1",
-           '2' :  "Singh_CRP_EE_IP_Rep2",
-           '3' :  "Singh_CRP_EE_Mock_Rep1",
-           '4' :  "Singh_CRP_EE_Mock_Rep2", 
-           '5' :  "Singh_CRP_ME_IP_Rep1",
-           '6' :  "Singh_CRP_ME_IP_Rep2", 
-           '7' :  "Singh_CRP_ME_Mock_Rep1",
-           '8' :  "Singh_CRP_ME_Mock_Rep2", 
-           '9' :   "Singh_CRP_EE_IP_Rep1_nodup",
-           '10' :  "Singh_CRP_EE_IP_Rep2_nodup",
-           '11' :  "Singh_CRP_EE_Mock_Rep1_nodup",
-           '12' :  "Singh_CRP_EE_Mock_Rep2_nodup", 
-           '13' :  "Singh_CRP_ME_IP_Rep1_nodup",
-           '14' :  "Singh_CRP_ME_IP_Rep2_nodup", 
-           '15' :  "Singh_CRP_ME_Mock_Rep1_nodup",
-           '16' :  "Singh_CRP_ME_Mock_Rep2_nodup",            
-           }
+name_dict={'1' :  'D10_S1',
+           '2' :  'D11_S2',
+           '3' :  'D12_S3',
+           '4' :  'D13_S4',
+           '5' :  'D14_S5',
+           '6' :  'D15_S6',
+           '7' :  'D16_S7',
+           '8' :  'D17_S8',  
+           '9' :  'D18_S9',
+          '10' :  'D19_S10'         
+           }      
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name=''

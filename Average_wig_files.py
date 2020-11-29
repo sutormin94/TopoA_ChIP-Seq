@@ -19,21 +19,21 @@ from matplotlib import cm as cm
 
 
 #Path to the working directory.
-PWD="C:\Sutor\Science\E_coli_ChIP-Seqs\Lal_Psoralen_chip\WIG\\"
+PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\RNAP_Borukhov\FE\\"
 
 #Dictionary of replicas 
 #'Replica name' : 'Path to wig file'
-Dict_of_replicas={'Replic 1' : PWD + "GSE77687_exp_1_norm_signal.wig",
-                  'Replic 2' : PWD + "GSE77687_exp_2_norm_signal.wig",}
+Dict_of_replicas={'Replic 1' : PWD + "WT_RNAP_LB_rep1_FE.wig",
+                  'Replic 2' : PWD + "WT_RNAP_LB_rep2_FE.wig",}
 
 #ID or short description of the track (will be the name of a track in IGV).
-name='Lal_psoralen_chip_av'
+name='Borukhov_RpoB_MG1655_FE_av'
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
 Chromosome_name='NC_007779.1_w3110_Mu'
 #Output path for the final file.
-average_file_path=PWD + "Lal_psoralen_chip_av.wig"
+average_file_path=PWD + "Borukhov_RpoB_MG1655_FE_av.wig"
 #Output path for the corralation matrix.
-Outpath=PWD + "Lal_psoralen_chip_av_correlation_matrix.png"
+Outpath=PWD + "Borukhov_RpoB_MG1655_FE_av_correlation_matrix.png"
 
 
 #######

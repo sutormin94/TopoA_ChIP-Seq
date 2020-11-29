@@ -17,11 +17,11 @@ from matplotlib import pyplot as plt
 from matplotlib_venn import venn2, venn2_circles
 
 #Dictionary of pathes to wig file with fold enrichment.
-Peaks_data={'RNApol' : 'C:\Sutor\science\DNA-gyrase\scripts\Gyrase_Topo-seq\Additional_genome_features\Pol_Sofi_LB_w3110_for_Mu.wig'}
+Peaks_data={'RNApol' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_RpoB_IP_ME.wig'}
 #Threshold for reproducible peaks calling (must not exceed number of replicas).
-Threshold=int(15)
+Threshold=int(750)
 #Outpath.
-Path_out=f'F:\TopoI_ChIP-Seq\Ec_TopoI_data\EcTopoI_vs_RNApol\RNApol_peaks\\'
+Path_out='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\\'
 
 
 #######

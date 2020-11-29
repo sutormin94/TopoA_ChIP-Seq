@@ -11,39 +11,45 @@
 import numpy as np
 
 #Path to the working directory.
-PWD="C:\Sutor\Science\E_coli_ChIP-Seqs\\"
+PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\RNAP_Borukhov\\"
 #Path to the file with IP data
-IP_path_dict={'1' :  PWD +        "Singh_CRP\WIG\Singh_CRP_EE_IP_Rep1_SRR5099114.wig",
-              '2' :  PWD +        "Singh_CRP\WIG\Singh_CRP_EE_IP_Rep2_SRR5099115.wig",  
-              '3' :  PWD +        "Singh_CRP\WIG\Singh_CRP_ME_IP_Rep1_SRR5099118.wig",
-              '4' :  PWD +        "Singh_CRP\WIG\Singh_CRP_ME_IP_Rep2_SRR5099119.wig", 
-              '5' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_EE_IP_Rep1_SRR5099114_nodup.wig",
-              '6' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_EE_IP_Rep2_SRR5099115_nodup.wig",
-              '7' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_ME_IP_Rep1_SRR5099118_nodup.wig",
-              '8' :  PWD +        "Singh_CRP\WIG_nodup\Singh_CRP_ME_IP_Rep2_SRR5099119_nodup.wig",              
+IP_path_dict={'1' :  PWD +        "WIG\deltaGreAB_RNAP_LB_rep1_IP.wig",
+              '2' :  PWD +        "WIG\deltaGreAB_RNAP_LB_rep2_IP.wig",  
+              '3' :  PWD +        "WIG\WT_RNAP_LB_rep1_IP.wig",
+              '4' :  PWD +        "WIG\WT_RNAP_LB_rep2_IP.wig", 
+              '5' :  PWD +        "WIG\WT_TAP_RNAP_LB_IP.wig", 
+              '6' :  PWD +        "WIG_nodup\deltaGreAB_RNAP_LB_rep1_IP_nodup.wig",
+              '7' :  PWD +        "WIG_nodup\deltaGreAB_RNAP_LB_rep2_IP_nodup.wig",
+              '8' :  PWD +        "WIG_nodup\WT_RNAP_LB_rep1_IP_nodup.wig",
+              '9' :  PWD +        "WIG_nodup\WT_RNAP_LB_rep2_IP_nodup.wig",    
+              '10' :  PWD +       "WIG_nodup\WT_TAP_RNAP_LB_IP_nodup.wig",    
               }
 
 #Path to the file Mock control data
-Mock_path_dict={'1' :  PWD +           "Singh_CRP\WIG\Singh_CRP_EE_Mock_Rep1_SRR5099116.wig",
-                '2' :  PWD +           "Singh_CRP\WIG\Singh_CRP_EE_Mock_Rep2_SRR5099117.wig",
-                '3' :  PWD +           "Singh_CRP\WIG\Singh_CRP_ME_Mock_Rep1_SRR5099120.wig",
-                '4' :  PWD +           "Singh_CRP\WIG\Singh_CRP_ME_Mock_Rep2_SRR5099121.wig",   
-                '5' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_EE_Mock_Rep1_SRR5099116_nodup.wig",
-                '6' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_EE_Mock_Rep2_SRR5099117_nodup.wig",
-                '7' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_ME_Mock_Rep1_SRR5099120_nodup.wig",
-                '8' :  PWD +           "Singh_CRP\WIG_nodup\Singh_CRP_ME_Mock_Rep2_SRR5099121_nodup.wig",                
+Mock_path_dict={'1' :  PWD +           "WIG\deltaGreAB_RNAP_LB_rep1_input.wig",
+                '2' :  PWD +           "WIG\deltaGreAB_RNAP_LB_rep2_input.wig",
+                '3' :  PWD +           "WIG\WT_RNAP_LB_rep1_input.wig",
+                '4' :  PWD +           "WIG\WT_RNAP_LB_rep2_input.wig",  
+                '5' :  PWD +           "WIG\WT_TAP_RNAP_LB_input.wig", 
+                '6' :  PWD +           "WIG_nodup\deltaGreAB_RNAP_LB_rep1_input_nodup.wig",
+                '7' :  PWD +           "WIG_nodup\deltaGreAB_RNAP_LB_rep2_input_nodup.wig",
+                '8' :  PWD +           "WIG_nodup\WT_RNAP_LB_rep1_input_nodup.wig", 
+                '9' :  PWD +           "WIG_nodup\WT_RNAP_LB_rep2_input_nodup.wig",
+                '10' :  PWD +          "WIG_nodup\WT_TAP_RNAP_LB_input_nodup.wig",
                 }
 
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' :  "Singh_CRP_EE_IP_Rep1/Singh_CRP_EE_Mock_Rep1",
-           '2' :  "Singh_CRP_EE_IP_Rep2/Singh_CRP_EE_Mock_Rep2", 
-           '3' :  "Singh_CRP_ME_IP_Rep1/Singh_CRP_ME_Mock_Rep1",
-           '4' :  "Singh_CRP_ME_IP_Rep2/Singh_CRP_ME_Mock_Rep2", 
-           '5' :  "Singh_CRP_EE_IP_Rep1_nodup/Singh_CRP_EE_Mock_Rep1_nodup",
-           '6' :  "Singh_CRP_EE_IP_Rep2_nodup/Singh_CRP_EE_Mock_Rep2_nodup",
-           '7' :  "Singh_CRP_ME_IP_Rep1_nodup/Singh_CRP_ME_Mock_Rep1_nodup",
-           '8' :  "Singh_CRP_ME_IP_Rep2_nodup/Singh_CRP_ME_Mock_Rep2_nodup",            
+name_dict={'1' :  "deltaGreAB_RNAP_LB_rep1_IP/deltaGreAB_RNAP_LB_rep1_input",
+           '2' :  "deltaGreAB_RNAP_LB_rep2_IP/deltaGreAB_RNAP_LB_rep2_input", 
+           '3' :  "WT_RNAP_LB_rep1_IP/WT_RNAP_LB_rep1_input",
+           '4' :  "WT_RNAP_LB_rep2_IP/WT_RNAP_LB_rep2_input", 
+           '5' :  "WT_TAP_RNAP_LB_IP/WT_TAP_RNAP_LB_input",
+           '6' :  "deltaGreAB_RNAP_LB_rep1_IP_nodup/deltaGreAB_RNAP_LB_rep1_input_nodup",
+           '7' :  "deltaGreAB_RNAP_LB_rep2_IP_nodup/deltaGreAB_RNAP_LB_rep2_input_nodup",
+           '8' :  "WT_RNAP_LB_rep1_IP_nodup/WT_RNAP_LB_rep1_input_nodup",  
+           '9' :  "WT_RNAP_LB_rep2_IP_nodup/WT_RNAP_LB_rep2_input_nodup", 
+           '10' : "WT_TAP_RNAP_LB_IP_nodup/WT_TAP_RNAP_LB_input_nodup", 
            }
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
@@ -51,14 +57,16 @@ Chromosome_name_manual=''
 #Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
 Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path_dict={'1' :  PWD +           "Singh_CRP\FE\Singh_CRP_EE_FE_Rep1.wig",
-                   '2' :  PWD +           "Singh_CRP\FE\Singh_CRP_EE_FE_Rep2.wig",
-                   '3' :  PWD +           "Singh_CRP\FE\Singh_CRP_ME_FE_Rep1.wig",
-                   '4' :  PWD +           "Singh_CRP\FE\Singh_CRP_ME_FE_Rep2.wig",
-                   '5' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_EE_FE_Rep1_nodup.wig",
-                   '6' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_EE_FE_Rep2_nodup.wig",
-                   '7' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_ME_FE_Rep1_nodup.wig",
-                   '8' :  PWD +           "Singh_CRP\FE_nodup\Singh_CRP_ME_FE_Rep2_nodup.wig",                   
+FE_file_path_dict={'1' :  PWD +           "FE\deltaGreAB_RNAP_LB_rep1_FE.wig",
+                   '2' :  PWD +           "FE\deltaGreAB_RNAP_LB_rep2_FE.wig",
+                   '3' :  PWD +           "FE\WT_RNAP_LB_rep1_FE.wig",
+                   '4' :  PWD +           "FE\WT_RNAP_LB_rep2_FE.wig",
+                   '5' :  PWD +           "FE\WT_TAP_RNAP_LB_FE.wig",
+                   '6' :  PWD +           "FE_nodup\deltaGreAB_RNAP_LB_rep1_nodup_FE.wig",
+                   '7' :  PWD +           "FE_nodup\deltaGreAB_RNAP_LB_rep2_nodup_FE.wig",
+                   '8' :  PWD +           "FE_nodup\WT_RNAP_LB_rep1_nodup_FE.wig", 
+                   '9' :  PWD +           "FE_nodup\WT_RNAP_LB_rep2_nodup_FE.wig",
+                   '10' :  PWD +          "FE_nodup\WT_TAP_RNAP_LB_nodup_FE.wig",
                    }
 
 

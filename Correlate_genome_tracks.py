@@ -22,54 +22,21 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 
 #Path to folder with wig files.
-PWD_wig="C:\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\"
+PWD_wig="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\RNAP_Borukhov\FE\\"
 
 #Input: Continuous data (e.g. EcTopoI fold enrichment) (WIG).
 #Dictionary of replicas 
 #'Track name' : 'Path to wig file'
-Dict_of_tracks={'HNS Kahramanoglou'   : PWD_wig + "Kahramanoglou_HNS_IP_ME.wig",
-                'CsiR Aquino'         : PWD_wig + "Aquino_CsiR_FE_av.wig",
-                'Nac Aquino'          : PWD_wig + "Aquino_Nac_FE_av.wig",
-                'NtrC Aquino'         : PWD_wig + "Aquino_NtrC_FE_Rep1.wig",
-                'OmpR Aquino'         : PWD_wig + "Aquino_OmpR_FE_av.wig",
-                'Fur Beauchene'       : PWD_wig + "Beauchene_Fur_FE_av.wig",
-                'BolA Dressaire'      : PWD_wig + "Dressaire_BolA_FE.wig",
-                'Cra Kim'             : PWD_wig + "Kim_Cra_FE_av.wig",
-                'NsrR Mehta'          : PWD_wig + "Mehta_NsrR_FE_av.wig",
-                'FNR Myers'           : PWD_wig + "Myers_FNR_anaerobic_FE_av.wig",
-                'Lrp Kroner'          : PWD_wig + "Kroner_Lrp_delta_Lrp_FE_av.wig",
-                'ArcA Park'           : PWD_wig + "Park_anaerobic_ArcA_FE_av.wig",
-                'GadE Seo'            : PWD_wig + "Seo_GadE_FE_av.wig",
-                'GadW Seo'            : PWD_wig + "Seo_GadW_FE_av.wig",
-                'OxyR Seq'            : PWD_wig + "Seo_OxyR_FE_av.wig",
-                'RpoS Seo'            : PWD_wig + "Seo_RpoS_FE_Rep1.wig",
-                'SoxR Seo'            : PWD_wig + "Seo_SoxR_FE_av.wig",
-                'SoxS Seo'            : PWD_wig + "Seo_SoxS_FE_av.wig",
-                'GadX Seo'            : PWD_wig + "Seo_GadX_FE_av.wig",
-                'EcTopoI score'       : "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Motif_scanning\ChIP-Munk\Rep12_thr_0.001\EcTopoI_motif_w3110_scanned_both.wig", 
-                'EcTopoI CTD-/Rif-'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_123.wig",
-                'EcTopoI CTD-/Rif+'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig",
-                'EcTopoI CTD+/Rif-'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_plus_Rif_minus_FE_av.wig",
-                'EcTopoI CTD+/Rif+'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig",                
-                'CRP Singh'           : PWD_wig + "Singh_CRP_ME_FE_av.wig",
-                'RpoS Peano'          : PWD_wig + "Peano_RpoS_FE_av.wig",                
-                'RpoD Myers'          : PWD_wig + "Myers_RpoD_FE_av.wig",
-                'Dps Antipov'         : PWD_wig + "Antipov_Dps_FE_Rep1.wig",
-                'RpoB Borukhov'       : PWD_wig + "Borukhov_RpoB_Pol_Sofi_LB_FE.wig",
-                'RpoB Kahramanoglou'  : PWD_wig + "Kahramanoglou_RpoB_IP_ME.wig",                
-                'Fis Kahramanoglou'   : PWD_wig + "Kahramanoglou_Fis_IP_ME.wig",
-                'MatP Nolivos'        : PWD_wig + "Nolivos_MatP_IP_av.wig",
-                'MukB Nolivos'        : PWD_wig + "Nolivos_MukB_IP_av.wig",
-                'RNA-Seq Sutormin'    : PWD_wig + "Sutormin_RNA_Seq_Exponential_av.wig",
-                'TopoIV Sayyed'       : PWD_wig + "Sayyed_TopoIV_ParC_1_FE.wig",
-                'TopoIV Sutormin'     : PWD_wig + "Sutormin_TopoIV_Cfx_FE_av.wig",                
-                'Gyrase Sutormin'     : PWD_wig + "Sutormin_Gyrase_Cfx_10mkM_FE_av.wig",
-                'Gyrase Rif Sutormin' : PWD_wig + "Sutormin_Gyrase_RifCfx_122mkM_10mkM_FE_av.wig",
-                'GC'                  : "C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig",
+Dict_of_tracks={'BW25113_wt_1' :        PWD_wig + 'WT_RNAP_LB_rep1_FE.wig',
+                'BW25113_wt_2' :        PWD_wig + 'WT_RNAP_LB_rep2_FE.wig',
+                'DY330_TAP' :           PWD_wig + 'WT_TAP_RNAP_LB_FE.wig',
+                'BW25113_BA-_1' :       PWD_wig + 'deltaGreAB_RNAP_LB_rep1_FE.wig',
+                'BW25113_BA-_2' :       PWD_wig + 'deltaGreAB_RNAP_LB_rep2_FE.wig',
+                'RpoB Kahramanoglou'  : "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_RpoB_IP_ME.wig"               
                 }
 
 #Path to folder with output files.
-PWD_out="C:\Sutor\Science\E_coli_ChIP-Seqs\Tracks_correlation_clusterization\\"
+PWD_out="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\RNAP_Borukhov\FE\\"
 
 
 #######
@@ -217,27 +184,28 @@ def Clustering(clust_matrix, outpath_folder, file_name):
 def read_wig_correlate_plot(Dict_of_tracks, corr_type, PWD_out):
     Replicas_dataframe=read_combine(Dict_of_tracks)
     Replicas_dataframe_masked=mask_dataframe(Replicas_dataframe)
-    Correlation_matrix=make_correlation_matrix_plot(Replicas_dataframe_masked, corr_type, 'Correlation of samples', PWD_out, "All_availiable_tracks_correlation_matrix_masked")
-    Correlation_matrix_clusterized=Clustering(Correlation_matrix, PWD_out, "All_availiable_tracks_correlation_matrix_clusterized_masked")
-    correlation_matrix_plot(Correlation_matrix_clusterized, corr_type, 'Correlation of samples clusterized', PWD_out, "All_availiable_tracks_correlation_matrix_clusterized_masked")    
+    Correlation_matrix=make_correlation_matrix_plot(Replicas_dataframe_masked, corr_type, 'Correlation of samples', PWD_out, "RNAP_tracks_correlation_matrix_masked")
+    Correlation_matrix_clusterized=Clustering(Correlation_matrix, PWD_out, "RNAP_tracks_correlation_matrix_clusterized_masked")
+    correlation_matrix_plot(Correlation_matrix_clusterized, corr_type, 'Correlation of samples clusterized', PWD_out, "RNAP_tracks_correlation_matrix_clusterized_masked")    
     return
 
-#read_wig_correlate_plot(Dict_of_tracks, 'pearson', PWD_out)
+read_wig_correlate_plot(Dict_of_tracks, 'pearson', PWD_out)
 
 
 def read_matrix_plot(PWD_out, corr_type):
-    Correlation_matrix=pd.read_csv(PWD_out+'All_availiable_tracks_correlation_matrix_masked.csv', sep='\t', header=0, index_col=0)
-    Datasets_order=['CsiR Aquino', 'Nac Aquino', 'NtrC Aquino', 'OmpR Aquino', 'Fur Beauchene', 'BolA Dressaire', 'NsrR Mehta', 'FNR Myers', 'Lrp Kroner',                    
-                    'EcTopoI score', 'CRP Singh', 'RpoS Peano', 'HNS Kahramanoglou', 'EcTopoI CTD-/Rif+', 'EcTopoI CTD+/Rif-', 'EcTopoI CTD+/Rif+', 'EcTopoI CTD-/Rif-',
-                    'Cra Kim', 'ArcA Park', 'GadE Seo', 'GadW Seo', 'OxyR Seq', 'RpoS Seo', 'SoxR Seo', 'SoxS Seo', 'GadX Seo', 'RpoD Myers', 'Dps Antipov',         
-                    'RpoB Borukhov', 'RpoB Kahramanoglou', 'Fis Kahramanoglou', 'MatP Nolivos', 'MukB Nolivos', 'RNA-Seq Sutormin', 'TopoIV Sayyed',       
-                    'TopoIV Sutormin', 'Gyrase Sutormin', 'Gyrase Rif Sutormin', 'GC']    
+    Correlation_matrix=pd.read_csv(PWD_out+'RNAP_tracks_correlation_matrix_masked.csv', sep='\t', header=0, index_col=0)
+    #Datasets_order=['CsiR Aquino', 'Nac Aquino', 'NtrC Aquino', 'OmpR Aquino', 'Fur Beauchene', 'BolA Dressaire', 'NsrR Mehta', 'FNR Myers', 'Lrp Kroner',                    
+    #                'EcTopoI score', 'CRP Singh', 'RpoS Peano', 'HNS Kahramanoglou', 'EcTopoI CTD-/Rif+', 'EcTopoI CTD+/Rif-', 'EcTopoI CTD+/Rif+', 'EcTopoI CTD-/Rif-',
+    #                'Cra Kim', 'ArcA Park', 'GadE Seo', 'GadW Seo', 'OxyR Seq', 'RpoS Seo', 'SoxR Seo', 'SoxS Seo', 'GadX Seo', 'RpoD Myers', 'Dps Antipov',         
+    #                'RpoB Borukhov', 'RpoB Kahramanoglou', 'Fis Kahramanoglou', 'MatP Nolivos', 'MukB Nolivos', 'RNA-Seq Sutormin', 'TopoIV Sayyed',       
+    #                'TopoIV Sutormin', 'Gyrase Sutormin', 'Gyrase Rif Sutormin', 'GC']  
+    Datasets_order=['BW25113_wt_1', 'BW25113_wt_2', 'DY330_TAP', 'BW25113_BA-_1', 'BW25113_BA-_2', 'RpoB Kahramanoglou']      
     Correlation_matrix=Correlation_matrix[Datasets_order]
     Correlation_matrix=Correlation_matrix.reindex(Datasets_order)
-    correlation_matrix_plot(Correlation_matrix, corr_type, 'Correlation of samples clusterized', PWD_out, "All_availiable_tracks_correlation_matrix_masked_refined_order")    
+    correlation_matrix_plot(Correlation_matrix, corr_type, 'Correlation of samples clusterized', PWD_out, "RNAP_tracks_correlation_matrix_masked_refined_order")    
     return
 
-read_matrix_plot(PWD_out, 'pearson')
+#read_matrix_plot(PWD_out, 'pearson')
 
 
 """
@@ -318,5 +286,46 @@ Dict_of_tracks={'HNS Kahramanoglou'   : PWD_wig + "Kahramanoglou_HNS_IP_ME.wig",
                 'Gyrase Sutormin'     : PWD_wig + "Sutormin_Gyrase_Cfx_10mkM_FE_av.wig",
                 'Gyrase Rif Sutormin' : PWD_wig + "Sutormin_Gyrase_RifCfx_122mkM_10mkM_FE_av.wig",
                 'GC'                  : "C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig",
-                }                
+                }   
+                
+Dict_of_tracks={'HNS Kahramanoglou'   : PWD_wig + "Kahramanoglou_HNS_IP_ME.wig",
+                'CsiR Aquino'         : PWD_wig + "Aquino_CsiR_FE_av.wig",
+                'Nac Aquino'          : PWD_wig + "Aquino_Nac_FE_av.wig",
+                'NtrC Aquino'         : PWD_wig + "Aquino_NtrC_FE_Rep1.wig",
+                'OmpR Aquino'         : PWD_wig + "Aquino_OmpR_FE_av.wig",
+                'Fur Beauchene'       : PWD_wig + "Beauchene_Fur_FE_av.wig",
+                'BolA Dressaire'      : PWD_wig + "Dressaire_BolA_FE.wig",
+                'Cra Kim'             : PWD_wig + "Kim_Cra_FE_av.wig",
+                'NsrR Mehta'          : PWD_wig + "Mehta_NsrR_FE_av.wig",
+                'FNR Myers'           : PWD_wig + "Myers_FNR_anaerobic_FE_av.wig",
+                'Lrp Kroner'          : PWD_wig + "Kroner_Lrp_delta_Lrp_FE_av.wig",
+                'ArcA Park'           : PWD_wig + "Park_anaerobic_ArcA_FE_av.wig",
+                'GadE Seo'            : PWD_wig + "Seo_GadE_FE_av.wig",
+                'GadW Seo'            : PWD_wig + "Seo_GadW_FE_av.wig",
+                'OxyR Seq'            : PWD_wig + "Seo_OxyR_FE_av.wig",
+                'RpoS Seo'            : PWD_wig + "Seo_RpoS_FE_Rep1.wig",
+                'SoxR Seo'            : PWD_wig + "Seo_SoxR_FE_av.wig",
+                'SoxS Seo'            : PWD_wig + "Seo_SoxS_FE_av.wig",
+                'GadX Seo'            : PWD_wig + "Seo_GadX_FE_av.wig",
+                'EcTopoI score'       : "C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Motif_scanning\ChIP-Munk\Rep12_thr_0.001\EcTopoI_motif_w3110_scanned_both.wig", 
+                'EcTopoI CTD-/Rif-'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_123.wig",
+                'EcTopoI CTD-/Rif+'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig",
+                'EcTopoI CTD+/Rif-'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_plus_Rif_minus_FE_av.wig",
+                'EcTopoI CTD+/Rif+'   : PWD_wig + "Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig",                
+                'CRP Singh'           : PWD_wig + "Singh_CRP_ME_FE_av.wig",
+                'RpoS Peano'          : PWD_wig + "Peano_RpoS_FE_av.wig",                
+                'RpoD Myers'          : PWD_wig + "Myers_RpoD_FE_av.wig",
+                'Dps Antipov'         : PWD_wig + "Antipov_Dps_FE_Rep1.wig",
+                'RpoB Borukhov'       : PWD_wig + "Borukhov_RpoB_Pol_Sofi_LB_FE.wig",
+                'RpoB Kahramanoglou'  : PWD_wig + "Kahramanoglou_RpoB_IP_ME.wig",                
+                'Fis Kahramanoglou'   : PWD_wig + "Kahramanoglou_Fis_IP_ME.wig",
+                'MatP Nolivos'        : PWD_wig + "Nolivos_MatP_IP_av.wig",
+                'MukB Nolivos'        : PWD_wig + "Nolivos_MukB_IP_av.wig",
+                'RNA-Seq Sutormin'    : PWD_wig + "Sutormin_RNA_Seq_Exponential_av.wig",
+                'TopoIV Sayyed'       : PWD_wig + "Sayyed_TopoIV_ParC_1_FE.wig",
+                'TopoIV Sutormin'     : PWD_wig + "Sutormin_TopoIV_Cfx_FE_av.wig",                
+                'Gyrase Sutormin'     : PWD_wig + "Sutormin_Gyrase_Cfx_10mkM_FE_av.wig",
+                'Gyrase Rif Sutormin' : PWD_wig + "Sutormin_Gyrase_RifCfx_122mkM_10mkM_FE_av.wig",
+                'GC'                  : "C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig",
+                }
 """

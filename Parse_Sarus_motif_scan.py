@@ -2,9 +2,7 @@
 ##Dmitry Sutormin, 2019##
 ##TopoA ChIP-Seq analysis##
 
-#Takes NarrowPeaks with ChIP-Seq peaks,
-#Returns sequences under them,
-#Computes GC%, writes multifasta file.
+#Takes output of Sarus (genome scanning with a motif) and prepares wig tracks for IGV.
 ###############################################
 
 #######
@@ -23,13 +21,13 @@ from Bio.SeqUtils import GC as GC_count
 #######
 
 #Input: SARUS output, containing all scores for all positions in forward and reverse orientation.
-Input_SARUS_output="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Motif_scanning\ChIP-Munk\\Rif_Rep12_thr_0.001\\results.txt"
+Input_SARUS_output="C:\OneDrive\\ThinkPad_working\Sutor\Science\\TopoI-ChIP-Seq\Data_analysis\Motif_scanning\SARUS_new\\noCTD_Rif_1_scan_thr_-100.txt"
 
 #Output path.
-Output_path="F:\TopoI_ChIP-Seq\Ec_TopoI_data\Motif_scanning\ChIP-Munk\Rif_Rep12_thr_0.001\\"
+Output_path="C:\OneDrive\\ThinkPad_working\Sutor\Science\\TopoI-ChIP-Seq\Data_analysis\Motif_scanning\SARUS_new\\"
 
 #Name of a dataset.
-Dataset_name="EcTopoI_Rif_motif_w3110_scanned"
+Dataset_name="EcTopoI_noCTD_Rif_motif_1_w3110_Mu_scanned"
 
 
 #######
@@ -48,19 +46,19 @@ def read_sarus_parse(sarus_output):
             seq_id=line[0]
         else:
             line=line.rstrip().split('\t')
-            score=line[0]
-            position=line[1]
+            score=float(line[0])
+            position=int(line[1])
             strand=line[2]
             if strand=='+':
                 ar_plus.append(line)
             elif strand=='-':
                 ar_minus.append(line)
-            if line[1] not in dict_plus_minus:
-                dict_plus_minus[line[1]]=[line]
+            if position not in dict_plus_minus:
+                dict_plus_minus[position]=[line]
             else:
-                dict_plus_minus[line[1]].append(line)
-                max_score=max(dict_plus_minus[line[1]][0][0], dict_plus_minus[line[1]][1][0])
-                ar_max_score.append([max_score, line[1], '.'])
+                dict_plus_minus[position].append(line)
+                max_score=max(dict_plus_minus[position][0][0], dict_plus_minus[position][1][0])
+                ar_max_score.append([max_score, position, '.'])
     filein.close()
     print(f'File was parsed succesfully')
     return seq_id, ar_plus, ar_minus, ar_max_score

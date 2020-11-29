@@ -60,14 +60,51 @@ Peaks_data5={'CTD-/Rif-' : PWD_peaks5 + "TopoA_noCTD_noRif_rep123_thr_3_nm_0.001
              'CTD+/Rif+' : PWD_peaks5 + "TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks.narrowPeak",             
              }
 
+#Path to the working directory with NarrowPeak files.
+PWD_peaks6="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
+Set_name6="EcTopoI_and_EcRpoC"
+Peaks_data6={'EcTopoI' : PWD_peaks6 + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+             'EcRpoC' :  PWD_peaks6 + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak",             
+             }
+
+#Path to the working directory with NarrowPeak files.
+PWD_peaks7="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\\"
+Set_name7="EcRpoC_and_EcRpoB"
+Peaks_data7={'EcRpoB' : PWD_peaks7 + "RpoB_Kahramanoglou\RNApol_peaks_threshold_450.BroadPeak",
+             'EcRpoC' : PWD_peaks7 + "RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak",             
+             }
+
+#Path to the working directory with NarrowPeak files.
+PWD_peaks8="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
+Set_name8="EcTopoI_and_EcRpoB"
+Peaks_data8={'EcRpoB' : PWD_peaks8 + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\RNApol_peaks_threshold_450.BroadPeak",
+             'EcTopoI' : PWD_peaks8 + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",             
+             }
+
+#Path to the working directory with NarrowPeak files.
+PWD_peaks9="C:\\Users\sutor\OneDrive\\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\\"
+Set_name9="MsmRNAP_and_MsmTopoI"
+Peaks_data9={'MsmRNAP' :  PWD_peaks9 + "Peak_calling\\Landick_MsmRNAP_peaks_threshold_4.BroadPeak",
+             'MsmTopoI' : PWD_peaks9 + "Peak_calling\\Rani_MsmTopoI_FC_peaks_threshold_3.BroadPeak",             
+             }
+
+#Path to the working directory with NarrowPeak files.
+PWD_peaks10="C:\\Users\sutor\OneDrive\\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\\"
+Set_name10="MtbRNAP_and_MtbGyrase"
+Peaks_data10={'MtbRNAP' :   PWD_peaks10 + "Peak_calling\\Uplekar_MtbRNAP_peaks_threshold_3.BroadPeak",
+              'MtbGyrase' : PWD_peaks10 + "Peak_calling\\Ahmed_MtbGyrase_peaks_threshold_2.BroadPeak",             
+             }
+
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-Genome="C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+#Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+#Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\GCA_000767705.1_ASM76770v1_genomic.fna"
+Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\Mycobacterium_tuberculosis_H37Rv.fasta"
 #Threshold for reproducible peaks calling (must not exceed number of replicas).
 Threshold=int(2)
 #Outpath.
-Path_out="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_all_exp_shared_nm_0.001_peaks.narrowPeak"
+Path_out="C:\\Users\sutor\OneDrive\\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\MtbRNAP_3_shared_with_MtbGyrase_2_peaks.narrowPeak"
 #Pics outpath.
-Pics_path_out="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\\"
+Pics_path_out="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\Shared_peaks\\"
     
     
 #######
@@ -101,7 +138,7 @@ def deletions_info(del_path):
 
 def Indicate_where_peaks(genome_ar, peaks_ar):
     for peak in peaks_ar:
-        for i in range (peak[1]+1-peak[0]):
+        for i in range (peak[1]-peak[0]):
             genome_ar[peak[0]+i]+=1
     return genome_ar
 
@@ -113,12 +150,16 @@ def Find_rep_peaks(genome_ar, thr):
     peak=0
     rep_peaks_ar=[]
     for i in range(len(genome_ar)):
+        
+        #Rules how to enter a peak.
         if genome_ar[i]<thr and peak==0: #We are not in peak.
             continue
         elif genome_ar[i]>=thr and peak==0: #We are at left peak border.
             peak=1
             current_peak=[i]
             continue
+        
+        #Rules how go deeper into the peak.
         elif genome_ar[i]>=thr and peak==1: #We are within a peak.
             continue
         elif genome_ar[i]<thr and peak==1: #We are at the right peak border.
@@ -233,12 +274,15 @@ def draw_heatmap(Matrix_of_shared, keys_list, Title, File_name, pics_outpath):
 #######    
 
 def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
+    
     #Reads genome fasta.
     genome_length, genome_seq, chrom_name=read_genome(genome_path)
+    
     #Reads replicas data.
     rep_data={}
     for name, rep_path in reps_dict.items():
         rep_data[name]=deletions_info(rep_path)
+    
     #Create template genome-long array, Indicates peaks, Identify reproducible peaks.
     Rep_peaks_array=overlap_call(rep_data, thr, genome_length)
     keys_list=list(rep_data.keys())
@@ -260,6 +304,7 @@ def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
             Num_peaks14_shared, Num_peaks41_shared=Find_rep_peaks_pairwise(rep_data, keys_list[0], keys_list[3], Rep_peaks_array14)
             Num_peaks24_shared, Num_peaks42_shared=Find_rep_peaks_pairwise(rep_data, keys_list[1], keys_list[3], Rep_peaks_array24) 
             Num_peaks34_shared, Num_peaks43_shared=Find_rep_peaks_pairwise(rep_data, keys_list[2], keys_list[3], Rep_peaks_array34)
+    
     #Create 2d array for visualization.
     Matrix_of_shared=np.array([[len(rep_data[keys_list[0]]), Num_peaks12_shared],
                                [Num_peaks21_shared, len(rep_data[keys_list[1]])]])    
@@ -275,17 +320,18 @@ def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
                                    [Num_peaks41_shared, Num_peaks42_shared, Num_peaks43_shared, len(rep_data[keys_list[3]])]])
      
     #Visualize data with heatmap.
-    draw_heatmap(Matrix_of_shared, keys_list, "Number of peaks shared between\n" + set_name + " samples", 'TopoA_all_exp_nm_0.001_peaks_heatmap_num.png', pics_outpath) 
+    draw_heatmap(Matrix_of_shared, keys_list, "Number of peaks shared between\n" + set_name + " samples", 'MtbRNAP_3_shared_with_MtbGyrase_2_peaks_heatmap_num.png', pics_outpath) 
+    
     #Compute Jaccardian distances between samples, visualize data with heatmap.
     matrix_jac=num_to_jaccard_dist(Matrix_of_shared)
-    draw_heatmap(matrix_jac, keys_list, "Jaccardian distances between\n" + set_name + " samples", 'TopoA_all_exp_nm_0.001_peaks_heatmap_jac_dist.png', pics_outpath) 
-        
+    draw_heatmap(matrix_jac, keys_list, "Jaccardian distances between\n" + set_name + " samples", 'MtbRNAP_3_shared_with_MtbGyrase_2_peaks_heatmap_jac_dist.png', pics_outpath)   
     
     #Create Venn diagram represents replicas overlapping.
     plt.figure(figsize=(4,4))   
     keys_list=list(rep_data.keys())
     if len(keys_list)==2:
-        venn2(subsets=(len(rep_data[keys_list[0]])-len(Rep_peaks_array), len(rep_data[keys_list[1]])-len(Rep_peaks_array), len(Rep_peaks_array)), set_labels=(keys_list[0], keys_list[1]))
+        venn2(subsets=(len(rep_data[keys_list[0]])-len(Rep_peaks_array), len(rep_data[keys_list[1]])-len(Rep_peaks_array), len(Rep_peaks_array)), set_labels=(keys_list[0], keys_list[1]),
+              set_colors=('#8ec7f2', '#ff8692'), alpha = 0.7)
         venn2_circles(subsets=(len(rep_data[keys_list[0]])-len(Rep_peaks_array), len(rep_data[keys_list[1]])-len(Rep_peaks_array), len(Rep_peaks_array)), linestyle='solid')    
         plt.show()
     elif len(keys_list)==3:
@@ -311,10 +357,11 @@ def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
         plt.show()   
     else:
         print('Impossible to draw Venn diagram. Currently only 2 and 3 sets can be processed.')
-    plt.savefig(pics_outpath+'TopoA_all_exp_nm_0.001_peaks_venn.png', dpi=400, figsize=(4, 4))
+    plt.savefig(pics_outpath+'MtbRNAP_3_shared_with_MtbGyrase_2_peaks_venn.png', dpi=400, figsize=(4, 4))
+    
     #Write reproducible peaks.
     write_bed(Rep_peaks_array, chrom_name, outpath)
     return
             
-Wrapper(Peaks_data5, Set_name5, 4, Genome, Path_out, Pics_path_out)       
+Wrapper(Peaks_data10, Set_name10, 2, Genome, Path_out, Pics_path_out)       
     

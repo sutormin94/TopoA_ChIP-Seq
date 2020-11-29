@@ -182,6 +182,32 @@ associated with main character (signal of TopoA -Rif by default).
 **Output:** Plots with signal distribution, extending-frame plots describing the stability of feature divirgence.
 
 
+## Peak_overlap_simulation.py
+
+Takes two BroadPeak files of real ChIP-Seq peaks datasets and tests the significance of sets overlay. Uses Monte-Carlo approach to 
+place peaks randomly and then samples the overlay. Repetitive sampling gives a distribution for the number of peaks in overlay, which
+is then approximated by normal distribution and is used to test the number of peaks in overlay for real datasets.
+
+**Requirements:** Python 3
+
+**Input:** Two BroadPeak files with peaks coordinates, genome length, portion of a genome to mask (deletions, etc.)
+
+**Output:** Plot of a distribution of the number of overlaying peaks, p-value, text file with the number of overlaying peaks for every iteration.
+
+
+## Add 2: Growth_curve_plot.py
+
+Takes culture growth curve data in a form of xlsx table containing series of time-points and corresponding optical density of a culture. 
+Plots raw data growth curve and confidential intervals if several replicates provided.
+
+**Requirements:** Python 3
+
+**Input:** Table with time-points and optical density measurments
+
+**Output:** Growth curve plot.
+
+
+
 ## Normalize_calc_FE.py
 
 Script for advanced data analysis. Not completed yet.
