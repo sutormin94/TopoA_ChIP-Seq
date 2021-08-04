@@ -1,5 +1,5 @@
 ###############################################
-##Dmitry Sutormin, 2020##
+##Dmitry Sutormin, 2021##
 ##TopoI ChIP-Seq analysis##
 
 #The script tests sets of genomic intervals (Peaks, TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)
@@ -27,17 +27,25 @@ from scipy.stats import binom
 PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\\"
 
 #Input: Intervals (e.g. EcTopoI peaks) with additional info (FE, GC%, width, etc.).
-path_to_intervals_data_dict={'EcTopoI' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak',
-                             'RpoB' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\RNApol_peaks_threshold_450.BroadPeak',
-                             'Gyrase' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\Cfx_10mkM_trusted_GCSs_h_s.broadPeak'
+path_to_intervals_data_dict={'EcTopoI'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak',
+                             'RpoC'        : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak',
+                             'RpoB'        : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\RNApol_peaks_threshold_450.BroadPeak',
+                             'Gyrase'      : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\Cfx_10mkM_trusted_GCSs_h_s.broadPeak',
+                             'EcTopoI Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak',
+                             'RpoC Rif'    : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Rif_Mooney\Mooney_RpoC_Rif_peaks_threshold_1.5.BroadPeak',
+                                                          
                              }
 
-path_to_wig_files_dict={'EcTopoI' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_123.wig',
-                        'RpoB' :    'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_RpoB_IP_ME.wig',
-                        'Gyrase' :  'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\Topo-Seq_data_N3E\EP_Cfx_IP_Mu_10mkM_1_edt_N3E.wig'}
+path_to_wig_files_dict={'EcTopoI'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
+                        'RpoC'        : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Borukhov_RpoC_Pol_Sofi_LB_FE.wig',
+                        'RpoB'        : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_RpoB_IP_ME.wig',
+                        'Gyrase'      : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_Gyrase_Cfx_10mkM_FE_av.wig',
+                        'EcTopoI Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig',
+                        'RpoC Rif'    : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_Rif_FE.wig',
+                        }
 
 #Output: path to the dir to store output
-Outputpath=PWD + "Apr_data"
+Outputpath=PWD + "EcTopoI_Rif_vs_RpoC_Rif\\"
 if not os.path.exists(Outputpath):
     os.makedirs(Outputpath)
     
@@ -68,7 +76,7 @@ def read_peaks(path_dict):
         filein.close() 
         
         peaks_dict[name]=peaks_ar
-    #print(peaks_dict)
+
     return peaks_dict
 
 
@@ -135,18 +143,15 @@ def set_axis_style(ax, labels, pos):
     ax.set_xlim(0.25, max(pos)+0.75)
     return
 
-def draw_violins(sets_dict, pwd):
+def draw_violins(dataset1, signal_name, interval_name, pwd):
     
     #Positions of violins.
     pos1=[1, 2]
-    
-    #Datasets.
-    dataset1=[sets_dict['EcTopoI_wig_in_RpoB_peaks'], sets_dict['EcTopoI_wig_out_RpoB_peaks']]
 
     #Draw violin-plots.
     fig=plt.figure(figsize=(4.5,6), dpi=100)
     plt1=fig.add_subplot(1,1,1) 
-    violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
+    violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=2000)
     for i in range(len(violins['bodies'])):
         violins['bodies'][i].set_facecolor('#ff7762')
         violins['bodies'][i].set_edgecolor('black')
@@ -172,19 +177,19 @@ def draw_violins(sets_dict, pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['RpoB\npeaks', 'Other\nsites']
+    labels=[f'{interval_name}\npeaks', 'Other\nsites']
     set_axis_style(plt1, labels, pos1)
     
-    yticknames1=np.arange(0, 5, 1)
+    yticknames1=np.arange(0, 4.5, 1)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
-    plt1.set_ylabel('EcTopoI FE', size=15)
-    plt1.set_ylim(-0.2, 5.1)
+    plt1.set_ylabel(f'{signal_name} FE', size=15)
+    plt1.set_ylim(-0.5, 4.5)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     #plt1.set_yscale('log')
     
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(dataset1[0]),2)}', xy=(0.5, 2.2), xycoords='data', size=12, rotation=90)
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(dataset1[1]),2)}', xy=(1.5, 2.2), xycoords='data', size=12, rotation=90)        
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(dataset1[0]),2)}', xy=(0.5, 2), xycoords='data', size=12, rotation=90)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(dataset1[1]),2)}', xy=(1.5, 2), xycoords='data', size=12, rotation=90)        
     
     #Welch t-test.
     Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
@@ -192,11 +197,28 @@ def draw_violins(sets_dict, pwd):
 
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Apr_data\EcTopoI_FE_and_RpoB_peaks.png', dpi=400, figsize=(4.5,6))   
+    plt.savefig(f'{pwd}\{signal_name}_FE_and_{interval_name}_peaks.png', dpi=400, figsize=(4.5,6))   
     
     return
 
-Peaks_dictionary=read_peaks(path_to_intervals_data_dict)
-WIG_dictionary=read_wig(path_to_wig_files_dict)
-Sets_dictionary=mark_peaks_return_subsets(Peaks_dictionary, WIG_dictionary)
-draw_violins(Sets_dictionary, PWD)
+
+#######
+#Wrapper function.
+#######
+
+def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Outpath):
+
+    Peaks_dictionary=read_peaks(path_to_intervals_data_dict)
+    WIG_dictionary=read_wig(path_to_wig_files_dict)
+    Sets_dictionary=mark_peaks_return_subsets(Peaks_dictionary, WIG_dictionary)
+    
+    #Dataset. Specify names of datasets to be compared.
+    signal_name='RpoC Rif'
+    interval_name='EcTopoI Rif'
+    dataset1=[Sets_dictionary[f'{signal_name}_wig_in_{interval_name}_peaks'], Sets_dictionary[f'{signal_name}_wig_out_{interval_name}_peaks']]
+    
+    draw_violins(dataset1, signal_name, interval_name, Outpath)
+    
+    return
+
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Outputpath)

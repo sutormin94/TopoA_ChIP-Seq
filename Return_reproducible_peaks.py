@@ -1,9 +1,10 @@
 ###############################################
-##Dmitry Sutormin, 2019##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##TopoI ChIP-Seq analysis##
 
-#Takes narrowPeaks files with ChIP-Seq peaks identified in different biological replicas,
-#return narrowPeak only with reproducible peaks.
+#Takes narrowPeaks files with ChIP-Seq peaks identified in different biological replicas 
+#(or for different proteins if one wants to investigate the colocalization of signals),
+#return narrowPeak only with reproducible (overlapping) peaks.
 ###############################################
 
 #######
@@ -18,11 +19,11 @@ from matplotlib_venn import venn2, venn2_circles, venn3, venn3_circles
 
 Set_name1="CTD-/Rif-"
 #Path to the working directory with NarrowPeak files.
-PWD_peaks1="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\TopoA_noCTD_noRif_FC_nm_0.001\\"
+PWD_peaks1="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\TopoA_noCTD_noRif_FC_nm_0.001\\"
 #Dictionary of pathes to NarrowPeak file with peaks coordinates (MACS2 output).
-Peaks_data1={'CTD-/Rif- 1' : PWD_peaks1 + "TopoA_rep1_noCTD_noRif_FC_nm_0.001_peaks.narrowPeak",
-             'CTD-/Rif- 2' : PWD_peaks1 + "TopoA_rep2_noCTD_noRif_FC_nm_0.001_peaks.narrowPeak",
-             'CTD-/Rif- 3' : PWD_peaks1 + "TopoA_rep3_noCTD_noRif_FC_nm_0.001_peaks.narrowPeak",
+Peaks_data1={'CTD-/Rif- 1' : PWD_peaks1 + "TopoA_rep3_noCTD_noRif_FC_nm_0.001_peaks.narrowPeak",
+             'CTD-/Rif- 2' : PWD_peaks1 + "TopoA_rep4_noCTD_noRif_FC_nm_0.001_peaks.narrowPeak",
+             'CTD-/Rif- 3' : PWD_peaks1 + "TopoA_rep6_noCTD_noRif_FC_nm_0.001_peaks.narrowPeak",
              }
 
 Set_name2="CTD-/Rif+"
@@ -45,16 +46,16 @@ Peaks_data3={'CTD+/Rif- 1' : PWD_peaks3 + "TopoA_rep1_CTD_noRif_FC_nm_0.001_peak
 
 Set_name4="CTD+/Rif+"
 #Path to the working directory with NarrowPeak files.
-PWD_peaks4="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\TopoA_CTD_Rif_FC_nm_0.001\\"
+PWD_peaks4="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\TopoA_CTD_Rif_FC_nm_0.001\\"
 #Dictionary of pathes to NarrowPeak file with peaks coordinates (MACS2 output).
-Peaks_data4={'CTD+/Rif- 1' : PWD_peaks4 + "TopoA_rep1_CTD_Rif_FC_nm_0.001_peaks.narrowPeak",
-             'CTD+/Rif- 2' : PWD_peaks4 + "TopoA_rep2_CTD_Rif_FC_nm_0.001_peaks.narrowPeak",
+Peaks_data4={'CTD+/Rif+ 1' : PWD_peaks4 + "TopoA_rep1_CTD_Rif_FC_nm_0.001_peaks.narrowPeak",
+             'CTD+/Rif+ 2' : PWD_peaks4 + "TopoA_rep2_CTD_Rif_FC_nm_0.001_peaks.narrowPeak",
              }
 
 #Path to the working directory with NarrowPeak files.
-PWD_peaks5="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\\"
+PWD_peaks5="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\\"
 Set_name5="all"
-Peaks_data5={'CTD-/Rif-' : PWD_peaks5 + "TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+Peaks_data5={'CTD-/Rif-' : PWD_peaks5 + "TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
              'CTD-/Rif+' : PWD_peaks5 + "TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
              'CTD+/Rif-' : PWD_peaks5 + "TopoA_CTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
              'CTD+/Rif+' : PWD_peaks5 + "TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks.narrowPeak",             
@@ -63,7 +64,7 @@ Peaks_data5={'CTD-/Rif-' : PWD_peaks5 + "TopoA_noCTD_noRif_rep123_thr_3_nm_0.001
 #Path to the working directory with NarrowPeak files.
 PWD_peaks6="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
 Set_name6="EcTopoI_and_EcRpoC"
-Peaks_data6={'EcTopoI' : PWD_peaks6 + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+Peaks_data6={'EcTopoI' : PWD_peaks6 + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
              'EcRpoC' :  PWD_peaks6 + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak",             
              }
 
@@ -77,8 +78,8 @@ Peaks_data7={'EcRpoB' : PWD_peaks7 + "RpoB_Kahramanoglou\RNApol_peaks_threshold_
 #Path to the working directory with NarrowPeak files.
 PWD_peaks8="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
 Set_name8="EcTopoI_and_EcRpoB"
-Peaks_data8={'EcRpoB' : PWD_peaks8 + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\RNApol_peaks_threshold_450.BroadPeak",
-             'EcTopoI' : PWD_peaks8 + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",             
+Peaks_data8={'EcRpoB' : PWD_peaks8 + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\RNApol_peaks_threshold_350.BroadPeak",
+             'EcTopoI' : PWD_peaks8 + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",             
              }
 
 #Path to the working directory with NarrowPeak files.
@@ -95,16 +96,39 @@ Peaks_data10={'MtbRNAP' :   PWD_peaks10 + "Peak_calling\\Uplekar_MtbRNAP_peaks_t
               'MtbGyrase' : PWD_peaks10 + "Peak_calling\\Ahmed_MtbGyrase_peaks_threshold_2.BroadPeak",             
              }
 
+#Path to the working directory with NarrowPeak files.
+PWD_peaks11="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\\"
+Set_name11="EcTopoI_ChIP_Topo_Mock"
+Peaks_data11={'EcTopoI_ChIP_Seq' : PWD_peaks11 + "Data_analysis\Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+              'EcTopoI_Topo_Seq' : PWD_peaks11 + "TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\TCS_motifs\\Replics_123_av_Thresholds\TopoI_Ara_TCSs_called_10.BroadPeak",             
+             }
+
+#Path to the working directory with NarrowPeak files.
+PWD_peaks12="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\\"
+Set_name12="EcTopoI_ChIP_Topo_Mock"
+Peaks_data12={'EcTopoI_Rif' : PWD_peaks12 + "Data_analysis\Peak_calling\Reproducible_peaks\\TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+              'RpoC_Rif'    : PWD_peaks12 + "Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Rif_Mooney\Mooney_RpoC_Rif_peaks_threshold_1.5.BroadPeak",             
+             }
+
+#Path to the working directory with NarrowPeak files.
+PWD_peaks13="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\\"
+Set_name13="EcTopoI_ChIP_Topo_Mock"
+Peaks_data13={'EcTopoI_ChIP_Seq' : PWD_peaks13 + "Data_analysis\Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+              'EcTopoI_Topo_Seq' : PWD_peaks13 + "TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\TCS_motifs\\TopoI_Ara_TCSs_called_15.BroadPeak",             
+              'EcRpoC' :           PWD_peaks13 + "Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak",
+             }
+
+
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-#Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\GCA_000767705.1_ASM76770v1_genomic.fna"
-Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\Mycobacterium_tuberculosis_H37Rv.fasta"
+#Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\Mycobacterium_tuberculosis_H37Rv.fasta"
 #Threshold for reproducible peaks calling (must not exceed number of replicas).
-Threshold=int(2)
+Threshold=int(3)
 #Outpath.
-Path_out="C:\\Users\sutor\OneDrive\\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\MtbRNAP_3_shared_with_MtbGyrase_2_peaks.narrowPeak"
-#Pics outpath.
-Pics_path_out="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\Shared_peaks\\"
+Path_out="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_ChIP_Seq_vs_Topo_Seq_vs_RpoC\\"
+#Output name.
+Output_name="EcTopoI_ChIP_Topo_10_vs_RpoC_3"
     
     
 #######
@@ -273,7 +297,7 @@ def draw_heatmap(Matrix_of_shared, keys_list, Title, File_name, pics_outpath):
 #Identifies reproducible regions, writes broadPeak file with reproducible peaks.
 #######    
 
-def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
+def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pathout_name):
     
     #Reads genome fasta.
     genome_length, genome_seq, chrom_name=read_genome(genome_path)
@@ -320,11 +344,11 @@ def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
                                    [Num_peaks41_shared, Num_peaks42_shared, Num_peaks43_shared, len(rep_data[keys_list[3]])]])
      
     #Visualize data with heatmap.
-    draw_heatmap(Matrix_of_shared, keys_list, "Number of peaks shared between\n" + set_name + " samples", 'MtbRNAP_3_shared_with_MtbGyrase_2_peaks_heatmap_num.png', pics_outpath) 
+    draw_heatmap(Matrix_of_shared, keys_list, "Number of peaks shared between\n" + set_name + " samples", pathout_name+'_heatmap_num.png', outpath) 
     
     #Compute Jaccardian distances between samples, visualize data with heatmap.
     matrix_jac=num_to_jaccard_dist(Matrix_of_shared)
-    draw_heatmap(matrix_jac, keys_list, "Jaccardian distances between\n" + set_name + " samples", 'MtbRNAP_3_shared_with_MtbGyrase_2_peaks_heatmap_jac_dist.png', pics_outpath)   
+    draw_heatmap(matrix_jac, keys_list, "Jaccardian distances between\n" + set_name + " samples", pathout_name+'_heatmap_jac_dist.png', outpath)   
     
     #Create Venn diagram represents replicas overlapping.
     plt.figure(figsize=(4,4))   
@@ -357,11 +381,12 @@ def Wrapper(reps_dict, set_name, thr, genome_path, outpath, pics_outpath):
         plt.show()   
     else:
         print('Impossible to draw Venn diagram. Currently only 2 and 3 sets can be processed.')
-    plt.savefig(pics_outpath+'MtbRNAP_3_shared_with_MtbGyrase_2_peaks_venn.png', dpi=400, figsize=(4, 4))
+    plt.savefig(outpath+pathout_name+'_venn.png', dpi=400, figsize=(4, 4))
+    plt.savefig(outpath+pathout_name+'_venn.svg', dpi=400, figsize=(4, 4))
     
     #Write reproducible peaks.
-    write_bed(Rep_peaks_array, chrom_name, outpath)
+    write_bed(Rep_peaks_array, chrom_name, outpath+pathout_name+'.narrowPeak')
     return
             
-Wrapper(Peaks_data10, Set_name10, 2, Genome, Path_out, Pics_path_out)       
+Wrapper(Peaks_data13, Set_name13, Threshold, Genome, Path_out, Output_name)       
     

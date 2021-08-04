@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2019##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##EcTopoI ChIP-Seq analysis##
 
 #Takes wig file with fold enrichment, finds regions with enrichment > threshold,
 #returns BroadPeaks file with peaks.
@@ -17,11 +17,11 @@ from matplotlib import pyplot as plt
 from matplotlib_venn import venn2, venn2_circles
 
 #Dictionary of pathes to wig file with fold enrichment.
-Peaks_data={'RNApol' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_RpoB_IP_ME.wig'}
+Peaks_data={'Mooney_RpoC_Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_Rif_FE.wig'}
 #Threshold for reproducible peaks calling (must not exceed number of replicas).
-Threshold=int(750)
+Threshold=1.5
 #Outpath.
-Path_out='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\\'
+Path_out='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Rif_Mooney\\'
 
 
 #######

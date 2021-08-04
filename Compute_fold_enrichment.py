@@ -11,45 +11,51 @@
 import numpy as np
 
 #Path to the working directory.
-PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\RNAP_Borukhov\\"
+PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\\"
 #Path to the file with IP data
-IP_path_dict={'1' :  PWD +        "WIG\deltaGreAB_RNAP_LB_rep1_IP.wig",
-              '2' :  PWD +        "WIG\deltaGreAB_RNAP_LB_rep2_IP.wig",  
-              '3' :  PWD +        "WIG\WT_RNAP_LB_rep1_IP.wig",
-              '4' :  PWD +        "WIG\WT_RNAP_LB_rep2_IP.wig", 
-              '5' :  PWD +        "WIG\WT_TAP_RNAP_LB_IP.wig", 
-              '6' :  PWD +        "WIG_nodup\deltaGreAB_RNAP_LB_rep1_IP_nodup.wig",
-              '7' :  PWD +        "WIG_nodup\deltaGreAB_RNAP_LB_rep2_IP_nodup.wig",
-              '8' :  PWD +        "WIG_nodup\WT_RNAP_LB_rep1_IP_nodup.wig",
-              '9' :  PWD +        "WIG_nodup\WT_RNAP_LB_rep2_IP_nodup.wig",    
-              '10' :  PWD +       "WIG_nodup\WT_TAP_RNAP_LB_IP_nodup.wig",    
+IP_path_dict={'1' :  PWD + "WIG\\EcTopoI_BW25113_delta11_IP_1_Jan_4_S28.wig",
+              '2' :  PWD + "WIG\\EcTopoI_BW25113_delta11_IP_2_Jan_5_S29.wig",
+              '3' :  PWD + "WIG\\EcTopoI_BW25113_delta11_IP_3_Jan_6_S30.wig",  
+              '4' :  PWD + "WIG\\EcTopoI_BW25113_delta14_IP_1_Jan_10_S34.wig",
+              '5' :  PWD + "WIG\\EcTopoI_BW25113_delta14_IP_2_Jan_11_S35.wig",
+              '6' :  PWD + "WIG\\EcTopoI_BW25113_delta14_IP_3_Jan_23_S47.wig", 
+              '7' :  PWD + "WIG\\EcTopoI_BW25113_delta30_IP_1_Jan_16_S40.wig",
+              '8' :  PWD + "WIG\\EcTopoI_BW25113_delta30_IP_2_Jan_17_S41.wig",
+              '9' :  PWD + "WIG\\EcTopoI_BW25113_delta30_IP_3_Jan_18_S42.wig",    
+              '10' : PWD + "WIG\\EcTopoI_DY330_IP_1_Jan_22_S46.wig",
+              '11' : PWD + "WIG\\EcTopoI_DY330_IP_2_Jan_12_S36.wig",
+              '12' : PWD + "WIG\\EcTopoI_DY330_IP_3_Jan_24_S48.wig", 
               }
 
 #Path to the file Mock control data
-Mock_path_dict={'1' :  PWD +           "WIG\deltaGreAB_RNAP_LB_rep1_input.wig",
-                '2' :  PWD +           "WIG\deltaGreAB_RNAP_LB_rep2_input.wig",
-                '3' :  PWD +           "WIG\WT_RNAP_LB_rep1_input.wig",
-                '4' :  PWD +           "WIG\WT_RNAP_LB_rep2_input.wig",  
-                '5' :  PWD +           "WIG\WT_TAP_RNAP_LB_input.wig", 
-                '6' :  PWD +           "WIG_nodup\deltaGreAB_RNAP_LB_rep1_input_nodup.wig",
-                '7' :  PWD +           "WIG_nodup\deltaGreAB_RNAP_LB_rep2_input_nodup.wig",
-                '8' :  PWD +           "WIG_nodup\WT_RNAP_LB_rep1_input_nodup.wig", 
-                '9' :  PWD +           "WIG_nodup\WT_RNAP_LB_rep2_input_nodup.wig",
-                '10' :  PWD +          "WIG_nodup\WT_TAP_RNAP_LB_input_nodup.wig",
+Mock_path_dict={'1' :  PWD + "WIG\\EcTopoI_BW25113_delta11_Mock_1_Jan_1_S25.wig",
+                '2' :  PWD + "WIG\\EcTopoI_BW25113_delta11_Mock_2_Jan_2_S26.wig",
+                '3' :  PWD + "WIG\\EcTopoI_BW25113_delta11_Mock_3_Jan_3_S27.wig",  
+                '4' :  PWD + "WIG\\EcTopoI_BW25113_delta14_Mock_1_Jan_7_S31.wig",
+                '5' :  PWD + "WIG\\EcTopoI_BW25113_delta14_Mock_2_Jan_8_S32.wig",
+                '6' :  PWD + "WIG\\EcTopoI_BW25113_delta14_Mock_3_Jan_9_S33.wig", 
+                '7' : PWD + "WIG\\EcTopoI_BW25113_delta30_Mock_1_Jan_13_S37.wig",
+                '8' : PWD + "WIG\\EcTopoI_BW25113_delta30_Mock_2_Jan_14_S38.wig",
+                '9' : PWD + "WIG\\EcTopoI_BW25113_delta30_Mock_3_Jan_15_S39.wig",    
+                '10' : PWD + "WIG\\EcTopoI_DY330_Mock_1_Jan_19_S43.wig", 
+                '11' : PWD + "WIG\\EcTopoI_DY330_Mock_2_Jan_20_S44.wig",
+                '12' : PWD + "WIG\\EcTopoI_DY330_Mock_3_Jan_21_S45.wig", 
                 }
 
 
 #ID or short description of the track (will be the name of a track in IGV).
-name_dict={'1' :  "deltaGreAB_RNAP_LB_rep1_IP/deltaGreAB_RNAP_LB_rep1_input",
-           '2' :  "deltaGreAB_RNAP_LB_rep2_IP/deltaGreAB_RNAP_LB_rep2_input", 
-           '3' :  "WT_RNAP_LB_rep1_IP/WT_RNAP_LB_rep1_input",
-           '4' :  "WT_RNAP_LB_rep2_IP/WT_RNAP_LB_rep2_input", 
-           '5' :  "WT_TAP_RNAP_LB_IP/WT_TAP_RNAP_LB_input",
-           '6' :  "deltaGreAB_RNAP_LB_rep1_IP_nodup/deltaGreAB_RNAP_LB_rep1_input_nodup",
-           '7' :  "deltaGreAB_RNAP_LB_rep2_IP_nodup/deltaGreAB_RNAP_LB_rep2_input_nodup",
-           '8' :  "WT_RNAP_LB_rep1_IP_nodup/WT_RNAP_LB_rep1_input_nodup",  
-           '9' :  "WT_RNAP_LB_rep2_IP_nodup/WT_RNAP_LB_rep2_input_nodup", 
-           '10' : "WT_TAP_RNAP_LB_IP_nodup/WT_TAP_RNAP_LB_input_nodup", 
+name_dict={'1' :  "EcTopoI_BW25113_delta11_IP_1_Jan_4_S28/EcTopoI_BW25113_delta11_Mock_1_Jan_1_S25",
+           '2' :  "EcTopoI_BW25113_delta11_IP_2_Jan_5_S29/EcTopoI_BW25113_delta11_Mock_2_Jan_2_S26", 
+           '3' :  "EcTopoI_BW25113_delta11_IP_3_Jan_6_S30/EcTopoI_BW25113_delta11_Mock_3_Jan_3_S27",
+           '4' :  "EcTopoI_BW25113_delta14_IP_1_Jan_10_S34/EcTopoI_BW25113_delta14_Mock_1_Jan_7_S31",
+           '5' :  "EcTopoI_BW25113_delta14_IP_2_Jan_11_S35/EcTopoI_BW25113_delta14_Mock_2_Jan_8_S32", 
+           '6' :  "EcTopoI_BW25113_delta14_IP_3_Jan_23_S47/EcTopoI_BW25113_delta14_Mock_3_Jan_9_S33",
+           '7' :  "EcTopoI_BW25113_delta30_IP_1_Jan_16_S40/EcTopoI_BW25113_delta30_Mock_1_Jan_13_S37",
+           '8' :  "EcTopoI_BW25113_delta30_IP_2_Jan_17_S41/EcTopoI_BW25113_delta30_Mock_2_Jan_14_S38", 
+           '9' :  "EcTopoI_BW25113_delta30_IP_3_Jan_18_S42/EcTopoI_BW25113_delta30_Mock_3_Jan_15_S39",
+           '10' : "EcTopoI_DY330_IP_1_Jan_22_S46/EcTopoI_DY330_Mock_1_Jan_19_S43",
+           '11' : "EcTopoI_DY330_IP_2_Jan_12_S36/EcTopoI_DY330_Mock_2_Jan_20_S44", 
+           '12' : "EcTopoI_DY330_IP_3_Jan_24_S48/EcTopoI_DY330_Mock_3_Jan_21_S45",                                 
            }
 
 #ID of chromosome (for w3110_Mu_SGS: NC_007779.1_w3110_Mu)
@@ -57,16 +63,18 @@ Chromosome_name_manual=''
 #Mode for Chromosome name writing: 0 - auto detection from bed file provided, 1 - manualy provided by user in Chromosome_name variable.
 Auto_or_manual=int(0)
 #Output path to the final file (fold enrichment).
-FE_file_path_dict={'1' :  PWD +           "FE\deltaGreAB_RNAP_LB_rep1_FE.wig",
-                   '2' :  PWD +           "FE\deltaGreAB_RNAP_LB_rep2_FE.wig",
-                   '3' :  PWD +           "FE\WT_RNAP_LB_rep1_FE.wig",
-                   '4' :  PWD +           "FE\WT_RNAP_LB_rep2_FE.wig",
-                   '5' :  PWD +           "FE\WT_TAP_RNAP_LB_FE.wig",
-                   '6' :  PWD +           "FE_nodup\deltaGreAB_RNAP_LB_rep1_nodup_FE.wig",
-                   '7' :  PWD +           "FE_nodup\deltaGreAB_RNAP_LB_rep2_nodup_FE.wig",
-                   '8' :  PWD +           "FE_nodup\WT_RNAP_LB_rep1_nodup_FE.wig", 
-                   '9' :  PWD +           "FE_nodup\WT_RNAP_LB_rep2_nodup_FE.wig",
-                   '10' :  PWD +          "FE_nodup\WT_TAP_RNAP_LB_nodup_FE.wig",
+FE_file_path_dict={'1' :  PWD + "WIG\\EcTopoI_BW25113_delta11_FE_1.wig",
+                   '2' :  PWD + "WIG\\EcTopoI_BW25113_delta11_FE_2.wig",
+                   '3' :  PWD + "WIG\\EcTopoI_BW25113_delta11_FE_3.wig", 
+                   '4' :  PWD + "WIG\\EcTopoI_BW25113_delta14_FE_1.wig",
+                   '5' :  PWD + "WIG\\EcTopoI_BW25113_delta14_FE_2.wig",
+                   '6' :  PWD + "WIG\\EcTopoI_BW25113_delta14_FE_3.wig",
+                   '7' :  PWD + "WIG\\EcTopoI_BW25113_delta30_FE_1.wig",
+                   '8' :  PWD + "WIG\\EcTopoI_BW25113_delta30_FE_2.wig",
+                   '9' :  PWD + "WIG\\EcTopoI_BW25113_delta30_FE_3.wig",    
+                   '10' : PWD + "WIG\\EcTopoI_DY330_FE_1.wig", 
+                   '11' : PWD + "WIG\\EcTopoI_DY330_FE_2.wig",
+                   '12' : PWD + "WIG\\EcTopoI_DY330_FE_3.wig", 
                    }
 
 

@@ -2,7 +2,7 @@
 ##Dmitry Sutormin, 2020##
 ##TopoI ChIP-Seq analysis##
 
-#The script compares a aignal between different intervals groups (e.g. peaks).
+#The script compares a signal between different intervals groups (e.g. peaks).
 ###############################################
 
 #######

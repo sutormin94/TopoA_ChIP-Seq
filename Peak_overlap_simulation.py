@@ -25,20 +25,49 @@ from scipy.stats import norm
 PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
 
 #Dictionary of datasets.
-Input_dict={'EcTopoI' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
-            'EcRpoC' : PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak"}
+Input_dict={'EcTopoI' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+            'EcRpoB' :  PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak"}
+
+Input_dict1={'EcTopoI_ChIP' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+             'EcTopoI_Topo' : PWD + "EcTopoI_ChIP_Seq_vs_Topo_Seq\Try2\TopoI_Ara_TCSs_called_15.BroadPeak"}
+
+Input_dict2={'EcTopoI_Rif' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+             'RpoC_Rif'    : PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Rif_Mooney\Mooney_RpoC_Rif_peaks_threshold_1.5.BroadPeak"}
+
+Input_dict3={'EcRpoC' :       PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak",
+             'EcTopoI_Topo' : PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\TopoI_Ara_TCSs_called_15.BroadPeak"}
+
 
 #Pre-calculated data.
-Simulated_data_dict={'EcTopoI_vs_EcRpoC' : PWD + "EcTopoI_overlap_EcRpoC_simulation\EcTopoI_vs_EcRpoC_peaks_overlay_10000_it_Real_delcor.txt",
-                     'EcTopoI' : PWD + "EcTopoI_overlap_EcRpoC_simulation\EcTopoI_peaks_in_overlay_10000_it_Real_delcor.txt",
-                     'EcRpoC' : PWD + "EcTopoI_overlap_EcRpoC_simulation\EcRpoC_peaks_in_overlay_10000_it_Real_delcor.txt"}
+Simulated_data_dict={'EcTopoI_vs_EcRpoC' : PWD + "EcTopoI_overlap_EcRpoB_simulation_new\EcTopoI_vs_EcRpoB_peaks_overlay_10000_it_Real_delcor.txt",
+                     'EcTopoI' :           PWD + "EcTopoI_overlap_EcRpoB_simulation_new\EcTopoI_peaks_in_overlay_10000_it_Real_delcor.txt",
+                     'EcRpoB' :            PWD + "EcTopoI_overlap_EcRpoB_simulation_new\EcRpoB_peaks_in_overlay_10000_it_Real_delcor.txt"}
+
+Simulated_data_dict1={'EcTopoI_ChIP_vs_Topo' : PWD + "EcTopoI_ChIP_Seq_vs_Topo_Seq\EcTopoI_ChIP_vs_EcTopoI_Topo_peaks_overlay_10000_it_Real_delcor.txt",
+                      'EcTopoI_ChIP' :         PWD + "EcTopoI_ChIP_Seq_vs_Topo_Seq\EcTopoI_ChIP_peaks_in_overlay_10000_it_Real_delcor.txt",
+                      'EcTopoI_Topo' :         PWD + "EcTopoI_ChIP_Seq_vs_Topo_Seq\EcTopoI_Topo_peaks_in_overlay_10000_it_Real_delcor.txt"}
+
+Simulated_data_dict2={'EcTopoI_Rif_vs_RpoC_Rif' : PWD + "EcTopoI_vs_RNApol_Gyrase\EcTopoI_Rif_vs_RpoC_Rif\EcTopoI_Rif_vs_RpoC_Rif_peaks_overlay_10000_it_Real_delcor.txt",
+                      'EcTopoI_Rif'             : PWD + "EcTopoI_vs_RNApol_Gyrase\EcTopoI_Rif_vs_RpoC_Rif\EcTopoI_Rif_peaks_in_overlay_10000_it_Real_delcor.txt",
+                      'RpoC_Rif'                : PWD + "EcTopoI_vs_RNApol_Gyrase\EcTopoI_Rif_vs_RpoC_Rif\RpoC_Rif_peaks_in_overlay_10000_it_Real_delcor.txt"}
+
+Simulated_data_dict3={'EcTopoI_Topo_vs_RpoC' :  PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\EcRpoC_vs_EcTopoI_Topo_peaks_overlay_10000_it_Real_delcor.txt",
+                      'EcTopoI_Topo'         :  PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\EcTopoI_Topo_peaks_in_overlay_10000_it_Real_delcor.txt",
+                      'EcRpoC'               :  PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\EcRpoC_peaks_in_overlay_10000_it_Real_delcor.txt"}
+
 
 #Genome length.
 Genome_len=4647454 #E. coli DY330 4647454; M. tuberculosis 4411532; M. smegmatis 6988302
 Deletion_correction=126348 #Correcion on deletions cumulative length: E. coli DY330 126348; M. tuberculosis 0; M. smegmatis 0;
 
+#Binning regime.
+Binning='Real' #Supprted options: 'Real' - real peaks are used to simulate overlap; 'Generic' - uses peaks with a width equal to a mean width of peaks in a real dataset.
+
+#Data analysis regime.
+Run_regime='Read' #Supports options: 'Simulate' - run actual Monte-Carlo simmulation, takes some time; 'Read' - read and plot already pre-computed data (obtained in a 'Simulate' regime).
+
 #Output data path.
-Outpath=PWD + "EcTopoI_overlap_EcRpoC_simulation\\"
+Outpath=PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\\"
 
 #################
 ### Read input sets. Calculate bin width and number of peaks. Get number of real overlaying peaks.
@@ -342,6 +371,9 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     #Calculate p-value.
     Real_overlay_peaks_num=simulated_data_dict[names_list[0]][0]
     p_value=1-norm.cdf(Real_overlay_peaks_num, peaks_num_av, np.sqrt(peaks_num_var))
+    if p_value>0.5:
+        p_value=1-p_value
+        
     print(f'Simulated distribution of {names_list[0]} overlaying peaks: norm({np.round(peaks_num_av,1)}, {np.round(peaks_num_var,1)})')
     print(f'Overlaying peaks detected={Real_overlay_peaks_num}; p-value={p_value}')
     
@@ -349,16 +381,16 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     plt.hist(Overlay_peaks_num, bins=int(np.sqrt(Number_of_simulations)/4), density=True, facecolor='#ff9088', edgecolor='black', linewidth=0.1)
     plt.axvline(x=Real_overlay_peaks_num, color='r', linestyle='dashed', linewidth=2)
     plt.plot(pdf_x, pdf_y, 'b--', linewidth=2)   
-    plt.annotate(f'Iterations: {Number_of_simulations}', xy=(peaks_num_av+30, 0.038), xycoords='data', size=12)
-    plt.annotate(f'{names_list[1]}: {bin_info_dict[names_list[1]][0]} peaks {bin_info_dict[names_list[1]][1]} bp', xy=(peaks_num_av+30, 0.035), xycoords='data', size=12)
-    plt.annotate(f'{names_list[2]}: {bin_info_dict[names_list[2]][0]} peaks {bin_info_dict[names_list[2]][1]} bp', xy=(peaks_num_av+30, 0.032), xycoords='data', size=12)
-    plt.annotate(f'$\mu$={np.round(peaks_num_av,1)}', xy=(peaks_num_av+30, 0.029), xycoords='data', size=12)
-    plt.annotate(f'$\sigma^{2}$={np.round(peaks_num_var,1)}', xy=(peaks_num_av+30, 0.026), xycoords='data', size=12)
-    plt.annotate(f'Real peaks in overlay: {Real_overlay_peaks_num}', xy=(Real_overlay_peaks_num-13, 0.004), xycoords='data', size=12, rotation=90)
-    plt.annotate(f'p-value: {"{:.1e}".format(p_value)}', xy=(Real_overlay_peaks_num+5, 0.004), xycoords='data', size=12, rotation=90)    
+    plt.annotate(f'Iterations: {Number_of_simulations}', xy=(peaks_num_av-22, 0.12), xycoords='data', size=12)
+    plt.annotate(f'{names_list[1]}: {bin_info_dict[names_list[1]][0]} peaks {bin_info_dict[names_list[1]][1]} bp', xy=(peaks_num_av-22, 0.11), xycoords='data', size=12)
+    plt.annotate(f'{names_list[2]}: {bin_info_dict[names_list[2]][0]} peaks {bin_info_dict[names_list[2]][1]} bp', xy=(peaks_num_av-22, 0.10), xycoords='data', size=12)
+    plt.annotate(f'$\mu$={np.round(peaks_num_av,1)}', xy=(peaks_num_av-22, 0.09), xycoords='data', size=12)
+    plt.annotate(f'$\sigma^{2}$={np.round(peaks_num_var,1)}', xy=(peaks_num_av-22, 0.08), xycoords='data', size=12)
+    plt.annotate(f'Real peaks in overlay: {Real_overlay_peaks_num}', xy=(Real_overlay_peaks_num-1.5, 0.02), xycoords='data', size=12, rotation=90)
+    plt.annotate(f'p-value: {"{:.1e}".format(p_value)}', xy=(Real_overlay_peaks_num+0.5, 0.03), xycoords='data', size=12, rotation=90)    
     plt.ylabel('Probability', size=13)
     plt.xlabel('Number of peaks in overlay', size=13)
-    plt.xlim([np.min(Overlay_peaks_num)-30, Real_overlay_peaks_num+30])
+    plt.xlim([np.min(Overlay_peaks_num)-7, Real_overlay_peaks_num+25])
     plt.show()
     plt.savefig(f'{output_path}{names_list[0]}_peaks_overlay_{Number_of_simulations}_it_{peak_type}_delcor.png', dpi=300, figsize=(5, 3))
     plt.close()
@@ -383,44 +415,48 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     Real_peaks12_in_overlay_num=simulated_data_dict[names_list[1]][0]
     Real_peaks21_in_overlay_num=simulated_data_dict[names_list[2]][0]
     p_value12=1-norm.cdf(Real_peaks12_in_overlay_num, peaks12_num_av, np.sqrt(peaks12_num_var))
+    if p_value12>0.5:
+        p_value12=1-p_value12    
     p_value21=1-norm.cdf(Real_peaks21_in_overlay_num, peaks21_num_av, np.sqrt(peaks21_num_var))
+    if p_value21>0.5:
+        p_value21=1-p_value21    
     print(f'Simulated distribution of {names_list[1]} peaks in overlay: norm({np.round(peaks12_num_av,1)}, {np.round(peaks12_num_var,1)})')
     print(f'{names_list[1]} overlaying peaks detected={Real_peaks12_in_overlay_num}; p-value={p_value12}')
     print(f'Simulated distribution of {names_list[2]} peaks in overlay: norm({np.round(peaks21_num_av,1)}, {np.round(peaks21_num_var,1)})')
     print(f'{names_list[2]} overlaying peaks detected={Real_peaks21_in_overlay_num}; p-value={p_value21}')    
     
-    #Plot distribution of the number of peaks of set1 and set2 in overlay.
+    #Plot distribution of the number of peaks of set1 in overlay.
     plt.hist(Peaks12_in_overlay, bins=int(np.sqrt(Number_of_simulations)/4), density=True, facecolor='#ff9088', edgecolor='black', linewidth=0.1)
     plt.axvline(x=Real_peaks12_in_overlay_num, color='r', linestyle='dashed', linewidth=2)
     plt.plot(pdf_x12, pdf_y12, 'b--', linewidth=2)   
-    plt.annotate(f'Iterations: {Number_of_simulations}', xy=(peaks12_num_av-45, 0.12), xycoords='data', size=12)
-    plt.annotate(f'{names_list[1]}: {bin_info_dict[names_list[1]][0]} peaks {bin_info_dict[names_list[1]][1]} bp', xy=(peaks12_num_av-45, 0.11), xycoords='data', size=11)
-    plt.annotate(f'{names_list[2]}: {bin_info_dict[names_list[2]][0]} peaks {bin_info_dict[names_list[2]][1]} bp', xy=(peaks12_num_av-45, 0.10), xycoords='data', size=11)
-    plt.annotate(f'$\mu$={np.round(peaks12_num_av,1)}', xy=(peaks12_num_av-45, 0.09), xycoords='data', size=12)
-    plt.annotate(f'$\sigma^{2}$={np.round(peaks12_num_var,1)}', xy=(peaks12_num_av-45, 0.08), xycoords='data', size=12) 
-    plt.annotate(f'{names_list[1]} real peaks in overlay: {Real_peaks12_in_overlay_num}', xy=(Real_peaks12_in_overlay_num-3, 0.02), xycoords='data', size=12, rotation=90)
-    plt.annotate(f'p-value: {"{:.1e}".format(p_value12)}', xy=(Real_peaks12_in_overlay_num+1, 0.02), xycoords='data', size=12, rotation=90)    
+    plt.annotate(f'Iterations: {Number_of_simulations}', xy=(peaks12_num_av-20, 0.12), xycoords='data', size=12)
+    plt.annotate(f'{names_list[1]}: {bin_info_dict[names_list[1]][0]} peaks {bin_info_dict[names_list[1]][1]} bp', xy=(peaks12_num_av-20, 0.114), xycoords='data', size=11)
+    plt.annotate(f'{names_list[2]}: {bin_info_dict[names_list[2]][0]} peaks {bin_info_dict[names_list[2]][1]} bp', xy=(peaks12_num_av-20, 0.108), xycoords='data', size=11)
+    plt.annotate(f'$\mu$={np.round(peaks12_num_av,1)}', xy=(peaks12_num_av-20, 0.102), xycoords='data', size=12)
+    plt.annotate(f'$\sigma^{2}$={np.round(peaks12_num_var,1)}', xy=(peaks12_num_av-20, 0.096), xycoords='data', size=12) 
+    plt.annotate(f'{names_list[1]} real peaks in overlay: {Real_peaks12_in_overlay_num}', xy=(Real_peaks12_in_overlay_num-1.3, 0.02), xycoords='data', size=9, rotation=90)
+    plt.annotate(f'p-value: {"{:.1e}".format(p_value12)}', xy=(Real_peaks12_in_overlay_num+0.5, 0.045), xycoords='data', size=12, rotation=90)    
     plt.ylabel('Probability', size=13)
     plt.xlabel(f'Number of {names_list[1]} peaks in overlay', size=13)
-    plt.xlim([np.min(Peaks12_in_overlay)-30, Real_peaks12_in_overlay_num+10])
+    plt.xlim([np.min(Peaks12_in_overlay)-5, Real_peaks12_in_overlay_num+25])
     plt.show()
     plt.savefig(f'{output_path}{names_list[1]}_peaks_in_overlay_{Number_of_simulations}_it_{peak_type}_delcor.png', dpi=300, figsize=(5, 3))    
     plt.close()
     
-    #Plot distribution of the number of peaks of set1 and set2 in overlay.
+    #Plot distribution of the number of peaks of set2 in overlay.
     plt.hist(Peaks21_in_overlay, bins=int(np.sqrt(Number_of_simulations)/5), density=True, facecolor='#ff9088', edgecolor='black', linewidth=0.1)
     plt.axvline(x=Real_peaks21_in_overlay_num, color='r', linestyle='dashed', linewidth=2)
     plt.plot(pdf_x21, pdf_y21, 'b--', linewidth=2)   
-    plt.annotate(f'Iterations: {Number_of_simulations}', xy=(peaks21_num_av+30, 0.033), xycoords='data', size=12)
-    plt.annotate(f'{names_list[1]}: {bin_info_dict[names_list[1]][0]} peaks {bin_info_dict[names_list[1]][1]} bp', xy=(peaks21_num_av+30, 0.030), xycoords='data', size=11)
-    plt.annotate(f'{names_list[2]}: {bin_info_dict[names_list[2]][0]} peaks {bin_info_dict[names_list[2]][1]} bp', xy=(peaks21_num_av+30, 0.027), xycoords='data', size=11)
-    plt.annotate(f'$\mu$={np.round(peaks21_num_av,1)}', xy=(peaks21_num_av+30, 0.024), xycoords='data', size=12)
-    plt.annotate(f'$\sigma^{2}$={np.round(peaks21_num_var,1)}', xy=(peaks21_num_av+30, 0.021), xycoords='data', size=12)
-    plt.annotate(f'{names_list[2]} real peaks in overlay: {Real_peaks21_in_overlay_num}', xy=(Real_peaks21_in_overlay_num-13, 0.004), xycoords='data', size=12, rotation=90)
-    plt.annotate(f'p-value: {"{:.1e}".format(p_value21)}', xy=(Real_peaks21_in_overlay_num+5, 0.004), xycoords='data', size=12, rotation=90)    
+    plt.annotate(f'Iterations: {Number_of_simulations}', xy=(peaks21_num_av-24, 0.10), xycoords='data', size=12)
+    plt.annotate(f'{names_list[1]}: {bin_info_dict[names_list[1]][0]} peaks {bin_info_dict[names_list[1]][1]} bp', xy=(peaks21_num_av-24, 0.095), xycoords='data', size=11)
+    plt.annotate(f'{names_list[2]}: {bin_info_dict[names_list[2]][0]} peaks {bin_info_dict[names_list[2]][1]} bp', xy=(peaks21_num_av-24, 0.090), xycoords='data', size=11)
+    plt.annotate(f'$\mu$={np.round(peaks21_num_av,1)}', xy=(peaks21_num_av-24, 0.085), xycoords='data', size=12)
+    plt.annotate(f'$\sigma^{2}$={np.round(peaks21_num_var,1)}', xy=(peaks21_num_av-24, 0.080), xycoords='data', size=12)
+    plt.annotate(f'{names_list[2]} real peaks in overlay: {Real_peaks21_in_overlay_num}', xy=(Real_peaks21_in_overlay_num-1.5, 0.004), xycoords='data', size=10, rotation=90)
+    plt.annotate(f'p-value: {"{:.1e}".format(p_value21)}', xy=(Real_peaks21_in_overlay_num+0.5, 0.02), xycoords='data', size=12, rotation=90)    
     plt.ylabel('Probability', size=13)
     plt.xlabel(f'Number of {names_list[2]} peaks in overlay', size=13)
-    plt.xlim([np.min(Peaks21_in_overlay)-30, Real_peaks21_in_overlay_num+30])
+    plt.xlim([np.min(Peaks21_in_overlay)-10, Real_peaks21_in_overlay_num+30])
     plt.show()
     plt.savefig(f'{output_path}{names_list[2]}_peaks_in_overlay_{Number_of_simulations}_it_{peak_type}_delcor.png', dpi=300, figsize=(5, 3))    
     plt.close()    
@@ -428,4 +464,4 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     return
 
 
-#analyse_simulated_data(Input_dict, Genome_len, Deletion_correction, 'Real', 10000, 'Read', Simulated_data_dict, Outpath)
+analyse_simulated_data(Input_dict3, Genome_len, Deletion_correction, Binning, 10000, Run_regime, Simulated_data_dict3, Outpath)

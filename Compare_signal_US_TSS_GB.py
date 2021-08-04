@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2020##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##TopoI ChIP-Seq analysis##
 
 #Takes sets of transcription units (TUs) and calculate EcTopoI signal (wig) in upstreams, TU bodies and at TU starts.
 ###############################################
@@ -20,20 +20,41 @@ from scipy import stats
 
 
 #Path to TUs data.
+#TUs_data_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_RNA-Seq\Expression_data\DY330_transcripts\\Representative_transcripts\\DY330_RNA-Seq_transcripts_representative_NO_DPS_EP_del_cor.txt"
 TUs_data_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_RNA-Seq\Expression_data\DY330_transcripts\\Representative_transcripts\\DY330_RNA-Seq_transcripts_representative_NO_DPS_NO_RFA_no_tRNA_rRNA_EP_del_cor_HETU_200.txt"
 
+#Name of TU set.
+TU_set_name="HETU"
+
 #Dict of path with signal data (wig).
-Signal_wig_path_dict={'TopA_CTD_minus_Rif_minus_av_1_2_3': 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_123.wig',
+Signal_wig_path_dict={'TopA_CTD_minus_Rif_minus_av_3_4_6': 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
                       'TopA_CTD_minus_Rif_plus_av_1_2_3':  'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig',
                       'TopA_CTD_plus_Rif_minus_av_1_2_3':  'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_plus_Rif_minus_FE_av.wig',
-                      'TopA_CTD_plus_Rif_plus_av_2_3':     'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig',}
+                      'TopA_CTD_plus_Rif_plus_av_2_3':     'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig',
+                      'Gyrase_Cfx_Sutormin' :              'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_Gyrase_Cfx_10mkM_FE_av.wig',
+                      'RpoC_Borukhov':                     'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Borukhov_RpoC_Pol_Sofi_LB_FE.wig',
+                      'RpoD_Myers':                        'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Myers_RpoD_FE_av.wig',
+                      'RpoS_Seo':                          'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Seo_RpoS_FE_Rep1.wig'}
+
+Signal_wig_path_dict_1={'EcTopoI_CTD_minus_Rif_minus_av_3_4_6': 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
+                        'EcTopoI_Y319F_plus_av_123'           : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_Y319F_ChIP-Seq\FE\EcTopoI_Y319F_FE_av.wig',
+                        'EcTopoI_F'                           : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\WIG_NE_strand_specific_masked_scaled_av_masked_accB_subtract_mock_subtract_no_Ara\TopoI_Ara_N3E_F_masked_scaled_av_123_subtr_mock_subtr_no_Ara.wig',
+                        'EcTopoI_R'                           : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\WIG_NE_strand_specific_masked_scaled_av_masked_accB_subtract_mock_subtract_no_Ara\TopoI_Ara_N3E_R_masked_scaled_av_123_subtr_mock_subtr_no_Ara.wig'}
+
+Signal_wig_path_dict_2={'EcTopoI_delta11' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta11_FE_av.wig',
+                        'EcTopoI_delta14' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta14_FE_av.wig',
+                        'EcTopoI_delta30' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta30_FE_av.wig'}
+
+
 
 #Intervals: define US, TSS, GB borders in bp.
-US_length=12000
-TSS_halfwidth=700
+US_length=5000
+TSS_halfwidth=200
+TUB_width=5000
+Bin_width=500
 
 #Output path.
-Outpath="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Signal_over_TUs\Representative_transcripts\Figures\Signal_US_TSS_GB\Rif_CTD_effects_4kb_half_distance_estimation\\"
+Outpath="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Signal_over_TUs\Representative_transcripts\Figures\Signal_US_TSS_GB_new\\"
 
 
 
@@ -174,6 +195,8 @@ def fetch_signal_relative(wig_data_dict, genes_annotation, US_width, TSS_halfwid
     for wig_name, wig_data in wig_data_dict.items():
         genome_len=4647454
         
+        print(f'Now working with {wig_name}...')
+        
         #Try using estimators calculated for binned genome (like for GC in Return_sequences_under_peaks...)
         TUB_estimators, TSS_estimators, TUU_estimators=genome_bin_mean_std_signal(genes_annotation, wig_data, TSS_halfwidth, US_width)
         
@@ -243,15 +266,17 @@ def fetch_signal_normalized(wig_data_dict, genes_annotation, US_width, TSS_halfw
     for wig_name, wig_data in wig_data_dict.items():
         genome_len=4647454
         
+        print(f'Now working with {wig_name}...')
+        
         #Try using estimators calculated for binned genome (like for GC in Return_sequences_under_peaks...)
         TUB_estimators, TSS_estimators, TUU_estimators=genome_bin_mean_std_signal(genes_annotation, wig_data, TSS_halfwidth, US_width)
         
-        WIG_mean_TUB=TUB_estimators[2]
-        WIG_std_TUB=TUB_estimators[3]
-        WIG_mean_TSS=TSS_estimators[2]
-        WIG_std_TSS=TSS_estimators[3]
-        WIG_mean_TUU=TUU_estimators[2]
-        WIG_std_TUU=TUU_estimators[3]        
+        WIG_mean_TUB=TUB_estimators[0]
+        WIG_std_TUB=TUB_estimators[1]
+        WIG_mean_TSS=TSS_estimators[0]
+        WIG_std_TSS=TSS_estimators[1]
+        WIG_mean_TUU=TUU_estimators[0]
+        WIG_std_TUU=TUU_estimators[1]        
     
         US_signal_ar=[]
         TSS_signal_ar=[]
@@ -309,6 +334,8 @@ def fetch_signal_abs(wig_data_dict, genes_annotation, US_width, TSS_halfwidth):
     
     for wig_name, wig_data in wig_data_dict.items():
         genome_len=4647454
+        
+        print(f'Now working with {wig_name}...')
     
         US_signal_ar=[]
         TSS_signal_ar=[]
@@ -362,14 +389,13 @@ def fetch_signal_abs(wig_data_dict, genes_annotation, US_width, TSS_halfwidth):
 #######
 
 #For relative data X-mean(X).
-def plot_proportions_US_TSS_GB_rel(Signal_dict, outpath):
+def plot_proportions_US_TSS_GB_rel(Signal_dict, TU_set_name, US_length, TSS_halfwidth, outpath):
     
     #Compare US, TSS, TUB.
-    
     fig, plot_av=plt.subplots(1,1,figsize=(8,3), dpi=100)
 
     #EcTopoI vs EcTopoI Rif+
-    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][0]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2])]
+    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2])]
     Ec_TopoI_Rif=[np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][0]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2])]
     Ec_TopoI_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][0]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2])]
     Ec_TopoI_Rif_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][0]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2])]
@@ -393,13 +419,13 @@ def plot_proportions_US_TSS_GB_rel(Signal_dict, outpath):
     plt.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1))
     plt.tight_layout(rect=[0,0,1,1])   
     plt.show()
-    plt.savefig(outpath + 'HETU_EcTopoI_Rif_CTD_effects_relative_barplot_US_12000_TSS_700_GB.png', dpi=300, size=(8,3))    
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effects_relative_barplot_US_{US_length}bp_TSS_{TSS_halfwidth*2}bp_TUB.png', dpi=300, size=(8,3))    
     
     
     #Compare TSS, TUB.
     fig, plot_av=plt.subplots(1,1,figsize=(8,3), dpi=100)
     
-    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2])]
+    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2])]
     Ec_TopoI_Rif=[np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2])]
     Ec_TopoI_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2])]
     Ec_TopoI_Rif_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2])]    
@@ -422,54 +448,63 @@ def plot_proportions_US_TSS_GB_rel(Signal_dict, outpath):
     plt.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1))
     plt.tight_layout(rect=[0,0,1,1]) 
     plt.show()
-    plt.savefig(outpath + 'HETU_EcTopoI_Rif_CTD_effects_relative_barplot_TSS_700_GB.png', dpi=300, size=(8,3))  
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effects_relative_barplot_TSS_{TSS_halfwidth*2}bp_TUB.png', dpi=300, size=(8,3))  
     
-    #Test whether differences between dataset are significant.
+    
+    #Test whether differences between conditions are significant.
     
     #Welch t-test. CTD-Rif- vs CTD-Rif+
+    #US
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][0], equal_var=False)
+    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0])}, Sample size CTD-/Rif+: {len(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][0])}')
+    print(f'\nT-test US RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][0]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
     #TSS
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1], equal_var=False)
-    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1])}, Sample size CTD-/Rif+: {len(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][1])}')
-    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1], equal_var=False)
+    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][1]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TUB
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2], equal_var=False)
-    print(f'\nT-test TUB- RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][2]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2], equal_var=False)
+    print(f'\nT-test TUB- RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][2]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     #Welch t-test. CTD-Rif- vs CTD+Rif-
+    #US
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][0], equal_var=False)
+    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0])}, Sample size CTD+/Rif-: {len(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][0])}')
+    print(f'\nT-test US RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][0]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TSS
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1], equal_var=False)
-    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1])}, Sample size CTD+/Rif-: {len(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][1])}')
-    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1], equal_var=False)
+    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][1]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TUB
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2], equal_var=False)
-    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][2]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2], equal_var=False)
+    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][2]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     #Welch t-test. CTD-Rif- vs CTD+Rif+
+    #US
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][0], equal_var=False)
+    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0])}, Sample size CTD+/Rif+: {len(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][0])}')
+    print(f'\nT-test US RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][0]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TSS
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1], equal_var=False)
-    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1])}, Sample size CTD+/Rif+: {len(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][1])}')
-    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1], equal_var=False)
+    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][1]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TUB
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2], equal_var=False)
-    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][2]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2], equal_var=False)
+    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][2]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     
     return
 
 #For normalized data (X-mean(X))/std(X).
-def plot_proportions_US_TSS_GB_norm(Signal_dict, outpath):
+def plot_proportions_US_TSS_GB_norm(Signal_dict, TU_set_name, US_length, TSS_halfwidth, outpath):
     
-    #Compare US, TSS, TUB.
     
+    #Compare US, TSS, TUB. Condition-wise plot.
     fig, plot_av=plt.subplots(1,1,figsize=(8,3), dpi=100)
 
-    #EcTopoI vs EcTopoI Rif+
-    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][0]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2])]
+    #Prepare data for condition-wise plotting.
+    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2])]
     Ec_TopoI_Rif=[np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][0]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2])]
     Ec_TopoI_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][0]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2])]
     Ec_TopoI_Rif_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][0]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2])]
 
-    
     Conditions=['US', 'TSS', 'TUB', 'US', 'TSS', 'TUB', 'US', 'TSS', 'TUB', 'US', 'TSS', 'TUB']
     
     X_coords_1=[1,2,3]
@@ -488,13 +523,44 @@ def plot_proportions_US_TSS_GB_norm(Signal_dict, outpath):
     plt.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1))
     plt.tight_layout(rect=[0,0,1,1]) 
     plt.show()
-    plt.savefig(outpath + 'HETU_EcTopoI_Rif_CTD_effects_normalized_barplot_US_12000_TSS_700_GB.png', dpi=300, size=(8,3))    
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effects_normalized_barplot_US_{US_length}bp_TSS_{TSS_halfwidth*2}bp_TUB.png', dpi=300, size=(8,3))  
     
     
-    #Compare TSS, TUB.
+    #Compare US, TSS, TUB. Region-wise plot.
+    fig, plot_av=plt.subplots(1,1,figsize=(6.1,3), dpi=100)
+    
+    Dataset_1_name='TopA_CTD_minus_Rif_minus_av_3_4_6'
+    Dataset_2_name='TopA_CTD_plus_Rif_plus_av_2_3'
+    
+    #Prepare data for region-wise plotting. -CTD/-Rif vs -CTD/+Rif
+    US=[np.mean(Signal_dict[Dataset_1_name][0]), np.mean(Signal_dict[Dataset_2_name][0])]
+    TSS=[np.mean(Signal_dict[Dataset_1_name][1]), np.mean(Signal_dict[Dataset_2_name][1])]
+    TUB=[np.mean(Signal_dict[Dataset_1_name][2]), np.mean(Signal_dict[Dataset_2_name][2])]
+    
+    Conditions=['US', 'TSS', 'TUB']
+    
+    X_coords_1=[1,2]
+    X_coords_2=[3.5,4.5]
+    X_coords_3=[6,7]
+    X_coords=[1.5, 4, 6.5]
+      
+    plot_av_1=plot_av.bar(X_coords_1, US,  width=0.9, color=['#ff6f8e', '#75595e'], edgecolor='k', linewidth=0.6)
+    plot_av.bar(X_coords_2, TSS, width=0.9, color=['#ff6f8e', '#75595e'], edgecolor='k', linewidth=0.6)
+    plot_av.bar(X_coords_3, TUB, width=0.9, color=['#ff6f8e', '#75595e'], edgecolor='k', linewidth=0.6)
+    plot_av.set_ylabel('Normalized FE (X-' + r"$\overline{X}$" + ')/'  + r"$\sigma$", size=16)
+    plot_av.set_xticks(X_coords)
+    plot_av.set_xticklabels(Conditions, rotation=0, size=7)     
+    plot_av.set_ylim([-0.1, 1.15])
+    plt.legend(plot_av_1, ('EcTopoI', 'EcTopoI Rif CTD'), frameon=False, loc='upper right', bbox_to_anchor=(1.6, 1))
+    plt.tight_layout(rect=[0,0,1,1]) 
+    plt.show()
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effect_normalized_barplot_US_{US_length}bp_TSS_{TSS_halfwidth*2}bp_TUB.png', dpi=300, size=(6.1,3))      
+    
+    
+    #Compare TSS, TUB. Condition-wise plot.
     fig, plot_av=plt.subplots(1,1,figsize=(8,3), dpi=100)
     
-    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2])]
+    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2])]
     Ec_TopoI_Rif=[np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2])]
     Ec_TopoI_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2])]
     Ec_TopoI_Rif_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2])]    
@@ -517,48 +583,57 @@ def plot_proportions_US_TSS_GB_norm(Signal_dict, outpath):
     plt.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1))
     plt.tight_layout(rect=[0,0,1,1]) 
     plt.show()
-    plt.savefig(outpath + 'HETU_EcTopoI_Rif_CTD_effects_normalized_barplot_TSS_700_GB.png', dpi=300, size=(8,3))  
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effects_normalized_barplot_TSS_{TSS_halfwidth*2}bp_TUB.png', dpi=300, size=(8,3))  
     
     #Test whether differences between dataset are significant.
     
     #Welch t-test. CTD-Rif- vs CTD-Rif+
+    #US
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][0], equal_var=True)
+    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0])}, Sample size CTD-/Rif+: {len(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][0])}')
+    print(f'\nT-test US NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][0]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TSS
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1], equal_var=True)
-    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1])}, Sample size CTD-/Rif+: {len(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][1])}')
-    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1], equal_var=True)
+    print(f'\nT-test TSS NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][1]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TUB
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2], equal_var=True)
-    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][2]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2], Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2], equal_var=True)
+    print(f'\nT-test TUB NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][2]),2)} CTD-/Rif+={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_plus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     #Welch t-test. CTD-Rif- vs CTD+Rif-
+    #US
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][0], equal_var=True)
+    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0])}, Sample size CTD+/Rif-: {len(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][0])}')
+    print(f'\nT-test US NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][0]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TSS
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1], equal_var=True)
-    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1])}, Sample size CTD+/Rif-: {len(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][1])}')
-    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1], equal_var=True)
+    print(f'\nT-test TSS NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][1]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TUB
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2], equal_var=True)
-    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][2]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2], Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2], equal_var=True)
+    print(f'\nT-test TUB NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][2]),2)} CTD+/Rif-={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_minus_av_1_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     #Welch t-test. CTD-Rif- vs CTD+Rif+
+    #US
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][0], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][0], equal_var=True)
+    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0])}, Sample size CTD+/Rif+: {len(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][0])}')
+    print(f'\nT-test US NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][0]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][0]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
     #TSS
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1], equal_var=True)
-    print(f'Sample size CTD-/Rif-: {len(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1])}, Sample size CTD+/Rif+: {len(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][1])}')
-    print(f'\nT-test TSS RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][1]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1], equal_var=True)
+    print(f'\nT-test TSS NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][1]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     #TUB
-    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2], equal_var=True)
-    print(f'\nT-test TUB RFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_1_2_3"][2]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    Intervals_stat=stats.ttest_ind(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2], Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2], equal_var=True)
+    print(f'\nT-test TUB NFE means\nCTD-/Rif-={round(np.mean(Signal_dict["TopA_CTD_minus_Rif_minus_av_3_4_6"][2]),2)} CTD+/Rif+={round(np.mean(Signal_dict["TopA_CTD_plus_Rif_plus_av_2_3"][2]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     
     return
 
 
 #For absolute data X.
-def plot_proportions_TSS_GB(Signal_dict, outpath):
+def plot_proportions_TSS_GB(Signal_dict, TU_set_name, US_length, TSS_halfwidth, outpath):
     
     fig, plot_av=plt.subplots(1,1,figsize=(8,3), dpi=100)
 
     #EcTopoI vs EcTopoI Rif+
-    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3'][2])]
+    Ec_TopoI=[np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_minus_av_3_4_6'][2])]
     Ec_TopoI_Rif=[np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3'][2])]
     Ec_TopoI_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_minus_av_1_2_3'][2])]
     Ec_TopoI_Rif_CTD=[np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][1]), np.mean(Signal_dict['TopA_CTD_plus_Rif_plus_av_2_3'][2])]
@@ -582,7 +657,7 @@ def plot_proportions_TSS_GB(Signal_dict, outpath):
     plt.legend(frameon=False, loc='upper right', bbox_to_anchor=(1.5, 1))
     plt.tight_layout(rect=[0,0,1,1]) 
     plt.show()
-    plt.savefig(outpath + 'HETU_EcTopoI_Rif_CTD_effects_absolute_barplot_TSS_700_GB.png', dpi=300, size=(8,3))    
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effects_absolute_barplot_TSS_{TSS_halfwidth*2}bp_US_{US_length}bp.png', dpi=300, size=(8,3))    
     
     #Make pie charts.
     fig, plot_av=plt.subplots(1,4,figsize=(9,3), dpi=100)
@@ -595,27 +670,30 @@ def plot_proportions_TSS_GB(Signal_dict, outpath):
     plot_av[2].pie(Ec_TopoI_CTD, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%', shadow=False, startangle=-70)
     plot_av[3].pie(Ec_TopoI_Rif_CTD, explode=explode, labels=labels, colors=colors, autopct='%1.1f%%', shadow=False, startangle=-70)
     plt.show()
-    plt.savefig(outpath + 'HETU_EcTopoI_Rif_CTD_effects_absolute_piechart_TSS_700_GB.png', dpi=300, size=(9,3))       
+    plt.savefig(f'{outpath}{TU_set_name}_EcTopoI_Rif_CTD_effects_absolute_piechart_TSS_{TSS_halfwidth*2}bp_US_{US_length}bp.png', dpi=300, size=(9,3))       
     
     return
 
-WIG_data_dict=wig_parsing(Signal_wig_path_dict)
+WIG_data_dict=wig_parsing(Signal_wig_path_dict_1)
 TUs_dictionary=parse_expression_annotation(TUs_data_path)
+
+
+
 #Relative_Signal_dictionary=fetch_signal_relative(WIG_data_dict, TUs_dictionary, US_length, TSS_halfwidth)
-#Normalized_Signal_dictionary=fetch_signal_normalized(WIG_data_dict, TUs_dictionary, US_length, TSS_halfwidth)
+Normalized_Signal_dictionary=fetch_signal_normalized(WIG_data_dict, TUs_dictionary, US_length, TSS_halfwidth)
 #Absolute_Signal_dictionary=fetch_signal_abs(WIG_data_dict, TUs_dictionary, US_length, TSS_halfwidth)
 
 
-#plot_proportions_US_TSS_GB_rel(Relative_Signal_dictionary, Outpath)
-#plot_proportions_US_TSS_GB_norm(Normalized_Signal_dictionary, Outpath)
-#plot_proportions_TSS_GB(Absolute_Signal_dictionary, Outpath)
+#plot_proportions_US_TSS_GB_rel(Relative_Signal_dictionary, TU_set_name, US_length, TSS_halfwidth, Outpath)
+#plot_proportions_US_TSS_GB_norm(Normalized_Signal_dictionary, TU_set_name, US_length, TSS_halfwidth, Outpath)
+#plot_proportions_TSS_GB(Absolute_Signal_dictionary, TU_set_name, US_length, TSS_halfwidth, Outpath)
 
 
 
 #################################
 #################################
-######### Part 2.
-######### Compute dependence of FE from the distance from TSS. Do statistics.
+######### Part 2. Decay plots.
+######### Compute dependence of FE from the distance from TSS. Do statistics. Absolute signal is used.
 #################################
 #################################
 
@@ -852,15 +930,15 @@ def plot_TSS_distance_FE(Signal_dict, Half_data_dict, output_path):
     return
 
 
-Signal_form_TSS_dict=TSS_distance_FE(WIG_data_dict, TUs_dictionary)
-Half_data_dictionary=compute_half_distance(WIG_data_dict, TUs_dictionary)
-plot_TSS_distance_FE(Signal_form_TSS_dict, Half_data_dictionary, Outpath)
+#Signal_form_TSS_dict=TSS_distance_FE(WIG_data_dict, TUs_dictionary)
+#Half_data_dictionary=compute_half_distance(WIG_data_dict, TUs_dictionary)
+#plot_TSS_distance_FE(Signal_form_TSS_dict, Half_data_dictionary, Outpath)
 
 
 
 #################################
 #################################
-######### Part 3.
+######### Part 3. Decay plots.
 ######### Normalize a signal.
 ######### Compute dependence of FE from the distance from TSS. Do statistics.
 #################################
@@ -876,6 +954,8 @@ def signal_normalize(wig_data_dict, width):
     
     #Estimate mean and standard deviation of datasets.
     for wig_name, wig_data in wig_data_dict.items():
+        
+        print(f'Now working with {wig_name}')
     
         #Mask deletions.
         deletions=[[274500, 372148], [793800, 807500], [1199000, 1214000]]
@@ -901,11 +981,11 @@ def signal_normalize(wig_data_dict, width):
         Signal_std_genome_binned=np.std(genome_signal_values_binned)    
         
         print(f'Global mean: {Signal_mean_genome}; Global std: {Signal_std_genome}') 
-        print(f'Signal binned mean: {Signal_mean_genome_binned}; Signal binned std: {Signal_std_genome_binned}') 
+        print(f'Signal binned mean: {Signal_mean_genome_binned}; Signal binned std: {Signal_std_genome_binned}; Bin width: {width}\n') 
         
         Signal_estimators=[Signal_mean_genome, Signal_std_genome, Signal_mean_genome_binned, Signal_std_genome_binned]
         
-        #Compute relative signal X-mean(X).
+        #Compute normalized signal (X-mean(X))/std(X).
         wig_relative_global=np.array(wig_data)-Signal_mean_genome
         wig_normalized_global=(np.array(wig_data)-Signal_mean_genome)/Signal_std_genome
         
@@ -926,22 +1006,24 @@ def signal_normalize(wig_data_dict, width):
 #Compute mean and std, plot for several conditions (e.g. -CTD vs +CTD).
 #######
 
-def TSS_distance_FE_normalized(Transformed_data_dict, genes_annotation):
+def TSS_distance_FE_normalized(Transformed_data_dict, genes_annotation, US_length, TUB_width):
     
     for wig_name, data in Transformed_data_dict.items():
         
-        print(f'Now on a {wig_name}.')
+        print(f'Now on a {wig_name}...')
         
         Prepared_data_ar=[]
     
         for wig_data in data['Transformed data']:
+            
+            glen=len(wig_data)
             
             GB_mean_ar=[]
             GB_std_ar=[]
             Distance_ar=[]
             Sample_size=[]
             
-            for TSS_distance in range(15000):
+            for TSS_distance in range(-US_length,TUB_width,1):
         
                 GB_signal_ar=[]
                 
@@ -952,14 +1034,18 @@ def TSS_distance_FE_normalized(Transformed_data_dict, genes_annotation):
                     
                     if TU_strand=="+":
                                 
-                        if TU_start+TSS_distance<TU_end:
+                        if (TU_start+TSS_distance<TU_end) and (TU_start+TSS_distance>=0):
                             GB_signal=wig_data[TU_start+TSS_distance]
-                        elif TU_start+TSS_distance>=TU_end:
+                        elif (TU_start+TSS_distance<TU_end) and (TU_start+TSS_distance<0):
+                            GB_signal=wig_data[TU_start+TSS_distance+glen]
+                        else:
                             GB_signal=-1
                             
                     elif TU_strand=="-":
                         
-                        if TU_end-TSS_distance>TU_start:
+                        if (TU_end-TSS_distance>TU_start) and (TU_end-TSS_distance>=glen):
+                            GB_signal=wig_data[TU_end-TSS_distance-glen]
+                        elif (TU_end-TSS_distance>TU_start) and (TU_end-TSS_distance<glen):
                             GB_signal=wig_data[TU_end-TSS_distance]
                         else:
                             GB_signal=-1
@@ -991,7 +1077,7 @@ def TSS_distance_FE_normalized_no_TU_end(Transformed_data_dict, genes_annotation
     
     for wig_name, data in Transformed_data_dict.items():
         
-        print(f'Now on a {wig_name}.')
+        print(f'Now on a {wig_name}...')
         
         Prepared_data_ar=[]
     
@@ -1043,24 +1129,29 @@ def TSS_distance_FE_normalized_no_TU_end(Transformed_data_dict, genes_annotation
 #Plot normalized FE TSS distance dependence.
 #######
 
-def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
+def plot_TSS_distance_FE_normalized(Signal_dict, TU_set_name, US_length, TUB_width, output_path):
+    
+    Dataset_1_name='TopA_CTD_minus_Rif_minus_av_3_4_6'
+    Dataset_2_name='TopA_CTD_plus_Rif_plus_av_2_3'
+    Pair_name='Rif_CTD_effect'
+    Pair_name_short='Rif CTD'
     
     
     ####################################################
     #Retrive data. Relative FE (X-mean(X)), global mean.
     ####################################################
-    Distance_ar_rgm=Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][0][2]
-    Mean_ar_rgm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][0][0])
-    Std_ar_rgm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][0][1])
-    Sample_size_ar_rgm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][0][3])
+    Distance_ar_rgm=Signal_dict[Dataset_1_name]['Prepared FE'][0][2]
+    Mean_ar_rgm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][0][0])
+    Std_ar_rgm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][0][1])
+    Sample_size_ar_rgm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][0][3])
     SE_ar_rgm=Std_ar_rgm/np.sqrt(Sample_size_ar_rgm)
     Upper_conf_interval_rgm=Mean_ar_rgm+SE_ar_rgm
     Lower_conf_interval_rgm=Mean_ar_rgm-SE_ar_rgm
     
-    Distance_ar_rgp=Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][0][2]
-    Mean_ar_rgp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][0][0])
-    Std_ar_rgp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][0][1])
-    Sample_size_ar_rgp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][0][3])
+    Distance_ar_rgp=Signal_dict[Dataset_2_name]['Prepared FE'][0][2]
+    Mean_ar_rgp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][0][0])
+    Std_ar_rgp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][0][1])
+    Sample_size_ar_rgp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][0][3])
     SE_ar_rgp=Std_ar_rgp/np.sqrt(Sample_size_ar_rgp)
     Upper_conf_interval_rgp=Mean_ar_rgp+SE_ar_rgp
     Lower_conf_interval_rgp=Mean_ar_rgp-SE_ar_rgp    
@@ -1072,13 +1163,13 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     #Standard order of colors: #B6B8BD, #333738, #b08642, #757d8b.
     
     #CTD-/Rif-
-    plot1.plot(Distance_ar_rgm, Mean_ar_rgm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=r"HETU $\overline{relFE}\pm$SE", zorder=6)
+    plot1.plot(Distance_ar_rgm, Mean_ar_rgm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=TU_set_name + r" $\overline{relFE}\pm$SE", zorder=6)
     plot1.plot(Distance_ar_rgm, Upper_conf_interval_rgm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5)       
     plot1.plot(Distance_ar_rgm, Lower_conf_interval_rgm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5) 
     plot1.fill_between(Distance_ar_rgm, Lower_conf_interval_rgm, Upper_conf_interval_rgm, facecolor='#43c287', alpha=0.3, interpolate=True, zorder=4)        
           
     #CTD+/Rif-
-    plot1.plot(Distance_ar_rgp, Mean_ar_rgp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=r"HETU Rif $\overline{relFE}\pm$ SE", zorder=3)
+    plot1.plot(Distance_ar_rgp, Mean_ar_rgp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=f'{TU_set_name} {Pair_name_short}' + r" $\overline{relFE}\pm$ SE", zorder=3)
     plot1.plot(Distance_ar_rgp, Upper_conf_interval_rgp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)       
     plot1.plot(Distance_ar_rgp, Lower_conf_interval_rgp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)     
     plot1.fill_between(Distance_ar_rgp, Lower_conf_interval_rgp, Upper_conf_interval_rgp, facecolor='#7ce0ff', alpha=0.3, interpolate=True, zorder=1) 
@@ -1087,44 +1178,42 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     plot2=plot1.twinx() 
     plot2.plot(Distance_ar_rgm, Sample_size_ar_rgm, linestyle='--', color='red', linewidth=1.2, alpha=1, label='Sample size')
                  
-    ticks=sorted(np.arange(0, len(Distance_ar_rgm)+100, 1000).tolist() + [len(Distance_ar_rgm)])
+    ticks=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_rgm)])
     plot1.set_xticks(ticks, minor=False)
-    ticks_lables=sorted(np.arange(0, len(Distance_ar_rgm)+100, 1000).tolist() + [len(Distance_ar_rgm)])
+    ticks_lables=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_rgm)])
     TSS_index=ticks_lables.index(0)
-    TES_index=ticks_lables.index(len(Distance_ar_rgm))
     ticks_lables[TSS_index]='TS'
-    ticks_lables[TES_index]='TE'
     plot1.set_xticklabels(ticks_lables, minor=False) 
     plot1.axvline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axvline(len(Distance_ar_rgm), color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axhline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
-    plot1.set_xlim([-100, 4100])    
+    plot1.set_xlim([-US_length-100, TUB_width+100])    
     plot1.set_xlabel('Distance, bp', size=20)
     plot1.set_ylabel(f'EcTopoI relative FE', size=20) 
     plot2.set_ylabel('Number of TUs', size=20)
     plot1.legend(fontsize=12, frameon=False, loc='upper right', bbox_to_anchor=(0.6, 1.3))
     plot2.legend(fontsize=12, frameon=False, loc='upper left', bbox_to_anchor=(0.6, 1.3))
     plt.tight_layout(rect=[0,0,1,0.9])     
-    plt.savefig(f'{output_path}EcTopoI_global_relative_FE_over_HETU_Rif_plus_minus.png', dpi=400, figsize=(6, 5), transparent=False)
+    plt.savefig(f'{output_path}EcTopoI_global_relative_FE_over_{TU_set_name}_{Pair_name}.png', dpi=400, figsize=(6, 5), transparent=False)
     plt.show()
     plt.close()  
     
     
     ####################################################
-    #Retrive data. Normalized FE (X-mean(X))/sigma(X), global mean, std.
+    #Retrive data. Normalized FE (X-mean(X))/std(X), global mean, std.
     ####################################################
-    Distance_ar_ngm=Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][1][2]
-    Mean_ar_ngm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][1][0])
-    Std_ar_ngm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][1][1])
-    Sample_size_ar_ngm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][1][3])
+    Distance_ar_ngm=Signal_dict[Dataset_1_name]['Prepared FE'][1][2]
+    Mean_ar_ngm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][1][0])
+    Std_ar_ngm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][1][1])
+    Sample_size_ar_ngm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][1][3])
     SE_ar_ngm=Std_ar_ngm/np.sqrt(Sample_size_ar_ngm)
     Upper_conf_interval_ngm=Mean_ar_ngm+SE_ar_ngm
     Lower_conf_interval_ngm=Mean_ar_ngm-SE_ar_ngm
     
-    Distance_ar_ngp=Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][1][2]
-    Mean_ar_ngp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][1][0])
-    Std_ar_ngp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][1][1])
-    Sample_size_ar_ngp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][1][3])
+    Distance_ar_ngp=Signal_dict[Dataset_2_name]['Prepared FE'][1][2]
+    Mean_ar_ngp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][1][0])
+    Std_ar_ngp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][1][1])
+    Sample_size_ar_ngp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][1][3])
     SE_ar_ngp=Std_ar_ngp/np.sqrt(Sample_size_ar_ngp)
     Upper_conf_interval_ngp=Mean_ar_ngp+SE_ar_ngp
     Lower_conf_interval_ngp=Mean_ar_ngp-SE_ar_ngp    
@@ -1136,13 +1225,13 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     #Standard order of colors: #B6B8BD, #333738, #b08642, #757d8b.
     
     #CTD-/Rif-
-    plot1.plot(Distance_ar_ngm, Mean_ar_ngm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=r"HETU $\overline{normFE}\pm$SE", zorder=6)
+    plot1.plot(Distance_ar_ngm, Mean_ar_ngm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=TU_set_name + r" $\overline{normFE}\pm$SE", zorder=6)
     plot1.plot(Distance_ar_ngm, Upper_conf_interval_ngm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5)       
     plot1.plot(Distance_ar_ngm, Lower_conf_interval_ngm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5) 
     plot1.fill_between(Distance_ar_ngm, Lower_conf_interval_ngm, Upper_conf_interval_ngm, facecolor='#43c287', alpha=0.3, interpolate=True, zorder=4)        
           
     #CTD+/Rif-
-    plot1.plot(Distance_ar_ngp, Mean_ar_ngp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=r"HETU Rif $\overline{normFE}\pm$ SE", zorder=3)
+    plot1.plot(Distance_ar_ngp, Mean_ar_ngp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=f'{TU_set_name} {Pair_name_short}' + r" $\overline{normFE}\pm$ SE", zorder=3)
     plot1.plot(Distance_ar_ngp, Upper_conf_interval_ngp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)       
     plot1.plot(Distance_ar_ngp, Lower_conf_interval_ngp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)     
     plot1.fill_between(Distance_ar_ngp, Lower_conf_interval_ngp, Upper_conf_interval_ngp, facecolor='#7ce0ff', alpha=0.3, interpolate=True, zorder=1) 
@@ -1151,25 +1240,23 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     plot2=plot1.twinx() 
     plot2.plot(Distance_ar_ngm, Sample_size_ar_ngm, linestyle='--', color='red', linewidth=1.2, alpha=1, label='Sample size')
                  
-    ticks=sorted(np.arange(0, len(Distance_ar_ngm)+100, 1000).tolist() + [len(Distance_ar_ngm)])
+    ticks=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_ngm)])
     plot1.set_xticks(ticks, minor=False)
-    ticks_lables=sorted(np.arange(0, len(Distance_ar_ngm)+100, 1000).tolist() + [len(Distance_ar_ngm)])
+    ticks_lables=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_ngm)])
     TSS_index=ticks_lables.index(0)
-    TES_index=ticks_lables.index(len(Distance_ar_ngm))
     ticks_lables[TSS_index]='TS'
-    ticks_lables[TES_index]='TE'
     plot1.set_xticklabels(ticks_lables, minor=False) 
     plot1.axvline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axvline(len(Distance_ar_ngm), color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axhline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
-    plot1.set_xlim([-100, 4100])   
+    plot1.set_xlim([-US_length-100, TUB_width+100])   
     plot1.set_xlabel('Distance, bp', size=20)
     plot1.set_ylabel(f'EcTopoI normalized FE', size=20) 
     plot2.set_ylabel('Number of TUs', size=20)
     plot1.legend(fontsize=12, frameon=False, loc='upper right', bbox_to_anchor=(0.6, 1.3))
     plot2.legend(fontsize=12, frameon=False, loc='upper left', bbox_to_anchor=(0.6, 1.3))
     plt.tight_layout(rect=[0,0,1,0.9])       
-    plt.savefig(f'{output_path}EcTopoI_global_normalized_FE_over_HETU_Rif_plus_minus.png', dpi=400, figsize=(6, 5), transparent=False)
+    plt.savefig(f'{output_path}EcTopoI_global_normalized_FE_over_{TU_set_name}_{Pair_name}.png', dpi=400, figsize=(6, 5), transparent=False)
     plt.show()
     plt.close()       
     
@@ -1177,18 +1264,18 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     ####################################################
     #Retrive data. Relative FE (X-mean(X)), binned mean.
     ####################################################
-    Distance_ar_rbm=Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][2][2]
-    Mean_ar_rbm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][2][0])
-    Std_ar_rbm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][2][1])
-    Sample_size_ar_rbm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][2][3])
+    Distance_ar_rbm=Signal_dict[Dataset_1_name]['Prepared FE'][2][2]
+    Mean_ar_rbm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][2][0])
+    Std_ar_rbm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][2][1])
+    Sample_size_ar_rbm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][2][3])
     SE_ar_rbm=Std_ar_rbm/np.sqrt(Sample_size_ar_rbm)
     Upper_conf_interval_rbm=Mean_ar_rbm+SE_ar_rbm
     Lower_conf_interval_rbm=Mean_ar_rbm-SE_ar_rbm
     
-    Distance_ar_rbp=Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][2][2]
-    Mean_ar_rbp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][2][0])
-    Std_ar_rbp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][2][1])
-    Sample_size_ar_rbp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][2][3])
+    Distance_ar_rbp=Signal_dict[Dataset_2_name]['Prepared FE'][2][2]
+    Mean_ar_rbp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][2][0])
+    Std_ar_rbp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][2][1])
+    Sample_size_ar_rbp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][2][3])
     SE_ar_rbp=Std_ar_rbp/np.sqrt(Sample_size_ar_rbp)
     Upper_conf_interval_rbp=Mean_ar_rbp+SE_ar_rbp
     Lower_conf_interval_rbp=Mean_ar_rbp-SE_ar_rbp    
@@ -1200,13 +1287,13 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     #Standard order of colors: #B6B8BD, #333738, #b08642, #757d8b.
     
     #CTD-/Rif-
-    plot1.plot(Distance_ar_rbm, Mean_ar_rbm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=r"HETU $\overline{relFE}\pm$SE", zorder=6)
+    plot1.plot(Distance_ar_rbm, Mean_ar_rbm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=TU_set_name + r" $\overline{relFE}\pm$SE", zorder=6)
     plot1.plot(Distance_ar_rbm, Upper_conf_interval_rbm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5)       
     plot1.plot(Distance_ar_rbm, Lower_conf_interval_rbm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5) 
     plot1.fill_between(Distance_ar_rbm, Lower_conf_interval_rbm, Upper_conf_interval_rbm, facecolor='#43c287', alpha=0.3, interpolate=True, zorder=4)        
           
     #CTD+/Rif-
-    plot1.plot(Distance_ar_rbp, Mean_ar_rbp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=r"HETU Rif $\overline{relFE}\pm$ SE", zorder=3)
+    plot1.plot(Distance_ar_rbp, Mean_ar_rbp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=f'{TU_set_name} {Pair_name_short}' + r" $\overline{relFE}\pm$ SE", zorder=3)
     plot1.plot(Distance_ar_rbp, Upper_conf_interval_rbp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)       
     plot1.plot(Distance_ar_rbp, Lower_conf_interval_rbp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)     
     plot1.fill_between(Distance_ar_rbp, Lower_conf_interval_rbp, Upper_conf_interval_rbp, facecolor='#7ce0ff', alpha=0.3, interpolate=True, zorder=1) 
@@ -1215,44 +1302,42 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     plot2=plot1.twinx() 
     plot2.plot(Distance_ar_rbm, Sample_size_ar_rbm, linestyle='--', color='red', linewidth=1.2, alpha=1, label='Sample size')
                  
-    ticks=sorted(np.arange(0, len(Distance_ar_rbm)+100, 1000).tolist() + [len(Distance_ar_rbm)])
+    ticks=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_rbm)])
     plot1.set_xticks(ticks, minor=False)
-    ticks_lables=sorted(np.arange(0, len(Distance_ar_rbm)+100, 1000).tolist() + [len(Distance_ar_rbm)])
+    ticks_lables=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_rbm)])
     TSS_index=ticks_lables.index(0)
-    TES_index=ticks_lables.index(len(Distance_ar_rbm))
     ticks_lables[TSS_index]='TS'
-    ticks_lables[TES_index]='TE'
     plot1.set_xticklabels(ticks_lables, minor=False) 
     plot1.axvline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axvline(len(Distance_ar_rbm), color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axhline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
-    plot1.set_xlim([-100, 4100])   
+    plot1.set_xlim([-US_length-100, TUB_width+100])   
     plot1.set_xlabel('Distance, bp', size=20)
     plot1.set_ylabel(f'EcTopoI relative FE', size=20) 
     plot2.set_ylabel('Number of TUs', size=20)
     plot1.legend(fontsize=12, frameon=False, loc='upper right', bbox_to_anchor=(0.6, 1.3))
     plot2.legend(fontsize=12, frameon=False, loc='upper left', bbox_to_anchor=(0.6, 1.3))
     plt.tight_layout(rect=[0,0,1,0.9])       
-    plt.savefig(f'{output_path}EcTopoI_binned_relative_FE_over_HETU_Rif_plus_minus.png', dpi=400, figsize=(6, 5), transparent=False)
+    plt.savefig(f'{output_path}EcTopoI_binned_relative_FE_over_{TU_set_name}_{Pair_name}.png', dpi=400, figsize=(6, 5), transparent=False)
     plt.show()
     plt.close()  
     
     
     ####################################################
-    #Retrive data. Normalized FE (X-mean(X))/sigma(X), binned mean, sigma.
+    #Retrive data. Normalized FE (X-mean(X))/std(X), binned mean, sigma.
     ####################################################
-    Distance_ar_nbm=Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][3][2]
-    Mean_ar_nbm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][3][0])
-    Std_ar_nbm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][3][1])
-    Sample_size_ar_nbm=np.array(Signal_dict['TopA_CTD_minus_Rif_minus_av_1_2_3']['Prepared FE'][3][3])
+    Distance_ar_nbm=Signal_dict[Dataset_1_name]['Prepared FE'][3][2]
+    Mean_ar_nbm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][3][0])
+    Std_ar_nbm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][3][1])
+    Sample_size_ar_nbm=np.array(Signal_dict[Dataset_1_name]['Prepared FE'][3][3])
     SE_ar_nbm=Std_ar_nbm/np.sqrt(Sample_size_ar_nbm)
     Upper_conf_interval_nbm=Mean_ar_nbm+SE_ar_nbm
     Lower_conf_interval_nbm=Mean_ar_nbm-SE_ar_nbm
     
-    Distance_ar_nbp=Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][3][2]
-    Mean_ar_nbp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][3][0])
-    Std_ar_nbp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][3][1])
-    Sample_size_ar_nbp=np.array(Signal_dict['TopA_CTD_minus_Rif_plus_av_1_2_3']['Prepared FE'][3][3])
+    Distance_ar_nbp=Signal_dict[Dataset_2_name]['Prepared FE'][3][2]
+    Mean_ar_nbp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][3][0])
+    Std_ar_nbp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][3][1])
+    Sample_size_ar_nbp=np.array(Signal_dict[Dataset_2_name]['Prepared FE'][3][3])
     SE_ar_nbp=Std_ar_nbp/np.sqrt(Sample_size_ar_nbp)
     Upper_conf_interval_nbp=Mean_ar_nbp+SE_ar_nbp
     Lower_conf_interval_nbp=Mean_ar_nbp-SE_ar_nbp    
@@ -1264,13 +1349,13 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     #Standard order of colors: #B6B8BD, #333738, #b08642, #757d8b.
     
     #CTD-/Rif-
-    plot1.plot(Distance_ar_nbm, Mean_ar_nbm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=r"HETU $\overline{normFE}\pm$SE", zorder=6)
+    plot1.plot(Distance_ar_nbm, Mean_ar_nbm, linestyle='-', color='#B6B8BD', linewidth=1.5, alpha=1, label=TU_set_name + r" $\overline{normFE}\pm$SE", zorder=6)
     plot1.plot(Distance_ar_nbm, Upper_conf_interval_nbm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5)       
     plot1.plot(Distance_ar_nbm, Lower_conf_interval_nbm, linestyle='-', color='#B6B8BD', linewidth=0.5, alpha=0.3, zorder=5) 
     plot1.fill_between(Distance_ar_nbm, Lower_conf_interval_nbm, Upper_conf_interval_nbm, facecolor='#43c287', alpha=0.3, interpolate=True, zorder=4)        
           
     #CTD+/Rif-
-    plot1.plot(Distance_ar_nbp, Mean_ar_nbp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=r"HETU Rif $\overline{normFE}\pm$ SE", zorder=3)
+    plot1.plot(Distance_ar_nbp, Mean_ar_nbp, linestyle='-', color='#333738', linewidth=1.5, alpha=1, label=f'{TU_set_name} {Pair_name_short}' + r" $\overline{normFE}\pm$ SE", zorder=3)
     plot1.plot(Distance_ar_nbp, Upper_conf_interval_nbp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)       
     plot1.plot(Distance_ar_nbp, Lower_conf_interval_nbp, linestyle='-', color='#333738', linewidth=0.5, alpha=0.3, zorder=2)     
     plot1.fill_between(Distance_ar_nbp, Lower_conf_interval_nbp, Upper_conf_interval_nbp, facecolor='#7ce0ff', alpha=0.3, interpolate=True, zorder=1) 
@@ -1279,25 +1364,23 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
     plot2=plot1.twinx() 
     plot2.plot(Distance_ar_nbm, Sample_size_ar_nbm, linestyle='--', color='red', linewidth=1.2, alpha=1, label='Sample size')
                  
-    ticks=sorted(np.arange(0, len(Distance_ar_nbm)+100, 1000).tolist() + [len(Distance_ar_nbm)])
+    ticks=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_nbm)])
     plot1.set_xticks(ticks, minor=False)
-    ticks_lables=sorted(np.arange(0, len(Distance_ar_nbm)+100, 1000).tolist() + [len(Distance_ar_nbm)])
+    ticks_lables=sorted(np.arange(-US_length, TUB_width+100, 1000).tolist() + [len(Distance_ar_nbm)])
     TSS_index=ticks_lables.index(0)
-    TES_index=ticks_lables.index(len(Distance_ar_nbm))
     ticks_lables[TSS_index]='TS'
-    ticks_lables[TES_index]='TE'
     plot1.set_xticklabels(ticks_lables, minor=False) 
     plot1.axvline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axvline(len(Distance_ar_nbm), color='black', linestyle='--', alpha=0.7, linewidth=1)
     plot1.axhline(0, color='black', linestyle='--', alpha=0.7, linewidth=1)
-    plot1.set_xlim([-100, 4100])    
+    plot1.set_xlim([-US_length-100, TUB_width+100])    
     plot1.set_xlabel('Distance, bp', size=20)
     plot1.set_ylabel(f'EcTopoI normalized FE', size=20) 
     plot2.set_ylabel('Number of TUs', size=20)
     plot1.legend(fontsize=12, frameon=False, loc='upper right', bbox_to_anchor=(0.6, 1.3))
     plot2.legend(fontsize=12, frameon=False, loc='upper left', bbox_to_anchor=(0.6, 1.3))
     plt.tight_layout(rect=[0,0,1,0.9])       
-    plt.savefig(f'{output_path}EcTopoI_binned_normalized_FE_over_HETU_Rif_plus_minus.png', dpi=400, figsize=(6, 5), transparent=False)
+    plt.savefig(f'{output_path}EcTopoI_binned_normalized_FE_over_{TU_set_name}_{Pair_name}.png', dpi=400, figsize=(6, 5), transparent=False)
     plt.show()
     plt.close()      
     
@@ -1305,9 +1388,9 @@ def plot_TSS_distance_FE_normalized(Signal_dict, output_path):
 
 
 
-#Transformed_data_dictionary=signal_normalize(WIG_data_dict, 200)
-#Signal_normalized_from_TSS_dict=TSS_distance_FE_normalized(Transformed_data_dictionary, TUs_dictionary)
+#Transformed_data_dictionary=signal_normalize(WIG_data_dict, Bin_width)
+#Signal_normalized_from_TSS_dict=TSS_distance_FE_normalized(Transformed_data_dictionary, TUs_dictionary, US_length, TUB_width)
 #Signal_normalized_from_TSS_TU_no_end_dict=TSS_distance_FE_normalized_no_TU_end(Transformed_data_dictionary, TUs_dictionary)
-#plot_TSS_distance_FE_normalized(Signal_normalized_from_TSS_dict, Outpath)
+#plot_TSS_distance_FE_normalized(Signal_normalized_from_TSS_dict, TU_set_name, US_length, TUB_width, Outpath)
 
 

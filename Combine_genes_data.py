@@ -23,27 +23,31 @@ import scipy.cluster.hierarchy as sch
 from matplotlib import cm as cm
 
 #Path to the working directory.
-PWD='F:\Signal_over_TUs'
+PWD='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Signal_over_TUs\Representative_transcripts\Signal_of_TUs_tab\All_TUs_1672\\'
 #Dictionary of input TAB data files (information about the signal over TUs).
-TUs_data_dict={'TopoA -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\TopoA -Rif_over_All genes_15000bp.txt',
-               'TopoA +Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\TopoA +Rif_over_All genes_15000bp.txt',
-               'TopoIV' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\TopoIV Cfx_over_All genes_15000bp.txt',
-               'Gyrase -Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\Gyrase Cfx_over_All genes_15000bp.txt',
-               'Gyrase +Rif' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\Gyrase Cfx +Rif_over_All_genes_15000bp.txt',
-               'MukB' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\MukB_over_All genes_15000bp.txt',
-               'RpoB' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\RpoB_over_All genes_15000bp.txt',
-               'H-NS' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\HNS_over_All genes_15000bp.txt',
-               'Fis' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\Fis_over_All genes_15000bp.txt',
-               'GC' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\GC_over_All genes_15000bp.txt',
-               'Expression' : 'C:\Sutor\science\TopoI_Topo-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\DOOR_Mu_del_cor_genes_expression.txt',
-               'MatP' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\MatP_over_All genes_15000bp.txt',
-               'PolSofi' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\PolSofi_over_All genes_15000bp.txt',
-               'RpoS' : 'F:\Signal_over_TUs\Signal_of_TUs_tab\All_genes\RpoS_over_All genes_15000bp.txt',
+TUs_data_dict={'TopoA -Rif/-CTD'      : PWD + 'TopA_CTD_minus_Rif_minus_av_1_2_3_over_All_TUs_1672_15000bp.txt',
+               'TopoA +Rif/-CTD'      : PWD + 'TopA_CTD_minus_Rif_plus_av_1_2_3_over_All_TUs_1672_15000bp.txt',
+               'TopoA -Rif/+CTD'      : PWD + 'TopA_CTD_plus_Rif_minus_av_1_2_3_over_All_TUs_1672_15000bp.txt',
+               'TopoA +Rif/+CTD'      : PWD + 'TopA_CTD_plus_Rif_plus_av_2_3_over_All_TUs_1672_15000bp.txt',               
+               'TopoIV Sutormin'      : PWD + 'TopoIV_Cfx_over_All_TUs_1672_15000bp.txt',
+               'Gyrase Sutormin'      : PWD + 'Gyrase_Cfx_over_All_TUs_1672_15000bp.txt',
+               'Gyrase +Rif Sutormin' : PWD + 'Gyrase_Cfx_Rif_over_All_TUs_1672_15000bp.txt',
+               'MukB Nolivos'         : PWD + 'MukB_Nolivos_over_All_TUs_1672_15000bp.txt',
+               'RpoB Kahramanoglou'   : PWD + 'RpoB_Kahramanoglou_over_All_TUs_1672_15000bp.txt',
+               'H-NS Kahramanoglou'   : PWD + 'HNS_Kahramanoglou_over_All_TUs_1672_15000bp.txt',
+               'Fis Kahramanoglou'    : PWD + 'Fis_Kahramanoglou_over_All_TUs_1672_15000bp.txt',
+               'GC'                   : PWD + 'GC_over_All_TUs_1672_15000bp.txt',
+               'Expression Sutormin'  : PWD + 'RNA_Seq_over_All_TUs_1672_15000bp.txt',
+               'MatP Nolivos'         : PWD + 'MatP_Nolivos_over_All_TUs_1672_15000bp.txt',
+               'RpoC Borukhov'        : PWD + 'RpoC_Borukhov_over_All_TUs_1672_15000bp.txt',
+               'RpoD Myers'           : PWD + 'RpoD_Myers_over_All_TUs_1672_15000bp.txt',
+               'RpoS Peano'           : PWD + 'RpoS_Peano_over_All_TUs_1672_15000bp.txt',
+               'RpoS Seo'             : PWD + 'RpoS_Seo_over_All_TUs_1672_15000bp.txt',
                }
 #Main table (to be added to).
-Main_table='F:\Signal_over_TUs\Signal_of_TUs_tab_all\All_genes\Old\\Signal_over_TUs_and_regulonDB_info_eq_len_All_genes_membrane_syns_TF.xlsx'
+Main_table=PWD + 'Representative_TUs_info.xlsx'
 #Set of genes.
-Set_of_genes='All_genes'
+Set_of_genes='All_representative_TUs'
 
 #######
 #Checks if directory exists and if not creates.
@@ -57,8 +61,7 @@ def Dir_check_create(some_path):
 #Output path.
 Out_path=PWD
 Dir_check_create(Out_path)
-Dir_check_create(PWD+'\Signal_of_TUs_tab_all\\'+Set_of_genes)
-Dir_check_create(PWD+'\Figures\Datasets_correlation\\'+Set_of_genes)
+Dir_check_create(Out_path+'Figures\\')
 
 
 #########
@@ -100,7 +103,7 @@ def Clustering(df, cor_method):
     L = sch.linkage(d, method='complete')
     ind = sch.fcluster(L, 0.5*d.max(), 'distance')
     columns = [df.columns.tolist()[i] for i in list((np.argsort(ind)))]
-    df = df.reindex_axis(columns, axis=1)
+    df = df.reindex(columns, axis=1)
     return df
 
 
@@ -111,45 +114,47 @@ def Clustering(df, cor_method):
 def read_FE_tables_combine_together(data_dict, main_table, cor_method, set_of_genes_name, path_out):
     #Read input dataframes.
     Dict_of_full_dataset={}
-    Df_of_critical_data=pd.DataFrame()
+    
     #Initiate with Expression data.
-    Expression_dataframe=pd.read_csv(data_dict['Expression'], sep='\t')
-    for index, row in Expression_dataframe.iterrows():
-        Expression_dot=row['Expression'].replace(',', '.')    
-        Expression_dataframe.at[index, 'Expression']=Expression_dot
-    Expression_dataframe=Expression_dataframe.astype({'Expression': np.float64})
-    Dict_of_full_dataset['Expression']=Expression_dataframe
-    Df_of_critical_data=Expression_dataframe
+    Df_of_critical_data=pd.read_csv(data_dict['Expression Sutormin'], sep='\t', header=0)
+    #for index, row in Expression_dataframe.iterrows():
+    #    Expression_dot=row['Expression Sutormin'].replace(',', '.')    
+    #    Expression_dataframe.at[index, 'Expression Sutormin']=Expression_dot
+    #Expression_dataframe=Expression_dataframe.astype({'Expression Sutormin': np.float64})
+    #Dict_of_full_dataset['Expression Sutormin']=Expression_dataframe
+    #Df_of_critical_data=Expression_dataframe
+    
+    print(Df_of_critical_data)
+    
     #Read other dataframes.
     for dataset_name, dataset in data_dict.items():
-        data_dataframe=pd.read_csv(dataset, sep='\t')
-        if dataset_name!='Expression':
+        data_dataframe=pd.read_csv(dataset, sep='\t', header=0)
+        if dataset_name!='Expression Sutormin':
             Dict_of_full_dataset[dataset_name]=data_dataframe
-            current_set_df=pd.DataFrame()
-            current_set_df['Gene_name']=data_dataframe['Gene_name'] #Extracts column with gene names.
-            current_set_df[f'{dataset_name}_FE_GB']=data_dataframe.iloc[: , 5:6] #Extracts column with signal over GB: FE_GB
-            Df_of_critical_data=pd.merge(Df_of_critical_data, current_set_df)
+            #current_set_df=pd.DataFrame()
+            #current_set_df['Gene_name']=data_dataframe['Gene_name'] #Extracts column with gene names.
+            #current_set_df[f'{dataset_name}_FE_GB']=data_dataframe.iloc[: , 5:6] #Extracts column with signal over GB: FE_GB
+            Df_of_critical_data=pd.merge(Df_of_critical_data, data_dataframe, how='right', on=['Gene_name', 'Start', 'End', 'Strand'])
             
     #Read main table to merge data to.
-    main_data=pd.read_excel(main_table)
-    main_and_critical_df=pd.merge(Df_of_critical_data, main_data, how='right', on=['Gene_name', 'GeneID', 'Start', 'End', 'Strand', 'OperonID'])
+    main_data=pd.read_excel(main_table, header=0)
+    main_and_critical_df=pd.merge(Df_of_critical_data, main_data, how='right', on=['Gene_name', 'Start', 'End', 'Strand'])
     
     #Write new dataframe.
-    Df_of_critical_data.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_{set_of_genes_name}.txt', sep='\t', index=False)    
-    main_and_critical_df.to_csv(f'{path_out}\Signal_of_TUs_tab_all\\{set_of_genes_name}\\Signal_over_TUs_and_regulonDB_info_eq_len_{set_of_genes_name}.txt', sep='\t', index=False)        
+    main_and_critical_df.to_csv(f'{path_out}\\Signal_over_TUs_{set_of_genes_name}.txt', sep='\t', index=False)        
     
     #Data cross-correlations.
     #Prepare only signal-containing columns.
     Data_to_correlate=Df_of_critical_data
-    Data_to_correlate.drop(['GeneID', 'Gene_name', 'Start', 'End', 'Strand', 'Gene_description', 'OperonID'], 1, inplace=True)
+    Data_to_correlate.drop(['Gene_name', 'Start', 'End', 'Strand'], 1, inplace=True)
     #Plot the correlation matrix.
     correlation_matrix(Data_to_correlate, cor_method, f'Correlation of signals over TUs for {set_of_genes_name}', 
-                       f'{path_out}\Figures\Datasets_correlation\\{set_of_genes_name}\\Signal_over_TUs_correlation_for_{set_of_genes_name}.png')
+                       f'{path_out}\Figures\\Signal_over_TUs_correlation_for_{set_of_genes_name}.png')
     #Perform the hierarchial clustering
     Data_to_correlate_Clusterized=Clustering(Data_to_correlate, cor_method)
     #Plot the correlation matrix after clustering.
     correlation_matrix(Data_to_correlate_Clusterized, cor_method, f'Clusterized correlation of signals over TUs for {set_of_genes_name}', 
-                       f'{path_out}\Figures\Datasets_correlation\\{set_of_genes_name}\\Signal_over_TUs_clusterized_correlation_for_{set_of_genes_name}.png')    
+                       f'{path_out}\Figures\\Signal_over_TUs_clusterized_correlation_for_{set_of_genes_name}.png')    
     
     return
 

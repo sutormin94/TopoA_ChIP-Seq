@@ -1,9 +1,9 @@
 ###############################################
-##Dmitry Sutormin, 2019##
+##Dmitry Sutormin, 2021##
 ##ChIP-Seq analysis##
 
 ####
-#The only purpose - to calculate and plot correlation matrix of a set of genome tracks (wig).
+#Script calculates and plots a correlation matrix of a set of genome tracks (WIG).
 ####
 
 ###############################################
@@ -118,12 +118,12 @@ def make_correlation_matrix_plot(df, cor_method, title, outpath_folder, file_nam
     ax1.set_yticklabels(labels, fontsize=12)
     ax1.set_ylim(sorted(ax1.get_xlim(), reverse=True)) #Solves a bug in matplotlib 3.1.1 discussed here: https://stackoverflow.com/questions/56942670/matplotlib-seaborn-first-and-last-row-cut-in-half-of-heatmap-plot
     #Create text annotation for heatmap pixels.
-    #for i in range(len(labels)):
-    #    for j in range(len(labels)):
-    #        text = ax1.text(i, j, round(df_cor_matrix[labels[i]][labels[j]], 2), ha="center", va="center", color="black")    
+    for i in range(len(labels)):
+        for j in range(len(labels)):
+            text = ax1.text(i, j, round(df_cor_matrix[labels[i]][labels[j]], 2), ha="center", va="center", color="black")    
     #Add colorbar.
     #Full scale:[-1.00, -0.95, -0.90, -0.85, -0.80, -0.75, -0.70, -0.65, -0.60, -0.55, -0.50, -0.45, -0.40, -0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, 0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00])
-    #axins1=inset_axes(ax1, width="5%",  height="50%",  loc='upper right', bbox_to_anchor=(1.05, 0., 1, 1), bbox_transform=ax1.transAxes, borderpad=0)    #From here: https://matplotlib.org/3.1.1/gallery/axes_grid1/demo_colorbar_with_inset_locator.html 
+    axins1=inset_axes(ax1, width="5%",  height="50%",  loc='upper right', bbox_to_anchor=(1.05, 0., 1, 1), bbox_transform=ax1.transAxes, borderpad=0)    #From here: https://matplotlib.org/3.1.1/gallery/axes_grid1/demo_colorbar_with_inset_locator.html 
     fig.colorbar(color_ax, ticks=[-1.00, -0.80, -0.60, -0.40, -0.20, 0.00, 0.20, 0.40, 0.60, 0.80, 1.00], shrink=0.5, panchor=(1.0, 0.5))
     plt.tight_layout()
     plt.savefig(outpath_folder+file_name+'.png', dpi=400, figsize=(10, 10))
@@ -152,12 +152,12 @@ def correlation_matrix_plot(df_cor_matrix, cor_method, title, outpath_folder, fi
     ax1.set_yticklabels(labels, fontsize=12)
     ax1.set_ylim(sorted(ax1.get_xlim(), reverse=True)) #Solves a bug in matplotlib 3.1.1 discussed here: https://stackoverflow.com/questions/56942670/matplotlib-seaborn-first-and-last-row-cut-in-half-of-heatmap-plot
     #Create text annotation for heatmap pixels.
-    #for i in range(len(labels)):
-    #    for j in range(len(labels)):
-    #        text = ax1.text(i, j, round(df_cor_matrix[labels[i]][labels[j]], 2), ha="center", va="center", color="black")    
+    for i in range(len(labels)):
+        for j in range(len(labels)):
+            text = ax1.text(i, j, round(df_cor_matrix[labels[i]][labels[j]], 2), ha="center", va="center", color="black")    
     #Add colorbar.
     #Full scale:[-1.00, -0.95, -0.90, -0.85, -0.80, -0.75, -0.70, -0.65, -0.60, -0.55, -0.50, -0.45, -0.40, -0.35, -0.30, -0.25, -0.20, -0.15, -0.10, -0.05, 0.00, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00])
-    #axins1=inset_axes(ax1, width="5%",  height="50%",  loc='upper right', bbox_to_anchor=(1.05, 0., 1, 1), bbox_transform=ax1.transAxes, borderpad=0)    #From here: https://matplotlib.org/3.1.1/gallery/axes_grid1/demo_colorbar_with_inset_locator.html 
+    axins1=inset_axes(ax1, width="5%",  height="50%",  loc='upper right', bbox_to_anchor=(1.05, 0., 1, 1), bbox_transform=ax1.transAxes, borderpad=0)    #From here: https://matplotlib.org/3.1.1/gallery/axes_grid1/demo_colorbar_with_inset_locator.html 
     fig.colorbar(color_ax, ticks=[-1.00, -0.80, -0.60, -0.40, -0.20, 0.00, 0.20, 0.40, 0.60, 0.80, 1.00], shrink=0.5, panchor=(1.0, 0.5))
     plt.tight_layout()
     plt.savefig(outpath_folder+file_name+'.png', dpi=400, figsize=(10, 10))

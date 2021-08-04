@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2020##
-##ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##EcTopoI ChIP-Seq analysis##
 
 ####
 #Converts wig file with some genomic feature to Circos-compatible format (bed-like).
@@ -17,16 +17,16 @@ import pandas as pd
 import scipy
 
 #Input files.
-Input_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\E_coli_w3110_Mu_GC_133bp.wig"
+Input_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\WIG_NE_strand_specific_masked_scaled_av_masked_accB_subtract_mock_subtract_no_Ara\TopoI_Ara_N3E_F_masked_scaled_av_123_subtr_mock_subtr_no_Ara.wig"
 
 #Bin width, nt.
-Bin_width=100
+Bin_width=2
 
 #Chromosome ID.
 Chromosome_id='chr1'
 
 #Output file.
-Output_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuals\circos-tutorials-0.67\E_coli_test\E_coli_w3110_Mu_GC_133bp_bin_100.txt"
+Output_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuals\circos-tutorials-0.67\E_coli_test\TopoI_Ara_N3E_F_masked_scaled_av_123_subtr_mock_subtr_no_Ara_bin_2.txt"
 
 
 #######

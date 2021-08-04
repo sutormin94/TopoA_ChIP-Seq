@@ -1,9 +1,9 @@
 ###############################################
-##Dmitry Sutormin, 2020##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##TopoI ChIP-Seq analysis##
 
 #Takes narrowPeaks files with ChIP-Seq peaks identified in different biological replicas,
-#return narrowPeak only with unique peaks.
+#return narrowPeak containing only unique peaks (non-overlaping with any other peak).
 ###############################################
 
 #######
@@ -17,20 +17,26 @@ from matplotlib import pyplot as plt
 from matplotlib_venn import venn2, venn2_circles, venn3, venn3_circles
 
 
+#Path to the working directory with NarrowPeak files.
+PWD_peaks="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\\"
+Set_name="EcTopoI_and_RpoB"
+Peaks_data={'EcTopoI' :  PWD_peaks + "Peak_calling\Reproducible_peaks\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+            'RpoB':      PWD_peaks + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoB_Kahramanoglou\RNApol_peaks_threshold_450.BroadPeak",             
+             }
 
 #Path to the working directory with NarrowPeak files.
-PWD_peaks="C:\\Users\sutor\OneDrive\\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\\"
-Set_name="MtbRNAP_and_MtbGyrase"
-Peaks_data={'MtbRNAP' :  PWD_peaks + "Peak_calling\\Uplekar_MtbRNAP_peaks_threshold_3.BroadPeak",
-            'MtbGyrase':  PWD_peaks + "Peak_calling\\Ahmed_MtbGyrase_peaks_threshold_2.BroadPeak",             
+PWD_peaks2="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\\"
+Set_name2="EcTopoI_ChIP_Topo_Mock"
+Peaks_data2={'EcTopoI_Rif' : PWD_peaks2 + "Data_analysis\Peak_calling\Reproducible_peaks\\TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+             'RpoC_Rif'    : PWD_peaks2 + "Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Rif_Mooney\Mooney_RpoC_Rif_peaks_threshold_1.5.BroadPeak",             
              }
 
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-#Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 #Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\GCA_000767705.1_ASM76770v1_genomic.fna"
-Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\Mycobacterium_tuberculosis_H37Rv.fasta"
+#Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Genome\Mycobacterium_tuberculosis_H37Rv.fasta"
 #Outpath.
-Path_out="C:\\Users\sutor\OneDrive\\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\\"
+Path_out="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\EcTopoI_Rif_vs_RpoC_Rif\\"
     
     
 #######
@@ -211,8 +217,8 @@ def Wrapper(reps_dict, set_name, genome_path, outpath):
     
           
     #Write unique peaks.
-    write_bed(Unique_peaks_1, chrom_name, outpath+'MtbRNAP_3_unique_from_MtbGyrase_2_peaks.narrowPeak')
-    write_bed(Unique_peaks_2, chrom_name, outpath+'MtbGyrase_2_unique_from_MtbRNAP_3_peaks.narrowPeak')
+    write_bed(Unique_peaks_1, chrom_name, outpath+'EcTopoI_noCTD_Rif_unique_from_RpoC_Rif_1.5_peaks_new.narrowPeak')
+    write_bed(Unique_peaks_2, chrom_name, outpath+'RpoC_Rif_1.5_unique_from_EcTopoI_noCTD_Rif_peaks_new.narrowPeak')
     return
             
-Wrapper(Peaks_data, Set_name, Genome, Path_out)       
+Wrapper(Peaks_data2, Set_name2, Genome, Path_out)       

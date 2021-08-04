@@ -42,37 +42,51 @@ Takes two WIG files (for IP and Mock control) and computes by-position fold enri
 
 ## Average_wig_files.py
 
-Takes a set of WIG files (organized as a dictionary) and computes by-position average WIG.
+Takes a set of WIG files (organized as a dictionary) and computes by-position average WIG. Returns correlation matrix 
+(file and heatmap) of pair-wize correlations between genomic tracks.
 
 **Requirements:** Python 2 or 3
 
 **Input:** WIG files to be averaged
 
-**Output:** Averaged WIG file
+**Output:** Averaged WIG file, correlation matrix (CSV), correlation matrix heatmap (PNG), clusterized correlation matrix (CSV), clusterized correlation matrix heatmap (PNG)
 
 
-## Return_sequences_under_peaks.py
+## Correlate_genome_tracks.py
+
+Takes a set of WIG files (organized as a dictionary) and computes a correlation matrix 
+(file and heatmap) of pair-wize correlations between genomic tracks.
+
+**Requirements:** Python 2 or 3
+
+**Input:** WIG files to be averaged
+
+**Output:** correlation matrix (CSV), correlation matrix heatmap (PNG), clusterized correlation matrix (CSV), clusterized correlation matrix heatmap (PNG)
+
+
+## Return_sequences_under_peaks_GC_width_FE_distribution.py
 
 Takes output of MACS2 for peaks called (NarrowPeak intervals), returns sequences under the peaks as a MFA file,
-plots distribution of peaks GC-content in comparison to genome GC-content and the distribution of peaks widths.
+plots distribution of peaks GC-content in comparison to genome GC-content, distribution of peaks widths, 
+and distribution of peaks fold enrichment.
 
 **Requirements:** Python 3
 
 **Input:** Peaks coordinates (NarrowPeaks), reference genome (FASTA)
 
-**Output:** MFA with sequences under the peaks, plots
+**Output:** MFA with sequences under the peaks, plots (GC% histogram, peaks width histogram, peaks FE histogram)
 
 
 ## Return_reproducible_peaks.py
 
 Takes a dictionary of narrowPeak files with peaks called by MACS2 for different biological replicas.
-Identifies reproducible regions and writes them as a broadPeak file.
+Identifies reproducible regions and writes them as a narrowPeak file.
 
 **Requirements:** Python 2 or 3
 
 **Input:** Peaks coordinates (NarrowPeaks), reference genome (FASTA)
 
-**Output:** Reproducible peaks coordinates (broadPeak)
+**Output:** Reproducible peaks coordinates (narrowPeak), heatmap (number of shared peaks), heatmap (Jaccardian distance between peak sets), Venn diagram (peak sets overlap)
 
 
 ## FE_for_peaks.py
@@ -87,7 +101,45 @@ Returns average fold enrichment of regions as computed by Compute_fold_enrichmen
 **Output:** Peaks with fold enrichment (broadPeak)
 
 
-## Enrichment_of_regions_comparision.py
+## Return_unique_peaks.py
+
+Takes a dictionary of narrowPeak files with peak regions.
+Identifies unique regions which do not overlap with other peaks, writes them as a narrowPeak file.
+
+**Requirements:** Python 2 or 3
+
+**Input:** Peaks coordinates (NarrowPeaks), reference genome (FASTA)
+
+**Output:** Unique peaks coordinates (narrowPeak), heatmap (number of shared peaks), heatmap (Jaccardian distance between peak sets), Venn diagram (peak sets overlap)
+
+
+## Peak_overlap_simulation.py
+
+Takes two BroadPeak files of real ChIP-Seq peaks datasets and tests the significance of sets overlay. Uses Monte-Carlo approach to 
+place peaks randomly and then samples the overlay. Repetitive sampling gives a distribution for the number of peaks in overlay, which
+is then approximated by normal distribution and is used to test the number of peaks in overlay for real datasets.
+
+**Requirements:** Python 3
+
+**Input:** Two BroadPeak files with peaks coordinates, genome length, portion of a genome to mask (deletions, etc.)
+
+**Output:** Plot of a distribution of the number of overlaying peaks, p-value, text file with the number of overlaying peaks for every iteration.
+
+
+## Violin_plots_EcTopoI_vs_RNAP_vs_Gyrase.py
+
+The script tests sets of genomic intervals (Peaks, TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)
+for the enrichment with some continously distributed character CDC (RNApol fold enrichment, score, GC%, etc.) (t-test). 
+Makes violin-plots of CDS in intervals vs other sites.
+
+**Requirements:** Python 2 or 3
+
+**Input:** Peaks coordinates (NarrowPeaks), continously distributed character (WIG)
+
+**Output:** Pearson correlation, violin plots
+
+
+## Regions_features_association.py
 
 The script tests sets of genomic intervals (Peaks, TUs, BIMEs-1, BIMEs-2, IHF sites, Fis sites, H-NS sites, MatP sites, etc.)
 for the enrichment with some continously distributed character CDC (RNApol fold enrichment, score, GC%, etc.) (t-test). 
@@ -109,18 +161,103 @@ downstream (DS) and over TUs bodies (GB).
 
 **Input:** Files with signal data (WIG), genome annotation (GFF or BroadPeak), regions to be omitted (BroadPeak)
 
-**Output:** WIG files with cumulative signal over all TUs, TAB files with average signal for each of TUs, plot of average signal over all TUs, histogram of the signal over TUs
+**Output:** WIG files with metagene signal over all TUs, TAB files with average signal for each of TUs, plot of average signal over all TUs, histogram of the signal over TUs
 
 
 ## Plot_signal_over_transcription_units.py
 
-Takes signal over transcriptions units in WIG format generated by FE_over_US_GB_DS.py, plots cumulative signal over TUs upstream, downstream and TU bodies.
+Takes signal over transcriptions units in WIG format generated by FE_over_US_GB_DS.py, plots metagene signal over TUs upstream, downstream and TU bodies.
 
 **Requirements:** Python 3
 
-**Input:** WIG files with cumulative signal over TUs sets
+**Input:** WIG files with metagene signal over TUs sets
 
-**Output:** Plots with cumulative signal
+**Output:** Plots with metagene signal
+
+
+## Compare_signal_US_TSS_GB
+
+Takes wig tracks of different continous genome features (TopoI ChIP-Seq FE, GC%, etc.). Computes relative (X-mean(X)) and normalized ((X-mean(X))/std(X)) signals.
+Compares mean signal at upstream (US), transcription start site (TSS), and in transcription unit body (TUB) regions for different ChIP-Seq conditions.
+Makes metagene plots without TU body scaling and with signal statistics.
+
+**Requirements:** Python 3
+
+**Input:** WIG files with FE data, TUs annotation (GFF)
+
+**Output:** Barplots comparing US, TSS, TUB; Metagene plot with signal statistics
+
+
+## FE_over_intergenic_regions.py
+
+Takes wig tracks of different genome features (GC%, MukB ChiP-Seq, etc.). Computes signal in intergenic regions (IGRs, provides as BroadPeak or GFF file), in respect to 
+orientation of adjacent genes: ++, +-, -+ or --. 
+
+**Requirements:** Python 3
+
+**Input:** Files with signal data (WIG), IGGs annotation (GFF or BroadPeak), regions to be omitted (e.g. deletions, BroadPeak)
+
+**Output:** WIG files with metagene signal over IGRs classified by adjacent genes orientation, TAB files with average signal for each of IGR, 
+plot of average signal over IGR groups, histogram of the signal over IGRs
+
+
+## Plot_signal_over_intergenic_regions.py
+
+Takes signal over intergenic regions in WIG format generated by FE_over_intergenic_regions.py, plots metagene signal over IGRs.
+
+**Requirements:** Python 3
+
+**Input:** WIG files with metagene signal over IGR sets
+
+**Output:** Plots with metagene signal
+
+
+## Intergenic_regions_promoters_TFs_and_EcTopoI.py
+
+1) Takes set of genes with assigned expression level and returns intergenic regions (IGRs).
+Select by length intergenic regins appropriate for further analysis: 50bp<length<1000bp. Creates SFig. 10.
+2) Searches for annotated promoters and transcription factor sites in selected IGRs. 
+Annotation is taken from RegulonDB.
+3) Adds signal info (wig files, e.g. EcTopoI ChIP-Seq FE) to the selected IGRs.
+Adds information on whether adjacent genes encode proteins targeting to membrane (from Ecocyc database).
+4) Adds information on whether adjacent genes encode proteins targeting to membrane (from PSORT database)
+5) Remove anomalous IGRs (near dps gene with extremely high EcTopoI peak or near rRNA genes).
+6) Compares EcTopoI FE (RNAP FE, Expression level) between IGRs sets defined by different features.
+Makes violin-plots: Fig. 4A-C, SFig. 11, SFig. 12, SFig. 14A, SFig. 15.
+
+**Requirements:** Python 3
+
+**Input:** TUs annotation (TAB), reference genome (FASTA), promoter sequences (FASTA), TF sites sequences (FASTA), 
+files with signal data (WIG), data on genes encoding membrane-targeting protein (TAB)
+
+**Output:** Combine data on IGRs (TAB), violin-plots describing different sets of IGRs
+
+
+## Run_ChIPMunk.bat
+
+Runs ChipMunk several times to detect motifs in sequences under ChIP-Seq peaks 
+(fasta files generated by Return_sequences_under_peaks_GC_width_FE_distribution.py)
+
+**Requirements:** ChipMunk, windows command line
+
+**Input:** MFA with sequences under the peaks
+
+**Output:** ChIPMunk log-files, ChIPMunk output files
+
+
+## Make_mfa_from_ChIPMunk_output.py
+
+Take ChipMunk output and creates MFA with sequences detected as motif. Creates Logo of the motif using Weblogo
+implementation in python.
+
+**Requirements:** Python 3
+
+**Input:** ChIPMunk output
+
+**Output:** MFA with sequences detected as motif, Logo of the motif
+
+
+
 
 
 ## Combine_genes_data.py
@@ -180,19 +317,6 @@ associated with main character (signal of TopoA -Rif by default).
 **Input:** Extended TAB with average signals for each of TUs
 
 **Output:** Plots with signal distribution, extending-frame plots describing the stability of feature divirgence.
-
-
-## Peak_overlap_simulation.py
-
-Takes two BroadPeak files of real ChIP-Seq peaks datasets and tests the significance of sets overlay. Uses Monte-Carlo approach to 
-place peaks randomly and then samples the overlay. Repetitive sampling gives a distribution for the number of peaks in overlay, which
-is then approximated by normal distribution and is used to test the number of peaks in overlay for real datasets.
-
-**Requirements:** Python 3
-
-**Input:** Two BroadPeak files with peaks coordinates, genome length, portion of a genome to mask (deletions, etc.)
-
-**Output:** Plot of a distribution of the number of overlaying peaks, p-value, text file with the number of overlaying peaks for every iteration.
 
 
 ## Add 2: Growth_curve_plot.py

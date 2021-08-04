@@ -1,8 +1,17 @@
 ###############################################
-##Dmitry Sutormin, 2020##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##EcTopoI ChIP-Seq analysis##
 
-# 1) Takes set of genes with assigned expression level and returns appropriate intergenic regions.
+# 1) Takes set of genes with assigned expression level and returns intergenic regions (IGRs).
+# Select by length intergenic regins appropriate for further analysis: 50bp<length<1000bp. Creates SFig. 10.
+# 2) Searches for annotated promoters and transcription factor sites in selected IGRs. 
+# Annotation is taken from RegulonDB.
+# 3) Adds signal info (wig files, e.g. EcTopoI ChIP-Seq FE) to the selected IGRs.
+# Adds information on whether adjacent genes encode proteins targeting to membrane (Ecocyc).
+# 4) Adds information on whether adjacent genes encode proteins targeting to membrane (PSORT)
+# 5) Remove anomalous IGRs (near dps gene with extremely high EcTopoI peak or near rRNA genes).
+# 6) Compares EcTopoI FE (RNAP FE, Expression level) between IGRs sets defined by different features.
+# Makes violin-plots: Fig. 4A-C, SFig. 11, SFig. 12, SFig. 14A, SFig. 15.
 ###############################################
 
 #######
@@ -19,6 +28,7 @@ from Bio.Blast.Applications import NcbiblastnCommandline, NcbimakeblastdbCommand
 import pandas as pd
 from pandas import DataFrame
 import math
+import re
 
 
 ##############
@@ -28,8 +38,11 @@ import math
 
 #Path to expression level of genes.
 Genes_EL="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\DY330_RNA-Seq_genes_EP_del_cor.txt"
+#Path to genome sequence of a strain you are working with (.fasta).
 Genome_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+#Path to the working directory.
 PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\\"
+
 
 #######
 #Opens and reads FASTA file with reference genome
@@ -42,15 +55,18 @@ def read_genome(genome_path):
         genomefa=str(record.seq)
     return genomefa
 
+
 #######
 #Read expression data, identify intergenic regions, return sequences of intergenic regions.
 #######
 
 def identify_IG_regions(filein_path, genome_path, fileout_path):
+    
     #Read data.
     EL_dataframe=pd.read_csv(filein_path, sep='\t', header=0, index_col=0)
     EL_dataframe.sort_values('Start', axis=0, ascending=True, inplace=True)
     print(EL_dataframe.head(10))
+    
     #Length of IG regions.
     Start=0
     End=0
@@ -72,6 +88,7 @@ def identify_IG_regions(filein_path, genome_path, fileout_path):
         Expression=row['Expression_E']
         
     print(min(IG_len_ar), max(IG_len_ar))
+    
     #Plot distribution of intergenic regions length.
     plt.hist(IG_len_ar, bins=10000)
     plt.axvline(50, linestyle='--', linewidth=1, color='black')
@@ -107,9 +124,10 @@ def identify_IG_regions(filein_path, genome_path, fileout_path):
 ##Read TFs data from RegulonDB, blast in a database constructed from a collection of intergenic sequences (see Part 1).
 ##############
 
+#Data on promoters from RegulonDB (for E. coli MG1655).
 Promoters_data_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\RegulonDB_PromoterSet.txt"
+#Data on transcription factor binding sites from RegulonDB (for E. coli MG1655).
 Transcription_Factors_data_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\RegulonDB_BindingSiteSet.txt"
-PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\\"
 
 #######
 #Read promoters data. 
@@ -131,6 +149,7 @@ def read_promoters(PD_path, P_seq_path):
     PD_file.close()
     PS_file.close()
     return
+
 
 #######
 #Read TFs data. 
@@ -161,12 +180,14 @@ def read_TFs(TF_path, TF_seq_path):
     TFS_file.close()
     return
 
+
 #######
 #Create database from a collection of intergenic regions sequences. 
 #Blast promoters sequences and TF sites sequences in the database.
 #######
 
 def db_create_and_blast(PWD):
+    
     #Create blast database.
     Make_IG_sequences_db=NcbimakeblastdbCommandline(dbtype="nucl", input_file=PWD+'DY330_intergenic_regions_sequences_filtrated_50_1000bp.fasta')    
     print('Making blast database: ' + str(Make_IG_sequences_db))
@@ -194,11 +215,12 @@ def db_create_and_blast(PWD):
 ##############
 ##Part 3.
 ##Read results of TF sites and promoters blast.
-##Combine data about intergenic regions and assign them fold enrichment of EcTopoI.
+##Combine data about intergenic regions and assign them with a fold enrichment for EcTopoI.
+##Add information on whether adjacent genes encode proteins targeting to membrane.
 ##############
 
-PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\\"
-EcTopoI_data_dict={'-Rif-CTD' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig',
+#Dictionary with .wig files containing continuous signal to be assigned with the set of IGRs.
+EcTopoI_data_dict={'-Rif-CTD' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_minus_average_FE_3_4_6.wig',
                    '+Rif-CTD' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_minus_Rif_plus_average_FE_1_2_3.wig',
                    '-Rif+CTD' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_minus_average_FE.wig',
                    '+Rif+CTD' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\TopA_ChIP_CTD_plus_Rif_plus_average_FE.wig',
@@ -215,9 +237,9 @@ def read_blast_output_combine(pwd):
     for line in Pblast_output:
         line=line.rstrip().split('\t')
         if line[1] in IG_info_dict:
-            IG_info_dict[line[1]]['Promotor_info'].append(line[0])
+            IG_info_dict[line[1]]['Promoter_info'].append(line[0])
         else:
-            IG_info_dict[line[1]]={'Promotor_info' : [line[0]], 'TF_info' : []}
+            IG_info_dict[line[1]]={'Promoter_info' : [line[0]], 'TF_info' : []}
     Pblast_output.close()
     
     #Read TF sites sequences blast results.
@@ -227,9 +249,10 @@ def read_blast_output_combine(pwd):
         if line[1] in IG_info_dict:
             IG_info_dict[line[1]]['TF_info'].append(line[0])
         else:
-            IG_info_dict[line[1]]={'Promotor_info' : [], 'TF_info' : [line[0]]}    
+            IG_info_dict[line[1]]={'Promoter_info' : [], 'TF_info' : [line[0]]}    
     TFblast_output.close()
     return IG_info_dict
+
 
 #######
 #Parsing WIG file.
@@ -248,6 +271,7 @@ def score_data_parser(inpath, param_name):
     print('Whole genome average ' + str(param_name) + ' : ' + str(sum(ar)/len(ar)))
     return ar, chrom_name
 
+
 #######
 #Read synonims and genes, encoding membrane proteins.
 #######
@@ -264,6 +288,7 @@ def mem_prot_genes(pwd):
     mem_prot_data.close()
     return mem_prot_genes_ar
 
+
 #######
 #Split and write TF and promoters data, assign IGs with EcTopoI signal.
 #######
@@ -275,7 +300,7 @@ def write_IG_data(IG_info_dict, pwd, EcTopoI_dict, mem_prot_genes_data):
         wig_data, chr_id=score_data_parser(path, name)
         EcTopoI_data[name]=wig_data
     
-    IG_output=open(pwd+'Intergenic_regions_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal.txt', 'w')
+    IG_output=open(pwd+'Intergenic_regions_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal.txt', 'w')
     IG_output.write('ID\tG1_name\tG1_start\tG1_end\tG1_strand\tG1_expression\tIG_length\tG2_name\tG2_start\tG2_end\tG2_strand\tG2_expression\t'+
                     'G1_membrane\tG2_membrane\t'+
                     'Promoters_names\tPromoters_sigmas\tPromoters_confidence\tPromoters_number\t'+
@@ -315,7 +340,7 @@ def write_IG_data(IG_info_dict, pwd, EcTopoI_dict, mem_prot_genes_data):
                 
         #List promoter names.
         names_string=''
-        for TSS in data['Promotor_info']:
+        for TSS in data['Promoter_info']:
             TSS=TSS.split('_')
             names_string=names_string+TSS[0]+';'
         names_string=names_string.rstrip(';')
@@ -323,7 +348,7 @@ def write_IG_data(IG_info_dict, pwd, EcTopoI_dict, mem_prot_genes_data):
         
         #List promoter's sigma factor.
         sigma_string=''
-        for TSS in data['Promotor_info']:
+        for TSS in data['Promoter_info']:
             TSS=TSS.split('_')
             sigma_string=sigma_string+TSS[2]+';'
         sigma_string=sigma_string.rstrip(';')
@@ -331,14 +356,13 @@ def write_IG_data(IG_info_dict, pwd, EcTopoI_dict, mem_prot_genes_data):
         
         #List promoter's confidence.
         Confidence_string=''
-        for TSS in data['Promotor_info']:
+        for TSS in data['Promoter_info']:
             TSS=TSS.split('_')
-            print(TSS)
             Confidence_string=Confidence_string+TSS[3]+';'
         Confidence_string=Confidence_string.rstrip(';')    
         IG_output.write(f'{Confidence_string}\t')
         
-        IG_output.write(f'{len(data["Promotor_info"])}\t')
+        IG_output.write(f'{len(data["Promoter_info"])}\t')
         
         #List TF names.
         TF_names_string=''
@@ -382,16 +406,221 @@ def write_IG_data(IG_info_dict, pwd, EcTopoI_dict, mem_prot_genes_data):
 #write_IG_data(IG_info_dictionary, PWD, EcTopoI_data_dict, Membrane_proteins_data)
 
 
+
 ##############
 ##Part 4.
-##Data analysis and visualization.
+##Add information from PSORT database (membrane-targeting proteins).
+##############
+
+#Source genome to extract sequences of genes from.
+MG1655_genome_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Genomes\E_coli_K-12_MG1655_NC_000913.3.fasta"
+#PSORT data.
+PSORT_data_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_membrane_proteins\Databases\PSORT_3_database_E_coli.xlsx"
+#W3110 genes.
+W3110_genes_path_txt="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\Intergenic_regions_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal.txt"
+W3110_genes_path_xlsx="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\Intergenic_regions_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal.xlsx"
+
+
+#######
+#Converts .txt file containing IGSs info (TAB) to .xlsx
+#######
+
+def convert_csv_to_xlsx(pathin, pathout):
+    
+    input_dataframe=pd.read_csv(pathin, sep='\t', header=0, index_col=False)
+    input_dataframe.to_excel(pathout, header=True, index=False, sheet_name='Intergenic_regions_info')
+    
+    return
+
+
+#######
+#Read PSORT data, return genes multifasta, blast.
+#######
+
+def read_PSORT_blast(PSORT_path, source_genome_path, pwd):
+    #Read PSORT data.
+    PSORT_data=pd.read_excel(PSORT_path, header=0, sheet_name='psortdb-results')
+    #Read source genome.
+    source_genome=read_genome(source_genome_path)
+    
+    #Write genes multifasta.
+    genes=open(pwd+'MG1655_PSORT_genes.fasta', 'w')
+    j=0
+    for i in PSORT_data.index:
+        #Retrive gene coordinates.
+        gene_coordinates=PSORT_data.loc[i, 'Genome_Location']
+        gene_coordinates=gene_coordinates.lstrip('c').split('..')
+        gene_start=int(gene_coordinates[0])
+        gene_end=int(gene_coordinates[1])
+        
+        #Retrive gene score.
+        gene_score=PSORT_data.loc[i, 'Final_Score']
+        
+        #Retrive gene localization prediction.
+        gene_localization=PSORT_data.loc[i, 'Final_Localization']
+        gene_localization=re.sub(' ', '', gene_localization)
+        
+        gene_sequence=source_genome[gene_start:gene_end]
+        
+        #Write gene sequence.
+        genes.write(f'>{gene_start}_{gene_end}_{gene_score}_{gene_localization}\n{gene_sequence}\n')
+        j+=1
+    genes.close()
+    
+    print(f'Number of genes from source genome: {j}')
+    
+    #Create BLAST DB.
+    Make_w3110_db=NcbimakeblastdbCommandline(dbtype="nucl", input_file=pwd+'Genome\E_coli_w3110_G_Mu.fasta')    
+    print('Making blast database: ' + str(Make_w3110_db))
+    Make_w3110_db()
+    
+    #Blast source genome gene sequences.
+    Genes_blast=NcbiblastnCommandline(query=pwd+'MG1655_PSORT_genes.fasta', db=pwd+'Genome\E_coli_w3110_G_Mu.fasta', out=pwd+'MG1655_genes_in_W3110_blast.txt', outfmt=6)  
+    print('Run blast of gene sequences: ' + str(Genes_blast))
+    Genes_blast()    
+    
+    return
+
+
+#######
+#Read blast data, add to IGR info, return new extended .xlsx.
+#######
+
+def read_blast_convert(pwd, target_genome_path):
+    
+    #Read gene sequences blast results.
+    Gblast_output=open(pwd+'MG1655_genes_in_W3110_blast.txt', 'r')
+    Genes_dict={}
+    j=0
+    i=0
+    for line in Gblast_output:
+        j+=1
+        line=line.rstrip().split('\t')
+        if line[0] in Genes_dict:
+            continue
+        else:
+            Genes_dict[line[0]]=[min([int(line[8]), int(line[9])]), max([int(line[8]), int(line[9])])]
+            i+=1
+        
+    Gblast_output.close()   
+    
+    print(f'Number of BLAST hits: {j}; Number of unique hits: {i}')
+    
+    #Read W3110 genes data.
+    Target_genome_data=pd.read_excel(target_genome_path, header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    
+    #Find corresponding genes.
+    G1_score_ar=[]
+    G1_Loc_ar=[]
+    G2_score_ar=[]
+    G2_Loc_ar=[]
+    for i in Target_genome_data.index:
+        G1_start=int(Target_genome_data.loc[i, 'G1_start'])
+        G1_end=int(Target_genome_data.loc[i, 'G1_end'])
+        G2_start=int(Target_genome_data.loc[i, 'G2_start'])
+        G2_end=int(Target_genome_data.loc[i, 'G2_end'])
+        
+        check_G1=0
+        check_G2=0
+        find=[0,0]
+        for gene_info, coordinates in Genes_dict.items():
+            #For G1.
+            if (abs(G1_start-coordinates[0])<10) & (abs(G1_end-coordinates[1])<10):
+                check_G1+=1
+                
+                gene_info=gene_info.split('_')
+                score=gene_info[2]
+                localization=gene_info[3]
+                
+                if check_G1<2:
+                
+                    G1_score_ar.append(score)
+                    G1_Loc_ar.append(localization)
+                
+                else:
+                    print(G1_start, G1_end, gene_info, coordinates)                   
+                
+                find[0]+=1   
+            #For G2.
+            if (abs(G2_start-coordinates[0])<10) & (abs(G2_end-coordinates[1])<10):
+                check_G2+=1
+                
+                gene_info=gene_info.split('_')
+                score=gene_info[2]
+                localization=gene_info[3]
+                
+                if check_G2<2:
+                
+                    G2_score_ar.append(score)
+                    G2_Loc_ar.append(localization)   
+                    
+                else:
+                    print(G2_start, G2_end, gene_info, coordinates)                
+                
+                find[1]+=1
+        
+        if check_G1==0:
+            G1_score_ar.append(0)
+            G1_Loc_ar.append('-')
+        if check_G2==0:
+            G2_score_ar.append(0)
+            G2_Loc_ar.append('-')
+        if find!=[1,1]:
+            print(find)
+        if len(G1_score_ar)!=len(G2_score_ar):
+            print('Smth wrong!')
+    
+    print(len(Target_genome_data.index), len(G1_score_ar), len(G1_Loc_ar), len(G2_score_ar), len(G2_Loc_ar))    
+    
+    #Add new data to dataframe.
+    Target_genome_data['G1_PSORT_score']=G1_score_ar
+    Target_genome_data['G1_PSORT_localization']=G1_Loc_ar
+    Target_genome_data['G2_PSORT_score']=G2_score_ar
+    Target_genome_data['G2_PSORT_localization']=G2_Loc_ar
+    
+    #Write updated dataframe.
+    Target_genome_data.to_excel(pwd+'Intergenic_regions_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=True, index=True, sheet_name='Intergenic_regions_info')
+    return
+
+#convert_csv_to_xlsx(W3110_genes_path_txt, W3110_genes_path_xlsx)
+#read_PSORT_blast(PSORT_data_path, MG1655_genome_path, PWD)
+#read_blast_convert(PWD, W3110_genes_path_xlsx)
+
+
+
+##############
+##Part 5.
+##Remove IGRs with anomalous signals (extremely high EcTopoI peaks near dps gene; or rRNA/tRNA genes with extremely high expression levels).
+##############
+
+
+#Genes to be removed.
+Genes_to_remove={'G1_name' : ['rrsG', 'rrsA', 'rrsB', 'rrsC', 'rrsD', 'dps', 'ybhB', 'ybhC'],
+                 'G2_name' : ['rrsE', 'rrsH']}
+
+def remove_anomalous_regions(pwd, genes_to_remove_dict):
+    
+    #Read input dataframe.
+    IGR_data=pd.read_excel(pwd+'Intergenic_regions_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index=0, sheet_name='Intergenic_regions_info')
+    #Remove rows containing undesired gene names.
+    IGR_data_filtered=IGR_data[(~IGR_data['G1_name'].isin(genes_to_remove_dict['G1_name'])) & (~IGR_data['G2_name'].isin(genes_to_remove_dict['G2_name']))]
+    #Write a resultant dataframe.
+    IGR_data_filtered.to_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=True, index=False, sheet_name='Intergenic_regions_info')
+    return
+
+#remove_anomalous_regions(PWD, Genes_to_remove)
+
+
+
+##############
+##Part 6.
+##IGRs data analysis and visualization.
 ##############
 
 PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\E_coli_TF_sites\\"
 
-
 #######
-#Read final table, test gene orientation hypothesis.
+#Read final table, test gene orientation factor.
 #######
 
 def set_axis_style(ax, labels, pos):
@@ -403,8 +632,9 @@ def set_axis_style(ax, labels, pos):
     return
 
 def read_test_gene_orientation(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info_promote')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     
     #Classify gene pairs by orientation.
@@ -464,37 +694,37 @@ def read_test_gene_orientation(pwd):
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.1, 40)
+    plt1.set_ylim(0.1, 50)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 9), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(1.5, 7.5), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(2.5, 1.8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'   {Genes_minus_plus.shape[0]}', xy=(3.5, 8), xycoords='data', size=15, rotation=0) 
+    plt1.annotate(f'   {Genes_plus_plus.shape[0]}',   xy=(0.5, 28), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(1.5, 28), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(2.5, 3), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'   {Genes_minus_plus.shape[0]}',  xy=(3.5, 29), xycoords='data', size=15, rotation=0) 
     
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.45), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.45), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.52), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_plus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.45), xycoords='data', size=12, rotation=0)      
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.35), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.32), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.45), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_plus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.31), xycoords='data', size=12, rotation=0)      
     
-    plt1.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(6.5, 23), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'   {Genes_plus_plus.shape[0]}',   xy=(6.5, 23), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(7.5, 12.5), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(8.5, 3.2), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'   {Genes_minus_plus.shape[0]}', xy=(9.5, 11), xycoords='data', size=15, rotation=0) 
+    plt1.annotate(f'   {Genes_minus_plus.shape[0]}',  xy=(9.5, 11), xycoords='data', size=15, rotation=0) 
     
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.45), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(7.5, 0.42), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.45), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(7.5, 0.42), xycoords='data', size=12, rotation=0)
     plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(8.5, 0.55), xycoords='data', size=12, rotation=0)
     plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_plus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(9.5, 0.45), xycoords='data', size=12, rotation=0)     
     
-    #EcTopoI.
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(4):
         for j in range(4):
             if j>i:
                 Intervals_stat=stats.ttest_ind(dataset1[j], dataset1[i], equal_var=False)
                 print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[i]),2)} Mean2={round(np.mean(dataset1[j]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    #EcTopoI Rif.
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     for i in range(4):
         for j in range(4):
             if j>i:
@@ -503,7 +733,7 @@ def read_test_gene_orientation(pwd):
                 
                 
     #RNAP fold enrichment.
-    #Draw violin-plots. Promoter factor.
+    #Draw violin-plots.
     plt2=fig.add_subplot(2,2,1) 
     violins=plt2.violinplot(dataset2, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -542,17 +772,17 @@ def read_test_gene_orientation(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'     {Genes_plus_plus.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
     plt2.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(1.5, 30), xycoords='data', size=15, rotation=0)
     plt2.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(2.5, 12), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'   {Genes_minus_plus.shape[0]}', xy=(3.5, 30), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'    {Genes_minus_plus.shape[0]}', xy=(3.5, 30), xycoords='data', size=15, rotation=0)
     
-    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.055), xycoords='data', size=12, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.05), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "RNAP"].tolist()),2)}', xy=(0.5, 0.055), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"RNAP"].tolist()),2)}', xy=(1.5, 0.05), xycoords='data', size=12, rotation=0)
     plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(2.5, 0.25), xycoords='data', size=12, rotation=0)  
     plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_plus.loc[:, "RNAP"].tolist()),2)}', xy=(3.5, 0.05), xycoords='data', size=12, rotation=0)      
     
-    #RNAP.
+    #Test RNAP FE difference between groups of IGRs.
     for i in range(4):
         for j in range(4):
             if j>i:
@@ -561,7 +791,7 @@ def read_test_gene_orientation(pwd):
     
     
     #Expression level.
-    #Draw violin-plots. Promoter factor.
+    #Draw violin-plots.
     plt3=fig.add_subplot(2,2,2) 
     violins=plt3.violinplot(dataset3, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -600,18 +830,18 @@ def read_test_gene_orientation(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log') 
     
-    plt3.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 1500), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'     {Genes_plus_plus.shape[0]}', xy=(0.5, 1500), xycoords='data', size=15, rotation=0)
     plt3.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(1.5, 2100), xycoords='data', size=15, rotation=0)
     plt3.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(2.5, 30), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f'   {Genes_minus_plus.shape[0]}', xy=(3.5, 800), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'    {Genes_minus_plus.shape[0]}', xy=(3.5, 800), xycoords='data', size=15, rotation=0)
 
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.0035), xycoords='data', size=12, rotation=0)
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0025), xycoords='data', size=12, rotation=0) 
+    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.0035), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0025), xycoords='data', size=12, rotation=0) 
     plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.12), xycoords='data', size=12, rotation=0)  
     plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_plus.loc[:, "Cumulative_expression"].tolist()),2)}', xy=(3.5, 0.0015), xycoords='data', size=12, rotation=0)   
         
     
-    #Expression level.
+    #Test Expression level difference between groups of IGRs.
     for i in range(4):
         for j in range(4):
             if j>i:
@@ -621,7 +851,7 @@ def read_test_gene_orientation(pwd):
            
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Genes_orientation_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(4.2, 6.5))         
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Genes_orientation_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(4.2, 6.5))         
     
     return
 
@@ -629,30 +859,40 @@ def read_test_gene_orientation(pwd):
 
 
 #######
-#Read final table, test membrane protein genes hypothesis.
-#Old data from GO terms.
+#Read final table, test genes-encode-membrane-targeting-protein factor effect on EcTopo signal.
+#Data from GO terms (Ecocyc).
 #######
 
-def read_test_membrane_orientation_old_GO_terms(pwd):
+def read_test_membrane_orientation_GO_terms(pwd, DB_type):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info_promote')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     
     #Classify gene pairs by membranness of the proteins they encode.
-    Genes_plus_plus=input_data[(input_data['G1_membrane']!='-') & (input_data['G2_membrane']!='-')]
-    Genes_plus_minus=input_data[((input_data['G1_membrane']=='-') & (input_data['G2_membrane']!='-')) | ((input_data['G1_membrane']!='-') & (input_data['G2_membrane']=='-'))]
-    Genes_minus_minus=input_data[(input_data['G1_membrane']=='-') & (input_data['G2_membrane']=='-')]
+    if DB_type=='Ecocyc':
+        Genes_plus_plus=input_data[(input_data['G1_membrane']!='-') & (input_data['G2_membrane']!='-')]
+        Genes_plus_minus=input_data[((input_data['G1_membrane']=='-') & (input_data['G2_membrane']!='-')) | ((input_data['G1_membrane']!='-') & (input_data['G2_membrane']=='-'))]
+        Genes_minus_minus=input_data[(input_data['G1_membrane']=='-') & (input_data['G2_membrane']=='-')]
+    elif DB_type=='PSORT':
+        input_data['G1_PSORT_mem']=(input_data['G1_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G1_PSORT_localization']=='OuterMembrane')
+        input_data['G2_PSORT_mem']=(input_data['G2_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G2_PSORT_localization']=='OuterMembrane')
+    
+        Genes_plus_plus=input_data[(input_data['G1_PSORT_mem']==True) & (input_data['G2_PSORT_mem']==True)]
+        Genes_plus_minus=input_data[((input_data['G1_PSORT_mem']==True) & (input_data['G2_PSORT_mem']==False)) | ((input_data['G1_PSORT_mem']==False) & (input_data['G2_PSORT_mem']==True))]
+        Genes_minus_minus=input_data[(input_data['G1_PSORT_mem']==False) & (input_data['G2_PSORT_mem']==False) ]       
     
     print(Genes_plus_plus.shape, Genes_minus_minus.shape, Genes_plus_minus.shape)
 
     #Plot EcTopoI enrichment.
     pos1=[1, 2, 3, 5, 6, 7]
     dataset1=[Genes_plus_plus.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_plus_minus.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_minus_minus.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
-             Genes_plus_plus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_plus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_minus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
+              Genes_plus_plus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_plus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_minus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
     pos2=[1, 2, 3]
     dataset2=[Genes_plus_plus.loc[:, 'RNAP'].tolist(), Genes_plus_minus.loc[:, 'RNAP'].tolist(), Genes_minus_minus.loc[:, 'RNAP'].tolist()]    
     dataset3=[Genes_plus_plus.loc[:, 'Cumulative_expression'].tolist(), Genes_plus_minus.loc[:, 'Cumulative_expression'].tolist(), Genes_minus_minus.loc[:, 'Cumulative_expression'].tolist()]
     
+    #EcTopoI fold enrichment.
     #Draw violin-plots.
     fig=plt.figure(figsize=(8,6.5), dpi=100)
     plt1=fig.add_subplot(2,1,2) 
@@ -688,37 +928,37 @@ def read_test_membrane_orientation_old_GO_terms(pwd):
     labels=['MM', 'M-', '--', 'MM', 'M-', '--']
     set_axis_style(plt1, labels, pos1)
     
-    yticknames1=np.arange(0.3, 30, 5)
+    yticknames1=np.arange(0.1, 47, 5)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.3, 30)
+    plt1.set_ylim(0.1, 47)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f'    {Genes_plus_plus.shape[0]}', xy=(0.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(1.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'    {Genes_minus_minus.shape[0]}', xy=(2.5, 9), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'    {Genes_plus_plus.shape[0]}',   xy=(0.5, 30), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'    {Genes_plus_minus.shape[0]}',  xy=(1.5, 27), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'    {Genes_minus_minus.shape[0]}', xy=(2.5, 27), xycoords='data', size=15, rotation=0)
     
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.55), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.55), xycoords='data', size=12, rotation=0)  
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.5), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.30), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.30), xycoords='data', size=12, rotation=0)  
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.30), xycoords='data', size=12, rotation=0)
         
-    plt1.annotate(f'    {Genes_plus_plus.shape[0]}', xy=(4.5, 9.7), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(5.5, 23), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'    {Genes_plus_plus.shape[0]}',   xy=(4.5, 9.7), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'    {Genes_plus_minus.shape[0]}',  xy=(5.5, 23), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'    {Genes_minus_minus.shape[0]}', xy=(6.5, 13), xycoords='data', size=15, rotation=0)
     
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.5), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.5), xycoords='data', size=12, rotation=0)   
-    plt1.annotate(r"    $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.45), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.45), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.45), xycoords='data', size=12, rotation=0)   
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.4), xycoords='data', size=12, rotation=0)
     
-    #EcTopoI.
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
                 Intervals_stat=stats.ttest_ind(dataset1[j], dataset1[i], equal_var=False)
                 print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[i]),2)} Mean2={round(np.mean(dataset1[j]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    #EcTopoI Rif.
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
@@ -766,15 +1006,15 @@ def read_test_membrane_orientation_old_GO_terms(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'   {Genes_plus_minus.shape[0]}', xy=(1.5, 30), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'     {Genes_plus_plus.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(1.5, 30), xycoords='data', size=15, rotation=0)
     plt2.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(2.5, 30), xycoords='data', size=15, rotation=0)
     
-    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.08), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "RNAP"].tolist()),2)}', xy=(0.5, 0.08), xycoords='data', size=12, rotation=0)
     plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.06), xycoords='data', size=12, rotation=0)  
-    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(2.5, 0.055), xycoords='data', size=12, rotation=0)    
+    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"RNAP"].tolist()),2)}', xy=(2.5, 0.055), xycoords='data', size=12, rotation=0)    
     
-    #RNAP.
+    #Test RNAP FE difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
@@ -822,15 +1062,15 @@ def read_test_membrane_orientation_old_GO_terms(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log') 
     
-    plt3.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 700), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f'   {Genes_plus_minus.shape[0]}', xy=(1.5, 1300), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'     {Genes_plus_plus.shape[0]}', xy=(0.5, 700), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(1.5, 1300), xycoords='data', size=15, rotation=0)
     plt3.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(2.5, 2100), xycoords='data', size=15, rotation=0)
     
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.007), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.007), xycoords='data', size=12, rotation=0)
     plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0065), xycoords='data', size=12, rotation=0)  
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.0015), xycoords='data', size=12, rotation=0)    
+    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.0015), xycoords='data', size=12, rotation=0)    
     
-    #Expression level.
+    #Test Expression level difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
@@ -840,22 +1080,23 @@ def read_test_membrane_orientation_old_GO_terms(pwd):
     
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Membrane_proteins_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(4.8, 6.5))       
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Membrane_proteins_{DB_type}_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(4.8, 6.5))       
     
     return
 
-#read_test_membrane_orientation_old_GO_terms(PWD)
+#read_test_membrane_orientation_GO_terms(PWD, 'PSORT')
 
 
 
 #######
-#Read final table, test membrane protein genes hypothesis.
-#New data - PSORT prediction.
+#Read final table, test genes-encode-membrane-targeting-protein factor effect on EcTopo signal.
+#Data from PSORT database.
 #######
 
-def read_test_membrane_orientation_new_PSORT(pwd):
+def read_test_membrane_orientation_PSORT(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     input_data['G1_PSORT_mem']=(input_data['G1_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G1_PSORT_localization']=='OuterMembrane')
     input_data['G2_PSORT_mem']=(input_data['G2_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G2_PSORT_localization']=='OuterMembrane')
@@ -873,11 +1114,12 @@ def read_test_membrane_orientation_new_PSORT(pwd):
     #Plot EcTopoI enrichment.
     pos1=[1, 2, 3, 5, 6, 7]
     dataset1=[Genes_plus_plus.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_plus_minus.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_minus_minus.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
-             Genes_plus_plus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_plus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_minus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
+              Genes_plus_plus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_plus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_minus_minus.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
     pos2=[1, 2, 3]
     dataset2=[Genes_plus_plus.loc[:, 'RNAP'].tolist(), Genes_plus_minus.loc[:, 'RNAP'].tolist(), Genes_minus_minus.loc[:, 'RNAP'].tolist()]    
     dataset3=[Genes_plus_plus.loc[:, 'Cumulative_expression'].tolist(), Genes_plus_minus.loc[:, 'Cumulative_expression'].tolist(), Genes_minus_minus.loc[:, 'Cumulative_expression'].tolist()]
     
+    #EcTopoI fold enrichment.
     #Draw violin-plots.
     fig=plt.figure(figsize=(8,6.5), dpi=100)
     plt1=fig.add_subplot(2,1,2) 
@@ -921,29 +1163,29 @@ def read_test_membrane_orientation_new_PSORT(pwd):
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f'    {Genes_plus_plus.shape[0]}', xy=(0.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(1.5, 7), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'      {Genes_plus_plus.shape[0]}', xy=(0.5, 8), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'     {Genes_plus_minus.shape[0]}', xy=(1.5, 7), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'    {Genes_minus_minus.shape[0]}', xy=(2.5, 9), xycoords='data', size=15, rotation=0)
     
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.55), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.55), xycoords='data', size=12, rotation=0)
     plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.48), xycoords='data', size=12, rotation=0)  
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.5), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.5), xycoords='data', size=12, rotation=0)
         
-    plt1.annotate(f'    {Genes_plus_plus.shape[0]}', xy=(4.5, 10), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(5.5, 12), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'      {Genes_plus_plus.shape[0]}', xy=(4.5, 10), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'     {Genes_plus_minus.shape[0]}', xy=(5.5, 12), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'    {Genes_minus_minus.shape[0]}', xy=(6.5, 25), xycoords='data', size=15, rotation=0)
     
-    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.57), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.57), xycoords='data', size=12, rotation=0)
     plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.5), xycoords='data', size=12, rotation=0)   
-    plt1.annotate(r"    $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.45), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.45), xycoords='data', size=12, rotation=0)
     
-    #EcTopoI.
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
                 Intervals_stat=stats.ttest_ind(dataset1[j], dataset1[i], equal_var=False)
                 print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[i]),2)} Mean2={round(np.mean(dataset1[j]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    #EcTopoI Rif.
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
@@ -991,15 +1233,15 @@ def read_test_membrane_orientation_new_PSORT(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 20), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'   {Genes_plus_minus.shape[0]}', xy=(1.5, 30), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'     {Genes_plus_plus.shape[0]}', xy=(0.5, 20), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(1.5, 30), xycoords='data', size=15, rotation=0)
     plt2.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(2.5, 30), xycoords='data', size=15, rotation=0)
     
-    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.08), xycoords='data', size=12, rotation=0)
-    plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.05), xycoords='data', size=12, rotation=0)  
+    plt2.annotate(r"     $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.08), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"    $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.05), xycoords='data', size=12, rotation=0)  
     plt2.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "RNAP"].tolist()),2)}', xy=(2.5, 0.055), xycoords='data', size=12, rotation=0)    
     
-    #RNAP.
+    #Test RNAP FE difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
@@ -1047,15 +1289,15 @@ def read_test_membrane_orientation_new_PSORT(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log') 
     
-    plt3.annotate(f'   {Genes_plus_plus.shape[0]}', xy=(0.5, 700), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f'   {Genes_plus_minus.shape[0]}', xy=(1.5, 574), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'     {Genes_plus_plus.shape[0]}', xy=(0.5, 700), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'    {Genes_plus_minus.shape[0]}', xy=(1.5, 574), xycoords='data', size=15, rotation=0)
     plt3.annotate(f'   {Genes_minus_minus.shape[0]}', xy=(2.5, 2100), xycoords='data', size=15, rotation=0)
     
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.007), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_plus.loc[:,  "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.007), xycoords='data', size=12, rotation=0)
     plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_plus_minus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0013), xycoords='data', size=12, rotation=0)  
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.0017), xycoords='data', size=12, rotation=0)    
+    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_minus_minus.loc[:,"Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.0017), xycoords='data', size=12, rotation=0)    
     
-    #Expression level.
+    #Test Expression level difference between groups of IGRs.
     for i in range(3):
         for j in range(3):
             if j>i:
@@ -1065,21 +1307,22 @@ def read_test_membrane_orientation_new_PSORT(pwd):
     
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Membrane_proteins_and_EcTopoI_enrichment_in_IG_regions_no_trRNA_PSORT.png', dpi=400, figsize=(4.8, 6.5))       
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Membrane_proteins_and_EcTopoI_enrichment_in_IG_regions_no_rRNA_PSORT.png', dpi=400, figsize=(4.8, 6.5))       
     
     return
 
-#read_test_membrane_orientation_new_PSORT(PWD)
+#read_test_membrane_orientation_PSORT(PWD)
 
 
 
 #######
-#Read final table, test promoter complexity hypothesis.
+#Read final table, test IGRs complexity hypothesis (if IGR contain promoter or TF sites).
 #######
 
-def read_test_promoter_complexity(pwd):
+def read_test_IGR_complexity(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info_promote')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     
@@ -1090,19 +1333,20 @@ def read_test_promoter_complexity(pwd):
     Genes_no_TFs=input_data[(input_data['TF_number']==0)]
     
     print(Genes_with_promoter.shape, Genes_no_promoter.shape, Genes_with_TFs.shape, Genes_no_TFs.shape)
-
+    
     #Plot EcTopoI enrichment.
     pos=[1, 2, 4, 5]
     pos2=[1, 2]
     
     dataset1=[Genes_with_promoter.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_no_promoter.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(),Genes_with_promoter.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_no_promoter.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
-    dataset2=[Genes_with_TFs.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_no_TFs.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_with_TFs.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_no_TFs.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist()]
+    dataset2=[Genes_with_TFs.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_no_TFs.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_with_TFs.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_no_TFs.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
     dataset3=[Genes_with_promoter.loc[:, 'RNAP'].tolist(), Genes_no_promoter.loc[:, 'RNAP'].tolist()]   
     dataset4=[Genes_with_promoter.loc[:, 'Cumulative_expression'].tolist(), Genes_no_promoter.loc[:, 'Cumulative_expression'].tolist()]    
     dataset5=[Genes_with_TFs.loc[:, 'RNAP'].tolist(), Genes_no_TFs.loc[:, 'RNAP'].tolist()]   
     dataset6=[Genes_with_TFs.loc[:, 'Cumulative_expression'].tolist(), Genes_no_TFs.loc[:, 'Cumulative_expression'].tolist()]        
     
-    #Draw violin-plots. Promoter factor.
+    #EcTopoI fold enrichment.
+    #Draw violin-plots.
     fig=plt.figure(figsize=(5,6.5), dpi=100)
     plt1=fig.add_subplot(2,1,2) 
     violins=plt1.violinplot(dataset1, positions=pos, widths=0.77, showmeans=True, showmedians=True, points=500)
@@ -1137,34 +1381,35 @@ def read_test_promoter_complexity(pwd):
     labels=['+P', '-P', '+P', '-P']
     set_axis_style(plt1, labels, pos)    
     
-    yticknames1=np.arange(0.3, 40, 5)
+    yticknames1=np.arange(0.2, 45, 5)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.3, 40)
+    plt1.set_ylim(0.2, 45)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f' {Genes_with_promoter.shape[0]}', xy=(0.5, 9), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_with_promoter.shape[0]}',  xy=(0.5, 30), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'    {Genes_no_promoter.shape[0]}', xy=(1.5, 1.1), xycoords='data', size=15, rotation=0)
 
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.5), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.58), xycoords='data', size=12, rotation=0)  
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:,"EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.35), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.53), xycoords='data', size=12, rotation=0)  
    
-    plt1.annotate(f' {Genes_with_promoter.shape[0]}', xy=(3.5, 23), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_with_promoter.shape[0]}',  xy=(3.5, 23), xycoords='data', size=15, rotation=0)
     plt1.annotate(f'    {Genes_no_promoter.shape[0]}', xy=(4.5, 1.3), xycoords='data', size=15, rotation=0)
 
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.45), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.58), xycoords='data', size=12, rotation=0)   
-
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:,"EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.45), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.58), xycoords='data', size=12, rotation=0)   
+    
+    #Test EcTopoI FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset1[2], dataset1[3], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[2]),2)} Mean2={round(np.mean(dataset1[3]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
     
     #RNAP fold enrichment.
-    #Draw violin-plots. Promoter factor.
+    #Draw violin-plots.
     plt2=fig.add_subplot(2,2,1) 
     violins=plt2.violinplot(dataset3, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -1203,12 +1448,13 @@ def read_test_promoter_complexity(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f'{Genes_with_promoter.shape[0]}', xy=(0.5, 35), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'{Genes_with_promoter.shape[0]}',  xy=(0.5, 35), xycoords='data', size=15, rotation=0)
     plt2.annotate(f'   {Genes_no_promoter.shape[0]}', xy=(1.5, 25), xycoords='data', size=15, rotation=0)
 
-    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.055), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:,"RNAP"].tolist()),2)}', xy=(0.5, 0.055), xycoords='data', size=12, rotation=0)
     plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.08), xycoords='data', size=12, rotation=0)   
     
+    #Test RNAP FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset3[0], dataset3[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset3[0]),2)} Mean2={round(np.mean(dataset3[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
@@ -1252,21 +1498,23 @@ def read_test_promoter_complexity(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log')
     
-    plt3.annotate(f'{Genes_with_promoter.shape[0]}', xy=(0.5, 3000), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f'{Genes_with_promoter.shape[0]}',  xy=(0.5, 3000), xycoords='data', size=15, rotation=0)
     plt3.annotate(f'   {Genes_no_promoter.shape[0]}', xy=(1.5, 20), xycoords='data', size=15, rotation=0)
 
     plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_promoter.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.0015), xycoords='data', size=12, rotation=0)
-    plt3.annotate(r"   $\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.002), xycoords='data', size=12, rotation=0)   
+    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_no_promoter.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.002), xycoords='data', size=12, rotation=0)   
     
+    #Test Expression level difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset4[0], dataset4[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset4[0]),2)} Mean2={round(np.mean(dataset4[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')         
     
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Promoter_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(6.8, 6.5))       
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Promoter_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(6.8, 6.5))       
     
-             
-    #Draw violin-plots. TF factor.
+    
+    #EcTopoI fold enrichment.    
+    #Draw violin-plots.
     fig1=plt.figure(figsize=(5,6.5), dpi=100)
     plt1=fig1.add_subplot(2,1,2) 
     violins=plt1.violinplot(dataset2, positions=pos, widths=0.77, showmeans=True, showmedians=True, points=500)
@@ -1301,34 +1549,35 @@ def read_test_promoter_complexity(pwd):
     labels=['+TF', '-TF', '+TF', '-TF']
     set_axis_style(plt1, labels, pos)    
     
-    yticknames1=np.arange(0.3, 30, 5)
+    yticknames1=np.arange(0.2, 45, 5)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.3, 30)
+    plt1.set_ylim(0.2, 45)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')            
              
-    plt1.annotate(f'  {Genes_with_TFs.shape[0]}', xy=(0.5, 9.5), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {Genes_no_TFs.shape[0]}', xy=(1.5, 8), xycoords='data', size=15, rotation=0)             
+    plt1.annotate(f'  {Genes_with_TFs.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_no_TFs.shape[0]}',   xy=(1.5, 20), xycoords='data', size=15, rotation=0)             
     
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_TFs.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.55), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.5), xycoords='data', size=12, rotation=0)               
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_with_TFs.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.35), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:,   "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.35), xycoords='data', size=12, rotation=0)               
       
-    plt1.annotate(f'  {Genes_with_TFs.shape[0]}', xy=(3.5, 15), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {Genes_no_TFs.shape[0]}', xy=(4.5, 8), xycoords='data', size=15, rotation=0)   
+    plt1.annotate(f'  {Genes_with_TFs.shape[0]}', xy=(3.5, 14), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_no_TFs.shape[0]}',   xy=(4.5, 25), xycoords='data', size=15, rotation=0)   
     
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_TFs.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.55), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.5), xycoords='data', size=12, rotation=0)    
-                
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_with_TFs.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.52), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:,   "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.40), xycoords='data', size=12, rotation=0)    
+    
+    #Test EcTopoI FE difference between groups of IGRs.   
     Intervals_stat=stats.ttest_ind(dataset2[0], dataset2[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset2[0]),2)} Mean2={round(np.mean(dataset2[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset2[2], dataset2[3], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset2[2]),2)} Mean2={round(np.mean(dataset2[3]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
     
     #RNAP fold enrichment.
-    #Draw violin-plots. Promoter factor.
+    #Draw violin-plots.
     plt2=fig1.add_subplot(2,2,1) 
     violins=plt2.violinplot(dataset5, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -1368,11 +1617,12 @@ def read_test_promoter_complexity(pwd):
     plt2.set_yscale('log')
     
     plt2.annotate(f' {Genes_with_TFs.shape[0]}', xy=(0.5, 35), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_no_TFs.shape[0]}', xy=(1.5, 36), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_no_TFs.shape[0]}',   xy=(1.5, 36), xycoords='data', size=15, rotation=0)
 
     plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_TFs.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.07), xycoords='data', size=12, rotation=0)
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.05), xycoords='data', size=12, rotation=0)   
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:,  "RNAP"].tolist()),2)}', xy=(1.5, 0.05), xycoords='data', size=12, rotation=0)   
     
+    #Test RNAP FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset5[0], dataset5[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset5[0]),2)} Mean2={round(np.mean(dataset5[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
@@ -1417,48 +1667,49 @@ def read_test_promoter_complexity(pwd):
     plt3.set_yscale('log')
     
     plt3.annotate(f' {Genes_with_TFs.shape[0]}', xy=(0.5, 3000), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_no_TFs.shape[0]}', xy=(1.5, 2000), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_no_TFs.shape[0]}',   xy=(1.5, 2000), xycoords='data', size=15, rotation=0)
 
     plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_with_TFs.loc[:, "Cumulative_expression"].tolist()),0)}', xy=(0.5, 0.0013), xycoords='data', size=12, rotation=0)
-    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:, "Cumulative_expression"].tolist()),0)}', xy=(1.5, 0.003), xycoords='data', size=12, rotation=0)   
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_no_TFs.loc[:,  "Cumulative_expression"].tolist()),0)}', xy=(1.5, 0.003), xycoords='data', size=12, rotation=0)   
     
+    #Test Expression level difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset6[0], dataset6[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset6[0]),2)} Mean2={round(np.mean(dataset6[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
            
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\TFs_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(6.8, 6.5)) 
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_TFs_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(6.8, 6.5)) 
     
     return
 
-#read_test_promoter_complexity(PWD)
+#read_test_IGR_complexity(PWD)
 
 
 
 #######
-#Read final table, RNAP and expression.
+#Read final table, test effects of RNAP FE on EcTopoI signal.
 #######
 
-def read_test_RNAP_expression(pwd):
+def read_test_RNAP_effect(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
-    input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
-    input_data['G1_PSORT_mem']=(input_data['G1_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G1_PSORT_localization']=='OuterMembrane')
-    input_data['G2_PSORT_mem']=(input_data['G2_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G2_PSORT_localization']=='OuterMembrane')    
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']    
     
     #Classify gene pairs by RNAP or Expression level.
-    Genes_divergent_membrane_with_TF=input_data[(input_data['Cumulative_expression']>5) & (input_data['RNAP']>2)]
-    Genes_not_div_not_mem_no_TF=input_data[(input_data['Cumulative_expression']<5) & (input_data['RNAP']<2)]
+    Genes_high_RNAP=input_data[input_data['RNAP']>2]
+    Genes_low_RNAP=input_data[input_data['RNAP']<2]
     
-    print(Genes_divergent_membrane_with_TF.shape, Genes_not_div_not_mem_no_TF.shape)
+    print(Genes_high_RNAP.shape, Genes_low_RNAP.shape)
 
 
     #Plot EcTopoI enrichment.
     pos1=[1, 2, 4, 5]
-    dataset1=[Genes_divergent_membrane_with_TF.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
-              Genes_divergent_membrane_with_TF.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
+    dataset1=[Genes_high_RNAP.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_low_RNAP.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
+              Genes_high_RNAP.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_low_RNAP.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
     
-    #Draw violin-plots. Promoter factor.
+    #EcTopoI fold enrichment.
+    #Draw violin-plots.
     fig=plt.figure(figsize=(5,6.5), dpi=100)
     plt1=fig.add_subplot(2,1,2) 
     violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
@@ -1496,39 +1747,40 @@ def read_test_RNAP_expression(pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['RNAP>2\nCE>5', 'RNAP<2\nCE<5', 'RNAP>2\nCE>5', 'RNAP<2\nCE<5']
+    labels=['RNAP>2', 'RNAP<2', 'RNAP>2', 'RNAP<2']
     set_axis_style(plt1, labels, pos1)    
     
-    yticknames1=np.arange(0.3, 40, 5)
+    yticknames1=np.arange(0.2, 45, 5)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.3, 40)
+    plt1.set_ylim(0.2, 45)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f'  {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 9.43), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(1.5, 3.25), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_high_RNAP.shape[0]}', xy=(0.5, 31), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_low_RNAP.shape[0]}',  xy=(1.5, 29), xycoords='data', size=15, rotation=0)
 
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.50), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.47), xycoords='data', size=12, rotation=0)  
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_high_RNAP.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.35), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_low_RNAP.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.32), xycoords='data', size=12, rotation=0)  
    
-    plt1.annotate(f'  {Genes_divergent_membrane_with_TF.shape[0]}', xy=(3.5, 14.10), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(4.5, 14.40), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_high_RNAP.shape[0]}', xy=(3.5, 14), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_low_RNAP.shape[0]}',  xy=(4.5, 27), xycoords='data', size=15, rotation=0)
 
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.46), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.42), xycoords='data', size=12, rotation=0)   
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_high_RNAP.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.46), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_low_RNAP.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.42), xycoords='data', size=12, rotation=0)   
     
+    #Test EcTopoI FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset1[2], dataset1[3], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[2]),2)} Mean2={round(np.mean(dataset1[3]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
     
     
     #RNAP fold enrichment.
     pos2=[1, 2]
-    dataset2=[Genes_divergent_membrane_with_TF.loc[:, 'RNAP'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'RNAP'].tolist()]
+    dataset2=[Genes_high_RNAP.loc[:, 'RNAP'].tolist(), Genes_low_RNAP.loc[:, 'RNAP'].tolist()]
     
     #Draw violin-plots. Promoter factor.
     plt2=fig.add_subplot(2,2,1) 
@@ -1558,7 +1810,7 @@ def read_test_RNAP_expression(pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['RNAP>2\nCE>5', 'RNAP<2\nCE<5']
+    labels=['RNAP>2', 'RNAP<2']
     set_axis_style(plt2, labels, pos2)    
     
     yticknames1=np.arange(0.05, 60, 5)
@@ -1569,18 +1821,19 @@ def read_test_RNAP_expression(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 34), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'  {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(1.5, 2.42), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_high_RNAP.shape[0]}', xy=(0.5, 34), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_low_RNAP.shape[0]}',  xy=(1.5, 2.42), xycoords='data', size=15, rotation=0)
 
-    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 1.12), xycoords='data', size=12, rotation=0)
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.06), xycoords='data', size=12, rotation=0)   
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_high_RNAP.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 1.12), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_low_RNAP.loc[:,      "RNAP"].tolist()),2)}', xy=(1.5, 0.06), xycoords='data', size=12, rotation=0)   
     
+    #Test RNAP FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset2[0], dataset2[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset2[0]),2)} Mean2={round(np.mean(dataset2[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
     
     #Expression level.
-    dataset3=[Genes_divergent_membrane_with_TF.loc[:, 'Cumulative_expression'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'Cumulative_expression'].tolist()]
+    dataset3=[Genes_high_RNAP.loc[:, 'Cumulative_expression'].tolist(), Genes_low_RNAP.loc[:, 'Cumulative_expression'].tolist()]
     
     #Draw violin-plots. Promoter factor.
     plt3=fig.add_subplot(2,2,2) 
@@ -1610,7 +1863,7 @@ def read_test_RNAP_expression(pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['RNAP>2\nCE>5', 'RNAP<2\nCE<5']
+    labels=['RNAP>2', 'RNAP<2']
     set_axis_style(plt3, labels, pos2)    
     
     yticknames1=np.arange(0.001, 8000, 5)
@@ -1621,49 +1874,260 @@ def read_test_RNAP_expression(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log')
     
-    plt3.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 2586), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f'  {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(1.5, 7), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_high_RNAP.shape[0]}', xy=(0.5, 2586), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_low_RNAP.shape[0]}',  xy=(1.5, 1020), xycoords='data', size=15, rotation=0)
 
-    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 1.18), xycoords='data', size=12, rotation=0)
-    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0018), xycoords='data', size=12, rotation=0)   
+    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_high_RNAP.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.007), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_low_RNAP.loc[:,  "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0018), xycoords='data', size=12, rotation=0)   
     
+    #Test Expression level difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset3[0], dataset3[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset3[0]),2)} Mean2={round(np.mean(dataset3[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
     
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Expression_level_RNAP_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(5, 6.5))       
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_RNAP_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(5, 6.5))       
     
     return
 
-#read_test_RNAP_expression(PWD)
+#read_test_RNAP_effect(PWD)
 
 
 
 #######
-#Read final table, all factors together.
+#Read final table, test effects of expression level of adjacent genes on EcTopoI signal.
+#######
+
+def read_test_expression_level(pwd):
+    
+    #Read input data table.
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']    
+    
+    #Classify gene pairs by RNAP or Expression level.
+    Genes_high_EL=input_data[input_data['Cumulative_expression']>5]
+    Genes_low_EL=input_data[input_data['Cumulative_expression']<5]
+    
+    print(Genes_high_EL.shape, Genes_low_EL.shape)
+
+
+    #Plot EcTopoI enrichment.
+    pos1=[1, 2, 4, 5]
+    dataset1=[Genes_high_EL.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_low_EL.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
+              Genes_high_EL.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_low_EL.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
+    
+    #EcTopoI fold enrichment.
+    #Draw violin-plots.
+    fig=plt.figure(figsize=(5,6.5), dpi=100)
+    plt1=fig.add_subplot(2,1,2) 
+    violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
+    for i in range(len(violins['bodies'])):
+        if i in [0,1]:
+            violins['bodies'][i].set_facecolor('#ff7762')
+        elif i in [2,3]:
+            violins['bodies'][i].set_facecolor('#58ffb1')
+        violins['bodies'][i].set_edgecolor('black')
+        violins['bodies'][i].set_alpha(1)
+        
+        #Taken from here: https://stackoverflow.com/questions/29776114/half-violin-plot/29781988#29781988
+        #m=np.mean(violins['bodies'][i].get_paths()[0].vertices[:, 0])
+        #violins['bodies'][i].get_paths()[0].vertices[:, 0]=np.clip(violins['bodies'][i].get_paths()[0].vertices[:, 0], -np.inf, m)
+        #violins['bodies'][i].set_color('r')
+        
+    
+    vmin=violins['cmins']
+    vmin.set_linewidth(1)
+    vmin.set_color('black')
+    vmin.set_alpha(0.7)
+      
+    vmean=violins['cmeans']
+    vmean.set_linewidth(1)
+    vmean.set_color('black')
+    vmean.set_alpha(0.7)
+    
+    vmax=violins['cmaxes']
+    vmax.set_linewidth(1)
+    vmax.set_color('black')
+    vmax.set_alpha(0.7)
+    
+    vbars=violins['cbars']
+    vbars.set_linewidth(1)
+    vbars.set_color('black')
+    vbars.set_alpha(0.7)
+    
+    labels=['EL>5', 'EL<5', 'EL>5', 'EL<5']
+    set_axis_style(plt1, labels, pos1)    
+    
+    yticknames1=np.arange(0.1, 50, 5)
+    plt1.set_yticks(yticknames1, minor=False)
+    plt1.set_yticklabels(yticknames1)
+    plt1.set_ylabel('EcTopoI fold enrichment', size=15)
+    plt1.set_ylim(0.1, 50)
+    plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
+    plt1.set_yscale('log')
+    
+    plt1.annotate(f'  {Genes_high_EL.shape[0]}', xy=(0.5, 32), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_low_EL.shape[0]}',  xy=(1.5, 13.5), xycoords='data', size=15, rotation=0)
+
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_high_EL.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.37), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_low_EL.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.27), xycoords='data', size=12, rotation=0)  
+   
+    plt1.annotate(f'  {Genes_high_EL.shape[0]}', xy=(3.5, 25), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {Genes_low_EL.shape[0]}',  xy=(4.5, 14), xycoords='data', size=15, rotation=0)
+
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_high_EL.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.46), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_low_EL.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.42), xycoords='data', size=12, rotation=0)   
+    
+    #Test EcTopoI FE difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
+    #Test EcTopoI Rif FE difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset1[2], dataset1[3], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[2]),2)} Mean2={round(np.mean(dataset1[3]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
+    
+    
+    #RNAP fold enrichment.
+    pos2=[1, 2]
+    dataset2=[Genes_high_EL.loc[:, 'RNAP'].tolist(), Genes_low_EL.loc[:, 'RNAP'].tolist()]
+    
+    #Draw violin-plots. Promoter factor.
+    plt2=fig.add_subplot(2,2,1) 
+    violins=plt2.violinplot(dataset2, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
+    for i in range(len(violins['bodies'])):
+        violins['bodies'][i].set_facecolor('#ff9df0')
+        violins['bodies'][i].set_edgecolor('black')
+        violins['bodies'][i].set_alpha(1)   
+    
+    vmin=violins['cmins']
+    vmin.set_linewidth(1)
+    vmin.set_color('black')
+    vmin.set_alpha(0.7)
+      
+    vmean=violins['cmeans']
+    vmean.set_linewidth(1)
+    vmean.set_color('black')
+    vmean.set_alpha(0.7)
+    
+    vmax=violins['cmaxes']
+    vmax.set_linewidth(1)
+    vmax.set_color('black')
+    vmax.set_alpha(0.7)
+    
+    vbars=violins['cbars']
+    vbars.set_linewidth(1)
+    vbars.set_color('black')
+    vbars.set_alpha(0.7)
+    
+    labels=['EL>5', 'EL<5']
+    set_axis_style(plt2, labels, pos2)    
+    
+    yticknames1=np.arange(0.05, 60, 5)
+    plt2.set_yticks(yticknames1, minor=False)
+    plt2.set_yticklabels(yticknames1)
+    plt2.set_ylabel('RNAP fold enrichment', size=15)
+    plt2.set_ylim(0.05, 60)
+    plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
+    plt2.set_yscale('log')
+    
+    plt2.annotate(f' {Genes_high_EL.shape[0]}', xy=(0.5, 34), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_low_EL.shape[0]}',  xy=(1.5, 32), xycoords='data', size=15, rotation=0)
+
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_high_EL.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.12), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_low_EL.loc[:,  "RNAP"].tolist()),2)}', xy=(1.5, 0.06), xycoords='data', size=12, rotation=0)   
+    
+    #Test RNAP FE difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset2[0], dataset2[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset2[0]),2)} Mean2={round(np.mean(dataset2[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    
+    
+    #Expression level.
+    dataset3=[Genes_high_EL.loc[:, 'Cumulative_expression'].tolist(), Genes_low_EL.loc[:, 'Cumulative_expression'].tolist()]
+    
+    #Draw violin-plots. Promoter factor.
+    plt3=fig.add_subplot(2,2,2) 
+    violins=plt3.violinplot(dataset3, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
+    for i in range(len(violins['bodies'])):
+        violins['bodies'][i].set_facecolor('#ffe294')
+        violins['bodies'][i].set_edgecolor('black')
+        violins['bodies'][i].set_alpha(1)  
+    
+    vmin=violins['cmins']
+    vmin.set_linewidth(1)
+    vmin.set_color('black')
+    vmin.set_alpha(0.7)
+      
+    vmean=violins['cmeans']
+    vmean.set_linewidth(1)
+    vmean.set_color('black')
+    vmean.set_alpha(0.7)
+    
+    vmax=violins['cmaxes']
+    vmax.set_linewidth(1)
+    vmax.set_color('black')
+    vmax.set_alpha(0.7)
+    
+    vbars=violins['cbars']
+    vbars.set_linewidth(1)
+    vbars.set_color('black')
+    vbars.set_alpha(0.7)
+    
+    labels=['EL>5', 'EL<5']
+    set_axis_style(plt3, labels, pos2)    
+    
+    yticknames1=np.arange(0.001, 8000, 5)
+    plt3.set_yticks(yticknames1, minor=False)
+    plt3.set_yticklabels(yticknames1)
+    plt3.set_ylabel('Expression level', size=15)
+    plt3.set_ylim(0.001, 8000)
+    plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
+    plt3.set_yscale('log')
+    
+    plt3.annotate(f' {Genes_high_EL.shape[0]}', xy=(0.5, 2586), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_low_EL.shape[0]}',  xy=(1.5, 7), xycoords='data', size=15, rotation=0)
+
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_high_EL.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 1.18), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_low_EL.loc[:,  "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0018), xycoords='data', size=12, rotation=0)   
+    
+    #Test Expression level difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset3[0], dataset3[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset3[0]),2)} Mean2={round(np.mean(dataset3[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
+    
+    plt.show()
+    plt.tight_layout()
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Expression_level_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(5, 6.5))       
+    
+    return
+
+#read_test_expression_level(PWD)
+
+
+
+#######
+#Read final table, test expression factors combined together (RNAP and expression level),
+#test together factors not related to expression directly (gene orientation, membrane-targeting proteins, transcription factors).
 #######
 
 def read_test_factors_combination(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     input_data['G1_PSORT_mem']=(input_data['G1_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G1_PSORT_localization']=='OuterMembrane')
     input_data['G2_PSORT_mem']=(input_data['G2_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G2_PSORT_localization']=='OuterMembrane')    
     
-    #Classify gene pairs by promoters and TFs.
-    Genes_divergent_membrane_with_TF=input_data[(input_data['Cumulative_expression']>5)]
-    Genes_not_div_not_mem_no_TF=input_data[(input_data['Cumulative_expression']<5)]
+    #Classify gene pairs by non-expression factors(gene orientation, membrane-targeting proteins, transcription factors). 
+    Genes_divergent_membrane_with_TF=input_data[(input_data['G1_strand']=='-') & (input_data['G2_strand']=='+') & (input_data['TF_number']>0) & ((input_data['G1_PSORT_mem']==True) | (input_data['G2_PSORT_mem']==True))]
+    Genes_not_div_not_mem_no_TF=input_data[~((input_data['G1_strand']=='-') & (input_data['G2_strand']=='+')) & (input_data['TF_number']==0) & ~((input_data['G1_PSORT_mem']==True) | (input_data['G2_PSORT_mem']==True))]
     
     print(Genes_divergent_membrane_with_TF.shape, Genes_not_div_not_mem_no_TF.shape)
-
 
     #Plot EcTopoI enrichment.
     pos1=[1, 2, 4, 5]
     dataset1=[Genes_divergent_membrane_with_TF.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
               Genes_divergent_membrane_with_TF.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
     
-    #Draw violin-plots. Promoter factor.
+    #EcTopoI fold enrichment.
+    #Draw violin-plots.
     fig=plt.figure(figsize=(5,6.5), dpi=100)
     plt1=fig.add_subplot(2,1,2) 
     violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
@@ -1701,32 +2165,33 @@ def read_test_factors_combination(pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['Div\n+P\n+TF\nMem', '-Div\n-P\n-TF\n-Mem', 'Div\n+P\n+TF\nMem', '-Div\n-P\n-TF\n-Mem']
+    labels=['Div\n+TF\nMem', '-Div\n-TF\n-Mem', 'Div\n+TF\nMem', '-Div\n-TF\n-Mem']
     set_axis_style(plt1, labels, pos1)    
     
-    yticknames1=np.arange(0.3, 35, 5)
+    yticknames1=np.arange(0.2, 45, 5)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.3, 35)
+    plt1.set_ylim(0.2, 45)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f'  {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 9.25), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(1.5, 5.08), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_not_div_not_mem_no_TF.shape[0]}',      xy=(1.5, 17), xycoords='data', size=15, rotation=0)
 
     plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.49), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.46), xycoords='data', size=12, rotation=0)  
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:,     "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.3), xycoords='data', size=12, rotation=0)  
    
-    plt1.annotate(f'  {Genes_divergent_membrane_with_TF.shape[0]}', xy=(3.5, 24), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(4.5, 14.77), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(3.5, 12), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_not_div_not_mem_no_TF.shape[0]}',      xy=(4.5, 14.5), xycoords='data', size=15, rotation=0)
 
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.42), xycoords='data', size=12, rotation=0)
-    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.42), xycoords='data', size=12, rotation=0)   
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.49), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:,      "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.42), xycoords='data', size=12, rotation=0)   
     
+    #Test EcTopoI FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset1[2], dataset1[3], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[2]),2)} Mean2={round(np.mean(dataset1[3]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
     
@@ -1735,7 +2200,7 @@ def read_test_factors_combination(pwd):
     pos2=[1, 2]
     dataset2=[Genes_divergent_membrane_with_TF.loc[:, 'RNAP'].tolist(), Genes_not_div_not_mem_no_TF.loc[:, 'RNAP'].tolist()]
     
-    #Draw violin-plots. Promoter factor.
+    #Draw violin-plots.
     plt2=fig.add_subplot(2,2,1) 
     violins=plt2.violinplot(dataset2, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -1763,7 +2228,7 @@ def read_test_factors_combination(pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['Div\n+P\n+TF\nMem', '-Div\n-P\n-TF\n-Mem']
+    labels=['Div\n+TF\nMem', '-Div\n-TF\n-Mem']
     set_axis_style(plt2, labels, pos2)    
     
     yticknames1=np.arange(0.05, 60, 5)
@@ -1774,12 +2239,13 @@ def read_test_factors_combination(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 29.44), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(1.5, 29.44), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 18), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_not_div_not_mem_no_TF.shape[0]}',      xy=(1.5, 30.5), xycoords='data', size=15, rotation=0)
 
-    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.1), xycoords='data', size=12, rotation=0)
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.053), xycoords='data', size=12, rotation=0)   
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.12), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:,      "RNAP"].tolist()),2)}', xy=(1.5, 0.059), xycoords='data', size=12, rotation=0)   
     
+    #Test RNAP FE difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset2[0], dataset2[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset2[0]),2)} Mean2={round(np.mean(dataset2[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
@@ -1815,7 +2281,7 @@ def read_test_factors_combination(pwd):
     vbars.set_color('black')
     vbars.set_alpha(0.7)
     
-    labels=['Div\n+P\n+TF\nMem', '-Div\n-P\n-TF\n-Mem']
+    labels=['Div\n+TF\nMem', '-Div\n-TF\n-Mem']
     set_axis_style(plt3, labels, pos2)    
     
     yticknames1=np.arange(0.001, 8000, 5)
@@ -1826,19 +2292,214 @@ def read_test_factors_combination(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log')
     
-    plt3.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 2100), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_not_div_not_mem_no_TF.shape[0]}', xy=(1.5, 8.63), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_divergent_membrane_with_TF.shape[0]}', xy=(0.5, 800), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_not_div_not_mem_no_TF.shape[0]}',      xy=(1.5, 2000), xycoords='data', size=15, rotation=0)
 
-    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 1.09), xycoords='data', size=12, rotation=0)
-    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0014), xycoords='data', size=12, rotation=0)   
+    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_divergent_membrane_with_TF.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.009), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_not_div_not_mem_no_TF.loc[:,      "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.004), xycoords='data', size=12, rotation=0)   
     
+    #Test Expression level difference between groups of IGRs.
     Intervals_stat=stats.ttest_ind(dataset3[0], dataset3[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset3[0]),2)} Mean2={round(np.mean(dataset3[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
     
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Add_factors\Expression_level_5_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(5, 6.5))       
+    plt.savefig(f'{pwd}Factors_analysis\Add_factors\\NEW_non_expression_factors_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(5, 6.5))       
     
+    
+    
+    #Classify gene pairs by expression-related factors (RNAP, expression level). 
+    Genes_expression_high=input_data[(input_data['RNAP']>2) & (input_data['Cumulative_expression']>5)]
+    Genes_expression_low=input_data[(input_data['RNAP']<2) & (input_data['Cumulative_expression']<5)]
+    
+    print(Genes_expression_high.shape, Genes_expression_low.shape)
+
+
+    #Plot EcTopoI enrichment.
+    pos1=[1, 2, 4, 5]
+    dataset1=[Genes_expression_high.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), Genes_expression_low.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), 
+              Genes_expression_high.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist(), Genes_expression_low.loc[:, 'EcTopoI+Rif-CTD_FE'].tolist()]
+    
+    #EcTopoI fold enrichment.
+    #Draw violin-plots.
+    fig=plt.figure(figsize=(5,6.5), dpi=100)
+    plt1=fig.add_subplot(2,1,2) 
+    violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
+    for i in range(len(violins['bodies'])):
+        if i in [0,1]:
+            violins['bodies'][i].set_facecolor('#ff7762')
+        elif i in [2,3]:
+            violins['bodies'][i].set_facecolor('#58ffb1')
+        violins['bodies'][i].set_edgecolor('black')
+        violins['bodies'][i].set_alpha(1)
+        
+        #Taken from here: https://stackoverflow.com/questions/29776114/half-violin-plot/29781988#29781988
+        #m=np.mean(violins['bodies'][i].get_paths()[0].vertices[:, 0])
+        #violins['bodies'][i].get_paths()[0].vertices[:, 0]=np.clip(violins['bodies'][i].get_paths()[0].vertices[:, 0], -np.inf, m)
+        #violins['bodies'][i].set_color('r')
+        
+    
+    vmin=violins['cmins']
+    vmin.set_linewidth(1)
+    vmin.set_color('black')
+    vmin.set_alpha(0.7)
+      
+    vmean=violins['cmeans']
+    vmean.set_linewidth(1)
+    vmean.set_color('black')
+    vmean.set_alpha(0.7)
+    
+    vmax=violins['cmaxes']
+    vmax.set_linewidth(1)
+    vmax.set_color('black')
+    vmax.set_alpha(0.7)
+    
+    vbars=violins['cbars']
+    vbars.set_linewidth(1)
+    vbars.set_color('black')
+    vbars.set_alpha(0.7)
+    
+    labels=['EL>2\nRNAP>2', 'EL<2\nRNAP<2', 'EL>2\nRNAP>2', 'EL<2\nRNAP<2']
+    set_axis_style(plt1, labels, pos1)    
+    
+    yticknames1=np.arange(0.2, 45, 5)
+    plt1.set_yticks(yticknames1, minor=False)
+    plt1.set_yticklabels(yticknames1)
+    plt1.set_ylabel('EcTopoI fold enrichment', size=15)
+    plt1.set_ylim(0.2, 45)
+    plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
+    plt1.set_yscale('log')
+    
+    plt1.annotate(f' {Genes_expression_high.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_expression_low.shape[0]}',  xy=(1.5, 13), xycoords='data', size=15, rotation=0)
+
+    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_high.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.35), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_low.loc[:,  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.32), xycoords='data', size=12, rotation=0)  
+   
+    plt1.annotate(f' {Genes_expression_high.shape[0]}', xy=(3.5, 15), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f' {Genes_expression_low.shape[0]}',  xy=(4.5, 15), xycoords='data', size=15, rotation=0)
+
+    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_high.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.43), xycoords='data', size=12, rotation=0)
+    plt1.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_low.loc[:,  "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.42), xycoords='data', size=12, rotation=0)   
+    
+    #Test EcTopoI FE difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
+    #Test EcTopoI Rif FE difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset1[2], dataset1[3], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[2]),2)} Mean2={round(np.mean(dataset1[3]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
+    
+    
+    #RNAP fold enrichment.
+    pos2=[1, 2]
+    dataset2=[Genes_expression_high.loc[:, 'RNAP'].tolist(), Genes_expression_low.loc[:, 'RNAP'].tolist()]
+    
+    #Draw violin-plots.
+    plt2=fig.add_subplot(2,2,1) 
+    violins=plt2.violinplot(dataset2, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
+    for i in range(len(violins['bodies'])):
+        violins['bodies'][i].set_facecolor('#ff9df0')
+        violins['bodies'][i].set_edgecolor('black')
+        violins['bodies'][i].set_alpha(1)   
+    
+    vmin=violins['cmins']
+    vmin.set_linewidth(1)
+    vmin.set_color('black')
+    vmin.set_alpha(0.7)
+      
+    vmean=violins['cmeans']
+    vmean.set_linewidth(1)
+    vmean.set_color('black')
+    vmean.set_alpha(0.7)
+    
+    vmax=violins['cmaxes']
+    vmax.set_linewidth(1)
+    vmax.set_color('black')
+    vmax.set_alpha(0.7)
+    
+    vbars=violins['cbars']
+    vbars.set_linewidth(1)
+    vbars.set_color('black')
+    vbars.set_alpha(0.7)
+    
+    labels=['EL>2\nRNAP>2', 'EL<2\nRNAP<2']
+    set_axis_style(plt2, labels, pos2)    
+    
+    yticknames1=np.arange(0.05, 60, 5)
+    plt2.set_yticks(yticknames1, minor=False)
+    plt2.set_yticklabels(yticknames1)
+    plt2.set_ylabel('RNAP fold enrichment', size=15)
+    plt2.set_ylim(0.05, 60)
+    plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
+    plt2.set_yscale('log')
+    
+    plt2.annotate(f' {Genes_expression_high.shape[0]}', xy=(0.5, 35), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f' {Genes_expression_low.shape[0]}',  xy=(1.5, 2.5), xycoords='data', size=15, rotation=0)
+
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_high.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 1), xycoords='data', size=12, rotation=0)
+    plt2.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_low.loc[:,  "RNAP"].tolist()),2)}', xy=(1.5, 0.06), xycoords='data', size=12, rotation=0)   
+    
+    #Test RNAP FE difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset2[0], dataset2[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset2[0]),2)} Mean2={round(np.mean(dataset2[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    
+    
+    #Expression level.
+    dataset3=[Genes_expression_high.loc[:, 'Cumulative_expression'].tolist(), Genes_expression_low.loc[:, 'Cumulative_expression'].tolist()]
+    
+    #Draw violin-plots. Promoter factor.
+    plt3=fig.add_subplot(2,2,2) 
+    violins=plt3.violinplot(dataset3, positions=pos2, widths=0.77, showmeans=True, showmedians=True, points=500)
+    for i in range(len(violins['bodies'])):
+        violins['bodies'][i].set_facecolor('#ffe294')
+        violins['bodies'][i].set_edgecolor('black')
+        violins['bodies'][i].set_alpha(1)  
+    
+    vmin=violins['cmins']
+    vmin.set_linewidth(1)
+    vmin.set_color('black')
+    vmin.set_alpha(0.7)
+      
+    vmean=violins['cmeans']
+    vmean.set_linewidth(1)
+    vmean.set_color('black')
+    vmean.set_alpha(0.7)
+    
+    vmax=violins['cmaxes']
+    vmax.set_linewidth(1)
+    vmax.set_color('black')
+    vmax.set_alpha(0.7)
+    
+    vbars=violins['cbars']
+    vbars.set_linewidth(1)
+    vbars.set_color('black')
+    vbars.set_alpha(0.7)
+    
+    labels=['EL>2\nRNAP>2', 'EL<2\nRNAP<2']
+    set_axis_style(plt3, labels, pos2)    
+    
+    yticknames1=np.arange(0.001, 8000, 5)
+    plt3.set_yticks(yticknames1, minor=False)
+    plt3.set_yticklabels(yticknames1)
+    plt3.set_ylabel('Expression level', size=15)
+    plt3.set_ylim(0.001, 8000)
+    plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
+    plt3.set_yscale('log')
+    
+    plt3.annotate(f' {Genes_expression_high.shape[0]}', xy=(0.5, 2100), xycoords='data', size=15, rotation=0)
+    plt3.annotate(f' {Genes_expression_low.shape[0]}',  xy=(1.5, 8.63), xycoords='data', size=15, rotation=0)
+
+    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_high.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 1.09), xycoords='data', size=12, rotation=0)
+    plt3.annotate(r"$\overline{X}$"+f'={round(np.mean(Genes_expression_low.loc[:,  "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0014), xycoords='data', size=12, rotation=0)   
+    
+    #Test Expression level difference between groups of IGRs.
+    Intervals_stat=stats.ttest_ind(dataset3[0], dataset3[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset3[0]),2)} Mean2={round(np.mean(dataset3[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')        
+    
+    plt.show()
+    plt.tight_layout()
+    plt.savefig(f'{pwd}Factors_analysis\Add_factors\\NEW_expression_factors_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.png', dpi=400, figsize=(5, 6.5))       
+        
     return
 
 #read_test_factors_combination(PWD)
@@ -1849,8 +2510,9 @@ def read_test_factors_combination(pwd):
 #######
 
 def read_test_factors_combination_one_plot(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     input_data['G1_PSORT_mem']=(input_data['G1_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G1_PSORT_localization']=='OuterMembrane')
     input_data['G2_PSORT_mem']=(input_data['G2_PSORT_localization']=='CytoplasmicMembrane') | (input_data['G2_PSORT_localization']=='OuterMembrane')    
@@ -1875,14 +2537,15 @@ def read_test_factors_combination_one_plot(pwd):
     EL_RNAP_neg_not_div_TF_neg_not_Mem=input_data[(input_data['RNAP']<2) & (input_data['Cumulative_expression']<5) & ~((input_data['G1_strand']=='-') & (input_data['G2_strand']=='+')) & (input_data['TF_number']==0) & ~((input_data['G1_PSORT_mem']==True) | (input_data['G2_PSORT_mem']==True))]
 
     #Save new dataframe.
-    input_data.to_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal_PSORT_processed_1.xlsx', sheet_name='Intergenic_regions_info')
+    input_data.to_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT_processed_1.xlsx', sheet_name='Intergenic_regions_info')
+    
     
     #Plot EcTopoI enrichment. Positive factors.
     pos0=[1]
     dataset0=[All.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist()]
     
-    #Draw violin-plots. Promoter factor.
-    fig=plt.figure(figsize=(7,5), dpi=100)
+    #Draw violin-plots.
+    fig=plt.figure(figsize=(7,4.5), dpi=100)
     plt0=plt.subplot2grid((2,4),(0,0), rowspan=2) 
     violins=plt0.violinplot(dataset0, positions=pos0, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -1919,17 +2582,20 @@ def read_test_factors_combination_one_plot(pwd):
     labels=[0]
     set_axis_style(plt0, labels, pos0)    
     
-    yticknames1=np.arange(0.5, 20, 5)
+    yticknames1=np.arange(0.25, 45, 5)
     plt0.set_yticks(yticknames1, minor=False)
     plt0.set_yticklabels(yticknames1)
     #plt0.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt0.set_ylim(0.5, 20)
+    plt0.set_ylim(0.25, 45)
     plt.setp(plt0.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt0.set_yscale('log')
     
-    plt0.annotate(f'  {All.shape[0]}', xy=(0.5, 9.25), xycoords='data', size=15, rotation=0)   
+    plt0.spines['top'].set_visible(False)
+    plt0.spines['right'].set_visible(False)      
+    
+    plt0.annotate(f'   {All.shape[0]}', xy=(0.5, 30), xycoords='data', size=15, rotation=0)   
 
-    plt0.annotate(r"  $\overline{X}$"+f'={round(np.mean(All.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.58), xycoords='data', size=12, rotation=0)     
+    plt0.annotate(r"    $\overline{X}$"+f'={round(np.mean(All.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.34), xycoords='data', size=12, rotation=0)     
     
     
 
@@ -1938,7 +2604,7 @@ def read_test_factors_combination_one_plot(pwd):
     dataset1=[EL_pos.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), RNAP_pos.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), EL_RNAP_pos.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), EL_RNAP_pos_div.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(),
               EL_RNAP_pos_div_TF_pos.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), EL_RNAP_pos_div_TF_pos_Mem.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist()]
     
-    #Draw violin-plots. Promoter factor.
+    #Draw violin-plots.
     plt1=plt.subplot2grid((2,4),(0,1), colspan=3) 
     violins=plt1.violinplot(dataset1, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -1975,28 +2641,32 @@ def read_test_factors_combination_one_plot(pwd):
     labels=['1\n\n\n\n', 2, 3, 4, 5, 6]
     set_axis_style(plt1, labels, pos1)    
     
-    yticknames1=np.arange(0.2, 20, 5)
+    yticknames1=np.arange(0.2, 65, 5)
     #plt1.set_yticks(yticknames1, minor=False)
     #plt1.set_yticklabels(yticknames1)
     #plt1.set_ylabel('EcTopoI FE', size=15)
-    plt1.set_ylim(0.2, 20)
+    plt1.set_ylim(0.2, 65)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=0)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f'  {EL_pos.shape[0]}', xy=(0.5, 9.25), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {RNAP_pos.shape[0]}', xy=(1.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {EL_RNAP_pos.shape[0]}', xy=(2.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'  {EL_RNAP_pos_div.shape[0]}', xy=(3.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'   {EL_RNAP_pos_div_TF_pos.shape[0]}', xy=(4.5, 8), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f'   {EL_RNAP_pos_div_TF_pos_Mem.shape[0]}', xy=(5.5, 8), xycoords='data', size=15, rotation=0)    
-
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_pos.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(RNAP_pos.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.45), xycoords='data', size=10, rotation=0)  
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos_div.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.45), xycoords='data', size=10, rotation=0) 
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos_div_TF_pos.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos_div_TF_pos_Mem.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.45), xycoords='data', size=10, rotation=0)       
+    plt1.spines['top'].set_visible(False)
+    plt1.spines['right'].set_visible(False)    
     
+    plt1.annotate(f'  {EL_pos.shape[0]}',                     xy=(0.5, 31), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {RNAP_pos.shape[0]}',                   xy=(1.5, 31), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {EL_RNAP_pos.shape[0]}',                xy=(2.5, 31), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'  {EL_RNAP_pos_div.shape[0]}',            xy=(3.5, 31), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'   {EL_RNAP_pos_div_TF_pos.shape[0]}',     xy=(4.5, 31), xycoords='data', size=15, rotation=0)
+    plt1.annotate(f'   {EL_RNAP_pos_div_TF_pos_Mem.shape[0]}', xy=(5.5, 31), xycoords='data', size=15, rotation=0)    
+
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(EL_pos.loc[:,                     "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.25), xycoords='data', size=10, rotation=0)
+    plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(RNAP_pos.loc[:,                  "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.25), xycoords='data', size=10, rotation=0)  
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos.loc[:,                "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.25), xycoords='data', size=10, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos_div.loc[:,            "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.41), xycoords='data', size=10, rotation=0) 
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos_div_TF_pos.loc[:,     "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.44), xycoords='data', size=10, rotation=0)
+    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(EL_RNAP_pos_div_TF_pos_Mem.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.60), xycoords='data', size=10, rotation=0)       
+    
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(len(dataset1)):
         for j in range(len(dataset1)):
             if j>i:
@@ -2007,7 +2677,8 @@ def read_test_factors_combination_one_plot(pwd):
     #Plot EcTopoI enrichment. Negative factors.
     dataset2=[EL_neg.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), RNAP_neg.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), EL_RNAP_neg.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), EL_RNAP_neg_not_div.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(),
               EL_RNAP_neg_not_div_TF_neg.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist(), EL_RNAP_neg_not_div_TF_neg_not_Mem.loc[:, 'EcTopoI-Rif-CTD_FE'].tolist()]    
-    #Draw violin-plots. Promoter factor.
+    
+    #Draw violin-plots.
     plt2=plt.subplot2grid((2,4),(1,1), colspan=3) 
     violins=plt2.violinplot(dataset2, positions=pos1, widths=0.77, showmeans=True, showmedians=True, points=500)
     for i in range(len(violins['bodies'])):
@@ -2038,28 +2709,32 @@ def read_test_factors_combination_one_plot(pwd):
     labels=['1\n\n\n\n', 2, 3, 4, 5, 6]
     set_axis_style(plt2, labels, pos1)    
     
-    yticknames1=np.arange(0.2, 20, 5)
+    yticknames1=np.arange(0.2, 60, 5)
     #plt2.set_yticks(yticknames1, minor=False)
     #plt2.set_yticklabels(yticknames1)
     #plt2.set_ylabel('EcTopoI FE', size=15)
-    plt2.set_ylim(0.2, 20)
+    plt2.set_ylim(0.2, 60)
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=0)   
     plt2.set_yscale('log')
-
-    plt2.annotate(f'  {EL_neg.shape[0]}', xy=(0.5, 5.05), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'  {RNAP_neg.shape[0]}', xy=(1.5, 9.5), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'  {EL_RNAP_neg.shape[0]}', xy=(2.5, 3.23), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'  {EL_RNAP_neg_not_div.shape[0]}', xy=(3.5, 3.23), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'  {EL_RNAP_neg_not_div_TF_neg.shape[0]}', xy=(4.5, 3.23), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f'  {EL_RNAP_neg_not_div_TF_neg_not_Mem.shape[0]}', xy=(5.5, 3.23), xycoords='data', size=15, rotation=0)    
-
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_neg.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.4), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(RNAP_neg.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.4), xycoords='data', size=10, rotation=0)  
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.4), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg_not_div.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.4), xycoords='data', size=10, rotation=0) 
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg_not_div_TF_neg.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.4), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg_not_div_TF_neg_not_Mem.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.4), xycoords='data', size=10, rotation=0)   
     
+    plt2.spines['top'].set_visible(False)
+    plt2.spines['right'].set_visible(False)    
+
+    plt2.annotate(f'  {EL_neg.shape[0]}',                             xy=(0.5, 13), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'  {RNAP_neg.shape[0]}',                           xy=(1.5, 28), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'  {EL_RNAP_neg.shape[0]}',                        xy=(2.5, 13), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'  {EL_RNAP_neg_not_div.shape[0]}',                xy=(3.5, 13), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'  {EL_RNAP_neg_not_div_TF_neg.shape[0]}',         xy=(4.5, 13), xycoords='data', size=15, rotation=0)
+    plt2.annotate(f'  {EL_RNAP_neg_not_div_TF_neg_not_Mem.shape[0]}', xy=(5.5, 13), xycoords='data', size=15, rotation=0)    
+
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_neg.loc[:,                             "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.25), xycoords='data', size=10, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(RNAP_neg.loc[:,                           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.25), xycoords='data', size=10, rotation=0)  
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg.loc[:,                        "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.25), xycoords='data', size=10, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg_not_div.loc[:,                "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.25), xycoords='data', size=10, rotation=0) 
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg_not_div_TF_neg.loc[:,         "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.25), xycoords='data', size=10, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(EL_RNAP_neg_not_div_TF_neg_not_Mem.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.25), xycoords='data', size=10, rotation=0)   
+    
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(len(dataset2)):
         for j in range(len(dataset2)):
             if j>i:
@@ -2079,8 +2754,8 @@ def read_test_factors_combination_one_plot(pwd):
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset0[0]),2)} Mean2={round(np.mean(dataset2[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')      
     
     plt.show()
-    #plt.tight_layout()
-    #plt.savefig(f'{pwd}Factors_analysis\Add_factors\Factors_combinations_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(7, 5))       
+    plt.tight_layout()
+    plt.savefig(f'{pwd}Factors_analysis\Add_factors\\NEW_Factors_combinations_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.svg', dpi=400, figsize=(7, 4.5), transparent=True)       
     
     return
 
@@ -2093,8 +2768,9 @@ def read_test_factors_combination_one_plot(pwd):
 
 
 def read_test_sigma_factor(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     
     #Classify intergenic regions by type of a promoter.
@@ -2268,66 +2944,65 @@ def read_test_sigma_factor(pwd):
     labels=['All', 'Sigma70', 'Sigma38', 'Sigma54', 'Sigma32', 'Sigma24', 'Sigma28', 'Unknown', 'Only\nunknown', 'Mixed', 'All', 'Sigma70', 'Sigma38', 'Sigma54', 'Sigma32', 'Sigma24', 'Sigma28', 'Unknown', 'Only\nunknown', 'Mixed']
     set_axis_style(plt1, labels, pos1)
     
-    yticknames1=np.arange(0.1, 40, 5)
+    yticknames1=np.arange(0.1, 45, 5)
     plt1.set_yticks(yticknames1, minor=False)
     plt1.set_yticklabels(yticknames1)
     plt1.set_ylabel('EcTopoI fold enrichment', size=15)
-    plt1.set_ylim(0.1, 40)
+    plt1.set_ylim(0.1, 45)
     plt.setp(plt1.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt1.set_yscale('log')
     
-    plt1.annotate(f' {input_data.shape[0]}', xy=(0.5, 9), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma70.shape[0]}', xy=(1.5, 9.43), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma38.shape[0]}', xy=(2.5, 7.12), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma54.shape[0]}', xy=(3.5, 7.12), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma32.shape[0]}', xy=(4.5, 8), xycoords='data', size=15, rotation=0) 
-    plt1.annotate(f' {Genes_sigma24.shape[0]}', xy=(5.5, 4.62), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma28.shape[0]}', xy=(6.5, 5.03), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma_unknown.shape[0]}', xy=(7.5, 9.03), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(8.5, 9.03), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma_mixed.shape[0]}', xy=(9.5, 8), xycoords='data', size=15, rotation=0)     
+    plt1.annotate(f' {input_data.shape[0]}',               xy=(0.5, 30),    xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma70.shape[0]}',            xy=(1.5, 30), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma38.shape[0]}',            xy=(2.5, 14), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma54.shape[0]}',            xy=(3.5, 19), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma32.shape[0]}',            xy=(4.5, 15),    xycoords='data', size=13, rotation=0) 
+    plt1.annotate(f' {Genes_sigma24.shape[0]}',            xy=(5.5, 15), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma28.shape[0]}',            xy=(6.5, 11), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma_unknown.shape[0]}',      xy=(7.5, 30), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(8.5, 17), xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma_mixed.shape[0]}',        xy=(9.5, 15),    xycoords='data', size=13, rotation=0)     
     
-     
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(input_data.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.45), xycoords='data', size=10, rotation=0)   
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.47), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.45), xycoords='data', size=10, rotation=0) 
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(7.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(8.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:, "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(9.5, 0.45), xycoords='data', size=10, rotation=0)      
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(input_data.loc[:,              "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(0.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:,           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(1.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:,           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(2.5, 0.30), xycoords='data', size=9, rotation=0)   
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:,           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(3.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:,           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(4.5, 0.30), xycoords='data', size=9, rotation=0) 
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:,           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(5.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:,           "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(6.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:,     "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(7.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:,"EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(8.5, 0.30), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:,       "EcTopoI-Rif-CTD_FE"].tolist()),2)}', xy=(9.5, 0.30), xycoords='data', size=9, rotation=0)      
     
-    plt1.annotate(f' {input_data.shape[0]}', xy=(11.5, 23.9), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma70.shape[0]}', xy=(12.5, 13.6), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma38.shape[0]}', xy=(13.5, 13.6), xycoords='data', size=15, rotation=0)    
-    plt1.annotate(f' {Genes_sigma54.shape[0]}', xy=(14.5, 22.9), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma32.shape[0]}', xy=(15.5, 6), xycoords='data', size=15, rotation=0) 
-    plt1.annotate(f' {Genes_sigma24.shape[0]}', xy=(16.5, 12.7), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma28.shape[0]}', xy=(17.5, 11.4), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma_unknown.shape[0]}', xy=(18.5, 23.4), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(19.5, 9.03), xycoords='data', size=15, rotation=0)
-    plt1.annotate(f' {Genes_sigma_mixed.shape[0]}', xy=(20.5, 13.04), xycoords='data', size=15, rotation=0) 
+    plt1.annotate(f' {input_data.shape[0]}',               xy=(11.5, 23.9),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma70.shape[0]}',            xy=(12.5, 13.6),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma38.shape[0]}',            xy=(13.5, 13.6),  xycoords='data', size=13, rotation=0)    
+    plt1.annotate(f' {Genes_sigma54.shape[0]}',            xy=(14.5, 22.9),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma32.shape[0]}',            xy=(15.5, 6),     xycoords='data', size=13, rotation=0) 
+    plt1.annotate(f' {Genes_sigma24.shape[0]}',            xy=(16.5, 12.7),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma28.shape[0]}',            xy=(17.5, 11.4),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma_unknown.shape[0]}',      xy=(18.5, 23.4),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(19.5, 9.03),  xycoords='data', size=13, rotation=0)
+    plt1.annotate(f' {Genes_sigma_mixed.shape[0]}',        xy=(20.5, 13.04), xycoords='data', size=13, rotation=0) 
     
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(input_data.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(11.5, 0.37), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(12.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(13.5, 0.51), xycoords='data', size=10, rotation=0)    
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(14.5, 0.52), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(15.5, 0.45), xycoords='data', size=10, rotation=0) 
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(16.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(17.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(18.5, 0.36), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(19.5, 0.45), xycoords='data', size=10, rotation=0)
-    plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(20.5, 0.45), xycoords='data', size=10, rotation=0)   
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(input_data.loc[:,               "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(11.5, 0.37), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:,            "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(12.5, 0.45), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:,            "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(13.5, 0.51), xycoords='data', size=9, rotation=0)    
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:,            "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(14.5, 0.52), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:,            "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(15.5, 0.45), xycoords='data', size=9, rotation=0) 
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:,            "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(16.5, 0.45), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:,            "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(17.5, 0.45), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:,      "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(18.5, 0.36), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:, "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(19.5, 0.45), xycoords='data', size=9, rotation=0)
+    plt1.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:,        "EcTopoI+Rif-CTD_FE"].tolist()),2)}', xy=(20.5, 0.45), xycoords='data', size=9, rotation=0)   
     
-    #EcTopoI.
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(len(pos2)):
         for j in range(len(pos2)):
             if j>i:
                 Intervals_stat=stats.ttest_ind(dataset1[j], dataset1[i], equal_var=False)
                 print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[i]),2)} Mean2={round(np.mean(dataset1[j]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    #EcTopoI Rif.
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     for i in range(len(pos2)):
         for j in range(len(pos2)):
             if j>i:
@@ -2376,29 +3051,29 @@ def read_test_sigma_factor(pwd):
     plt.setp(plt2.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt2.set_yscale('log')
     
-    plt2.annotate(f' {input_data.shape[0]}', xy=(0.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma70.shape[0]}', xy=(1.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma38.shape[0]}', xy=(2.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma54.shape[0]}', xy=(3.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma32.shape[0]}', xy=(4.5, 24), xycoords='data', size=15, rotation=0) 
-    plt2.annotate(f' {Genes_sigma24.shape[0]}', xy=(5.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma28.shape[0]}', xy=(6.5, 12), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma_unknown.shape[0]}', xy=(7.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(8.5, 31), xycoords='data', size=15, rotation=0)
-    plt2.annotate(f' {Genes_sigma_mixed.shape[0]}', xy=(9.5, 30.37), xycoords='data', size=15, rotation=0)     
+    plt2.annotate(f' {input_data.shape[0]}',               xy=(0.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma70.shape[0]}',            xy=(1.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma38.shape[0]}',            xy=(2.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma54.shape[0]}',            xy=(3.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma32.shape[0]}',            xy=(4.5, 24),    xycoords='data', size=13, rotation=0) 
+    plt2.annotate(f' {Genes_sigma24.shape[0]}',            xy=(5.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma28.shape[0]}',            xy=(6.5, 12),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma_unknown.shape[0]}',      xy=(7.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(8.5, 31),    xycoords='data', size=13, rotation=0)
+    plt2.annotate(f' {Genes_sigma_mixed.shape[0]}',        xy=(9.5, 30.37), xycoords='data', size=13, rotation=0)     
 
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(input_data.loc[:, "RNAP"].tolist()),2)}', xy=(0.5, 0.045), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:, "RNAP"].tolist()),2)}', xy=(1.5, 0.045), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:, "RNAP"].tolist()),2)}', xy=(2.5, 0.055), xycoords='data', size=10, rotation=0)    
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:, "RNAP"].tolist()),2)}', xy=(3.5, 0.056), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:, "RNAP"].tolist()),2)}', xy=(4.5, 0.045), xycoords='data', size=10, rotation=0) 
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:, "RNAP"].tolist()),2)}', xy=(5.5, 0.073), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:, "RNAP"].tolist()),2)}', xy=(6.5, 0.11), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:, "RNAP"].tolist()),2)}', xy=(7.5, 0.073), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:, "RNAP"].tolist()),2)}', xy=(8.5, 0.073), xycoords='data', size=10, rotation=0)
-    plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:, "RNAP"].tolist()),2)}', xy=(9.5, 0.045), xycoords='data', size=10, rotation=0)         
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(input_data.loc[:,               "RNAP"].tolist()),2)}', xy=(0.5, 0.045), xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:,            "RNAP"].tolist()),2)}', xy=(1.5, 0.045), xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:,            "RNAP"].tolist()),2)}', xy=(2.5, 0.055), xycoords='data', size=9, rotation=0)    
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:,            "RNAP"].tolist()),2)}', xy=(3.5, 0.056), xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:,            "RNAP"].tolist()),2)}', xy=(4.5, 0.045), xycoords='data', size=9, rotation=0) 
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:,            "RNAP"].tolist()),2)}', xy=(5.5, 0.073), xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:,            "RNAP"].tolist()),2)}', xy=(6.5, 0.11),  xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:,      "RNAP"].tolist()),2)}', xy=(7.5, 0.073), xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:, "RNAP"].tolist()),2)}', xy=(8.5, 0.073), xycoords='data', size=9, rotation=0)
+    plt2.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:,        "RNAP"].tolist()),2)}', xy=(9.5, 0.045), xycoords='data', size=9, rotation=0)         
     
-    #RNAP.
+    #Test RNAP FE difference between groups of IGRs.
     for i in range(len(pos2)):
         for j in range(len(pos2)):
             if j>i:
@@ -2446,30 +3121,30 @@ def read_test_sigma_factor(pwd):
     plt.setp(plt3.set_yticklabels(yticknames1), rotation=0, fontsize=15)   
     plt3.set_yscale('log') 
     
-    plt3.annotate(f' {input_data.shape[0]}', xy=(0.5, 2300), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma70.shape[0]}', xy=(1.5, 2300), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma38.shape[0]}', xy=(2.5, 200), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma54.shape[0]}', xy=(3.5, 370), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma32.shape[0]}', xy=(4.5, 506), xycoords='data', size=15, rotation=0) 
-    plt3.annotate(f' {Genes_sigma24.shape[0]}', xy=(5.5, 788), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma28.shape[0]}', xy=(6.5, 506), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma_unknown.shape[0]}', xy=(7.5, 2300), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(8.5, 2300), xycoords='data', size=15, rotation=0)
-    plt3.annotate(f' {Genes_sigma_mixed.shape[0]}', xy=(9.5, 419), xycoords='data', size=15, rotation=0)     
+    plt3.annotate(f' {input_data.shape[0]}',               xy=(0.5, 2300), xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma70.shape[0]}',            xy=(1.5, 2300), xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma38.shape[0]}',            xy=(2.5, 200),  xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma54.shape[0]}',            xy=(3.5, 370),  xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma32.shape[0]}',            xy=(4.5, 506),  xycoords='data', size=13, rotation=0) 
+    plt3.annotate(f' {Genes_sigma24.shape[0]}',            xy=(5.5, 788),  xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma28.shape[0]}',            xy=(6.5, 506),  xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma_unknown.shape[0]}',      xy=(7.5, 2300), xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma_only_unknown.shape[0]}', xy=(8.5, 2300), xycoords='data', size=13, rotation=0)
+    plt3.annotate(f' {Genes_sigma_mixed.shape[0]}',        xy=(9.5, 419),  xycoords='data', size=13, rotation=0)     
     
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(input_data.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.0012), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0012), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.006), xycoords='data', size=10, rotation=0)    
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(3.5, 0.026), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(4.5, 0.011), xycoords='data', size=10, rotation=0) 
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(5.5, 0.011), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(6.5, 0.024), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(7.5, 0.011), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(8.5, 0.011), xycoords='data', size=10, rotation=0)
-    plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:, "Cumulative_expression"].tolist()),1)}', xy=(9.5, 0.005), xycoords='data', size=10, rotation=0) 
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(input_data.loc[:,              "Cumulative_expression"].tolist()),1)}', xy=(0.5, 0.0012), xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma70.loc[:,           "Cumulative_expression"].tolist()),1)}', xy=(1.5, 0.0012), xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma38.loc[:,           "Cumulative_expression"].tolist()),1)}', xy=(2.5, 0.006),  xycoords='data', size=9, rotation=0)    
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma54.loc[:,           "Cumulative_expression"].tolist()),1)}', xy=(3.5, 0.026),  xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma32.loc[:,           "Cumulative_expression"].tolist()),1)}', xy=(4.5, 0.011),  xycoords='data', size=9, rotation=0) 
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma24.loc[:,           "Cumulative_expression"].tolist()),1)}', xy=(5.5, 0.011),  xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma28.loc[:,           "Cumulative_expression"].tolist()),1)}', xy=(6.5, 0.024),  xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_unknown.loc[:,     "Cumulative_expression"].tolist()),1)}', xy=(7.5, 0.011),  xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_only_unknown.loc[:,"Cumulative_expression"].tolist()),1)}', xy=(8.5, 0.011),  xycoords='data', size=9, rotation=0)
+    plt3.annotate(r" $\overline{X}$"+f'={round(np.mean(Genes_sigma_mixed.loc[:,       "Cumulative_expression"].tolist()),1)}', xy=(9.5, 0.005),  xycoords='data', size=9, rotation=0) 
         
     
-    #Expression level.
+    #Test Expression level difference between groups of IGRs.
     for i in range(len(pos2)):
         for j in range(len(pos2)):
             if j>i:
@@ -2479,14 +3154,12 @@ def read_test_sigma_factor(pwd):
            
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Sigma_factors_and_EcTopoI_enrichment_in_IG_regions_no_trRNA_3_add_missed_sigma38.png', dpi=400, figsize=(14, 6.5))         
-    
-    
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Sigma_factors_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.svg', dpi=400, figsize=(14, 6.5), transparent=True)         
     
     return
 
 
-read_test_sigma_factor(PWD)
+#read_test_sigma_factor(PWD)
 
 
 
@@ -2496,8 +3169,9 @@ read_test_sigma_factor(PWD)
 
 
 def read_test_transcription_factors(pwd):
+    
     #Read input data table.
-    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_RNAP_signal.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
+    input_data=pd.read_excel(pwd+'Intergenic_regions_NO_DPS_NO_rRNA_info_promoters_TF_sites_Membraness_EcTopoI_signal_new_RNAP_signal_PSORT.xlsx', header=0, index_col=0, sheet_name='Intergenic_regions_info')
     input_data['Cumulative_expression']=input_data['G1_expression']+input_data['G2_expression']
     
     #Classify intergenic regions by type of transcription factor.
@@ -2579,7 +3253,6 @@ def read_test_transcription_factors(pwd):
     print(labels2)
     print(dataset_noRif_mean)
     
-    
     dataset_noRif=[x for _,x in sorted(zip(dataset_noRif_mean,dataset_noRif))]
     dataset_Rif=[x for _,x in sorted(zip(dataset_noRif_mean,dataset_Rif))]
     dataset2=[x for _,x in sorted(zip(dataset_noRif_mean,dataset2))]
@@ -2649,20 +3322,20 @@ def read_test_transcription_factors(pwd):
     #Place set size annotation.
     for i in range(len(dataset1)):
         if i<len(dataset_noRif):
-            plt1.annotate(f' {len(dataset1[i])}', xy=((i+0.5), (1.2*max(dataset1[i]))), xycoords='data', size=15, rotation=0)
+            plt1.annotate(f' {len(dataset1[i])}', xy=((i+0.5), (1.2*max(dataset1[i]))), xycoords='data', size=12, rotation=0)
             plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(dataset1[i]),2)}', xy=((i+0.75), (0.3*min(dataset1[i]))), xycoords='data', size=8, rotation=90)
         else:
-            plt1.annotate(f' {len(dataset1[i])}', xy=((i+2.5), (1.2*max(dataset1[i]))), xycoords='data', size=15, rotation=0)
+            plt1.annotate(f' {len(dataset1[i])}', xy=((i+2.5), (1.2*max(dataset1[i]))), xycoords='data', size=12, rotation=0)
             plt1.annotate(r"  $\overline{X}$"+f'={round(np.mean(dataset1[i]),2)}', xy=((i+2.75), (0.3*min(dataset1[i]))), xycoords='data', size=8, rotation=90)           
     
 
-    #EcTopoI.
+    #Test EcTopoI FE difference between groups of IGRs.
     for i in range(len(dataset_noRif)):
         for j in range(len(dataset_noRif)):
             if j>i:
                 Intervals_stat=stats.ttest_ind(dataset1[j], dataset1[i], equal_var=False)
                 print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[i]),2)} Mean2={round(np.mean(dataset1[j]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-    #EcTopoI Rif.
+    #Test EcTopoI Rif FE difference between groups of IGRs.
     for i in range(len(dataset_Rif)):
         for j in range(len(dataset_Rif)):
             if j>i:
@@ -2713,10 +3386,10 @@ def read_test_transcription_factors(pwd):
     
     #Place set size annotation.
     for i in range(len(dataset2)):
-        plt2.annotate(f' {len(dataset2[i])}', xy=((i+0.5), (1.2*max(dataset2[i]))), xycoords='data', size=15, rotation=0)
+        plt2.annotate(f' {len(dataset2[i])}', xy=((i+0.5), (1.2*max(dataset2[i]))), xycoords='data', size=12, rotation=0)
         plt2.annotate(r"  $\overline{X}$"+f'={round(np.mean(dataset2[i]),2)}', xy=((i+0.75), (0.15*min(dataset2[i]))), xycoords='data', size=8, rotation=90)
 
-    #RNAP.
+    #Test RNAP FE difference between groups of IGRs.
     for i in range(len(dataset2)):
         for j in range(len(dataset2)):
             if j>i:
@@ -2766,10 +3439,10 @@ def read_test_transcription_factors(pwd):
     
     #Place set size annotation.
     for i in range(len(dataset3)):
-        plt3.annotate(f' {len(dataset3[i])}', xy=((i+0.5), (1.2*max(dataset3[i]))), xycoords='data', size=15, rotation=0)
+        plt3.annotate(f' {len(dataset3[i])}', xy=((i+0.5), (1.2*max(dataset3[i]))), xycoords='data', size=12, rotation=0)
         plt3.annotate(r"  $\overline{X}$"+f'={round(np.mean(dataset3[i]),1)}', xy=((i+0.75), (0.04*min(dataset3[i]))), xycoords='data', size=8, rotation=90)
 
-    #RNAP.
+    #Test Expression level difference between groups of IGRs.
     for i in range(len(dataset3)):
         for j in range(len(dataset3)):
             if j>i:
@@ -2779,7 +3452,7 @@ def read_test_transcription_factors(pwd):
            
     plt.show()
     plt.tight_layout()
-    plt.savefig(f'{pwd}Factors_analysis\Transcription_factors_and_EcTopoI_enrichment_in_IG_regions_no_trRNA.png', dpi=400, figsize=(14, 6.5))         
+    plt.savefig(f'{pwd}Factors_analysis\\NEW_Transcription_factors_and_EcTopoI_enrichment_in_IG_regions_no_rRNA.svg', dpi=400, figsize=(14, 6.5), transparent=True)         
     
     return
 

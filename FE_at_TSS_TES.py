@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2020##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##TopoI ChIP-Seq analysis##
 
 #Script computes Fold Enrichment (FE) near TSS (-5000bp:500bp) and TES (-500bp:5000bp)
 
@@ -67,7 +67,7 @@ Dict_of_wigs_path={'RpoC_Borukhov' : Path_to_input_files+'Borukhov_RpoC_Pol_Sofi
                    }
 
 #######
-#Checks if directory exists and if not creates.
+#Checks if directory exists and if not creates it.
 #######
 
 def Dir_check_create(some_path):

@@ -1,6 +1,6 @@
 ###############################################
-##Dmitry Sutormin, 2019##
-##TopoA ChIP-Seq analysis##
+##Dmitry Sutormin, 2021##
+##TopoI ChIP-Seq analysis##
 
 #Takes narrowPeaks files with list of regions (e.g. ChIP-Seq peaks identified in different biological replicas),
 #returns signal (fold enrichment) of them.
@@ -17,27 +17,29 @@ from Bio import SeqIO
 
 
 #Path to the working directory with NarrowPeak files.
-PWD_peaks="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\\"
+PWD_peaks="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\\"
+
 #Dictionary of pathes to NarrowPeak file with peaks coordinates (MACS2 output).
-Peaks_data={'TopoA_CTD_noRif_rep123_thr_3_nm_0.001_peaks' : PWD_peaks + "TopoA_CTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
-            'TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks' : PWD_peaks + "TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks.narrowPeak",
-            'TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks' : PWD_peaks + "TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
-            'TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks' : PWD_peaks + "TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+Peaks_data={'TopoA_CTD_noRif_rep123_thr_3_nm_0.001_peaks' :   PWD_peaks + "TopoA_CTD_noRif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
+            'TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks' :      PWD_peaks + "TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks.narrowPeak",
+            'TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks' : PWD_peaks + "TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+            'TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks' :   PWD_peaks + "TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak",
             }
 
-Peaks_data_shared=PWD_peaks + "TopoA_all_exp_shared_nm_0.001_peaks.narrowPeak"
+Peaks_data_shared=PWD_peaks + "TopoA_all_exp_shared_nm_0.001_peaks_new.narrowPeak"
 
 #Path to the working directory with WIG files.
-PWD_FE="C:\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\\"
+PWD_FE="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Fold_enrichment\\"
+
 #Dictionary of pathes to WIG file with fold enrichment tracks.
 FE_data={'TopoA_CTD_noRif_rep123_thr_3_nm_0.001_peaks' : PWD_FE + "TopA_ChIP_CTD_plus_Rif_minus_average_FE.wig",
          'TopoA_CTD_Rif_rep12_thr_2_nm_0.001_peaks' : PWD_FE + "TopA_ChIP_CTD_plus_Rif_plus_average_FE.wig",
-         'TopoA_noCTD_noRif_rep123_thr_3_nm_0.001_peaks' : PWD_FE + "TopA_ChIP_CTD_minus_Rif_minus_average_FE_1_2_3.wig",
+         'TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks' : PWD_FE + "TopA_ChIP_CTD_minus_Rif_minus_average_FE_3_4_6.wig",
          'TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks' : PWD_FE + "TopA_ChIP_CTD_minus_Rif_plus_average_FE_1_2_3.wig",
          }
 
 #Path to the reference genome (e.g. E_coli_w3110_G_Mu.fasta).
-Genome="C:\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
+Genome="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\E_coli_w3110_G_Mu.fasta"
 
 
 #######
@@ -97,7 +99,7 @@ def return_peaks_FE(peaks_array, wig_FoldEnrich):
     FE_list=[]
     for i in range(len(peaks_array_FE)):
         FE_list.append(peaks_array_FE[i][2])
-    print(np.mean(FE_list), np.std(FE_list))
+    print(f'Peaks mean FE: {np.mean(FE_list)}', f'Peaks FE std: {np.std(FE_list)}')
     return peaks_array_FE
 
 #######

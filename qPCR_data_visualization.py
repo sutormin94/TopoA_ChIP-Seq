@@ -29,11 +29,13 @@ from scipy.stats import binom
 #Path to qPCR data table.
 #topA_pc_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\EcTopoI_RNAP_uncoupling_effects_qPCR\\rnhAB_expression_analysis_qPCR\gyrAB_parCE_rnhAB_topB_calibration_16-22_09_20\gyrAB_parCE_rnhAB_topB_calibration_16-22_09_2020.xlsx"
 #rpmH_pc_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\CTD_and_transcription_qPCR\qPCR_results\CTD_effect_qPCR_primers_calibration\RpmH_primers_calibration_18_03_20_admin_2020-03-18 21-12-35_CT018440 -  Quantification Plate View Results.xlsx"
+BW25113_pc_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\BW25113_topA_mutants\Strains_competiton\BW25113_mutants_primer_titration.xlsx"
 #topA_pc=pd.read_excel(topA_pc_table, sheet_name='Processed_data', header=0, index_col=0)
 #rpmH_pc=pd.read_excel(rpmH_pc_table, sheet_name='Processed_data_rpmH', header=0, index_col=0)
+BW25113_pc=pd.read_excel(BW25113_pc_table, sheet_name='Processed_data_BW25113_mutants_', header=0, index_col=0)
 #print(topA_pc)
 #print(rpmH_pc)
-
+print(BW25113_pc)
 
 #Plot data.
 def qPCR_primers_calibration(dataframe, suptitle_text, outpath):
@@ -93,6 +95,8 @@ def qPCR_primers_calibration(dataframe, suptitle_text, outpath):
 
 #qPCR_primers_calibration(topA_pc, 'rho, gyrAB, parCE, topB, rnhAB primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\EcTopoI_RNAP_uncoupling_effects_qPCR\\rnhAB_expression_analysis_qPCR\gyrAB_parCE_rnhAB_topB_calibration_16-22_09_20\\gyrAB_parCE_rnhAB_topB_primers_calibration_09_20.png")
 #qPCR_primers_calibration(rpmH_pc, 'rpmH primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\CTD_and_transcription_qPCR\qPCR_results\CTD_effect_qPCR_primers_calibration\RpmH_primers_calibration_18_03_20.png")
+qPCR_primers_calibration(BW25113_pc, 'BW25113 mutants primers calibration filtered', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\BW25113_topA_mutants\Strains_competiton\BW25113_mutants_primers_calibration_10_03_2021_filt.png")
+
 
 
 #################
@@ -960,9 +964,9 @@ def qPCR_expression_2(dataframe, outpath):
 
 
 #Path to qPCR data table.
-data_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Poisoned_TopoI_mutant\qPCR\EcTopoI_Topo-Seq_25_11_20\\EcTopoI_Topo_Seq_pBAD_admin_2020-11-25 22-50-23_Alpha -  Quantification Plate View Results.xlsx"
-data_tab=pd.read_excel(data_table, sheet_name='Data_for_plot', header=0, index_col=0)
-print(data_tab)
+#data_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Poisoned_TopoI_mutant\qPCR\EcTopoI_Topo-Seq_25_11_20\\EcTopoI_Topo_Seq_pBAD_admin_2020-11-25 22-50-23_Alpha -  Quantification Plate View Results.xlsx"
+#data_tab=pd.read_excel(data_table, sheet_name='Data_for_plot', header=0, index_col=0)
+#print(data_tab)
 
 
 #Plot data.
@@ -1048,4 +1052,4 @@ def qPCR_Topo_Seq(dataframe, outpath):
 
     return
 
-qPCR_Topo_Seq(data_tab, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Poisoned_TopoI_mutant\qPCR\EcTopoI_Topo-Seq_25_11_20\EcTopoI_Topo-Seq_pBAD33_topA_mut_25_11_20.png")
+#qPCR_Topo_Seq(data_tab, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Poisoned_TopoI_mutant\qPCR\EcTopoI_Topo-Seq_25_11_20\EcTopoI_Topo-Seq_pBAD33_topA_mut_25_11_20.png")
