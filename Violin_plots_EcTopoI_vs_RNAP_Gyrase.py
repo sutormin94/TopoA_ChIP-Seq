@@ -191,10 +191,6 @@ def draw_violins(dataset1, signal_name, interval_name, pwd):
     plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(dataset1[0]),2)}', xy=(0.5, 2), xycoords='data', size=12, rotation=90)
     plt1.annotate(r"   $\overline{X}$"+f'={round(np.mean(dataset1[1]),2)}', xy=(1.5, 2), xycoords='data', size=12, rotation=90)        
     
-    #Welch t-test.
-    Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
-    print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')
-
     plt.show()
     plt.tight_layout()
     plt.savefig(f'{pwd}\{signal_name}_FE_and_{interval_name}_peaks.png', dpi=400, figsize=(4.5,6))   
@@ -213,11 +209,15 @@ def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Outpath)
     Sets_dictionary=mark_peaks_return_subsets(Peaks_dictionary, WIG_dictionary)
     
     #Dataset. Specify names of datasets to be compared.
-    signal_name='RpoC Rif'
-    interval_name='EcTopoI Rif'
+    signal_name='EcTopoI'
+    interval_name='Gyrase'
     dataset1=[Sets_dictionary[f'{signal_name}_wig_in_{interval_name}_peaks'], Sets_dictionary[f'{signal_name}_wig_out_{interval_name}_peaks']]
     
-    draw_violins(dataset1, signal_name, interval_name, Outpath)
+    #Welch t-test.
+    Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
+    print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    
+    #draw_violins(dataset1, signal_name, interval_name, Outpath)
     
     return
 
