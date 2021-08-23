@@ -26,23 +26,7 @@ from scipy import stats
 PWD='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\\'
 #Path to TUs groups file.
 TUs_groups_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_RNA-Seq\Expression_data\DY330_transcripts\Representative_transcripts\\"
-#Path to the input annotation, type of annotation and name of TUs set.
-##1##
-Path_to_annotation_1=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_EP_del_cor.txt'
-Type_of_annot_1='broadPeak'             
-Genes_set_name_1='All_TUs_1672'    
-##2##                                   
-Path_to_annotation_2=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_tRNA_rRNA_EP_del_cor.txt'
-Type_of_annot_2='broadPeak'             
-Genes_set_name_2='All_TUs_no_tRNA_rRNA_1623'    
-##3##                                   
-Path_to_annotation_3=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_tRNA_rRNA_ompX_EP_del_cor_HETU_200.txt'
-Type_of_annot_3='broadPeak'             
-Genes_set_name_3='HETU_no_ompX_200'         
-##4##                                   
-Path_to_annotation_4=TUs_groups_path + 'DY330_RNA-Seq_transcripts_representative_no_tRNA_rRNA_appY_ybiI_EP_del_cor_LETU_200.txt'
-Type_of_annot_4='broadPeak'             
-Genes_set_name_4='LETU_no_appY_ybiI_200'             
+#Path to the input annotation, type of annotation and name of TUs set.       
 ##5##                                   
 Path_to_annotation_5=TUs_groups_path + 'DY330_RNA-Seq_transcripts_EP_del_cor_rRNA_7.txt'
 Type_of_annot_5='broadPeak'             
@@ -93,28 +77,12 @@ Dict_of_wigs_path_2={'EcTopoI'                 : 'C:\\Users\sutor\OneDrive\Think
                      'EcTopoI_CTDplus_Rifplus' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig',
                      }
 
-Set_name_3='Y319F_oe'
-Dict_of_wigs_path_3={'EcTopoI'            : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
-                     'EcTopoI_Y319Fplus'  : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_Y319F_ChIP-Seq\FE\EcTopoI_Y319F_FE_av.wig',
-                     }
-
 Set_name_4='EcTopoI_all_conditions'
 Dict_of_wigs_path_4={'EcTopoI'                 : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
                      'EcTopoI_CTDplus'         : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_plus_Rif_minus_FE_av.wig',                     
                      'EcTopoI_Rifplus'         : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig',
                      'EcTopoI_CTDplus_Rifplus' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig',                     
                      }
-
-
-Set_name_5='BW25113_EcTopoI_mutants'                        
-Dict_of_wigs_path_5={'EcTopoI_delta11' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta11_FE_av.wig',
-                     'EcTopoI_delta14' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta14_FE_av.wig',
-                     'EcTopoI_delta30' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta30_FE_av.wig'
-                     }
-
-Set_name_6='Lal_psoralen_chip_chip'                        
-Dict_of_wigs_path_6={'Lal_psoralen' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Lal_psoralen_chip_av.wig',
-                       }
 
 Set_name_7='Mooney_RNAP'                        
 Dict_of_wigs_path_7={'Mooney_RpoC' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_FE_av.wig',
@@ -166,11 +134,6 @@ def create_out_dirs(out_path, genes_set_name, track_set_name):
     Dir_check_create(f'{out_path}\Signal_of_TUs_wig\{track_set_name}\{genes_set_name}')    
     return
 
-#create_out_dirs(Out_path, Genes_set_name_1)
-#create_out_dirs(Out_path, Genes_set_name_2)
-#create_out_dirs(Out_path, Genes_set_name_3)
-#create_out_dirs(Out_path, Genes_set_name_4)
-#create_out_dirs(Out_path, Genes_set_name_2)
 create_out_dirs(Out_path, Genes_set_name_7,  Set_name_4)
 create_out_dirs(Out_path, Genes_set_name_6,  Set_name_4)
 create_out_dirs(Out_path, Genes_set_name_5,  Set_name_4)

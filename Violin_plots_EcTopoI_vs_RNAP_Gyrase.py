@@ -217,7 +217,7 @@ def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Outpath)
     Intervals_stat=stats.ttest_ind(dataset1[0], dataset1[1], equal_var=False)
     print(f'\nT-test FE means\nMean1={round(np.mean(dataset1[0]),2)} Mean2={round(np.mean(dataset1[1]),2)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
     
-    #draw_violins(dataset1, signal_name, interval_name, Outpath)
+    draw_violins(dataset1, signal_name, interval_name, Outpath)
     
     return
 
