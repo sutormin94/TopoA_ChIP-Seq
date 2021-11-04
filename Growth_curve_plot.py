@@ -232,14 +232,14 @@ Plot_growth_curve_pBAD33_topA_mut(Growth_curves_data_pBAD33_topA_mut, WS_name_pB
 #########
 
 #Path to the raw data.
-Growth_curves_data_pCA25_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pCA24_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pCA25_topA="Sup_Table_11"
+WS_name_pCA24_topA="Sup_Table_11"
 #Path to the output plots.
-Outpath_pCA25_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_EcTopoI_induction_growth_curve.png"
+Outpath_pCA24_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_EcTopoI_induction_growth_curve.png"
 
 
-def Plot_growth_curve_pCA25_topA(data_inpath, sheetname, outpath):
+def Plot_growth_curve_pCA24_topA(data_inpath, sheetname, outpath):
     
     #Read growth curves data.
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
@@ -256,7 +256,7 @@ def Plot_growth_curve_pCA25_topA(data_inpath, sheetname, outpath):
 
     Colors_list=['#000000', '#FF4500']
     Fill_color_list=['#000000', '#FF4500']
-    Label_list=['pCA25 topA -IPTG', 'pCA25 topA +IPTG 1mM']
+    Label_list=['pCA24 topA -IPTG', 'pCA24 topA +IPTG 1mM']
     
     #Plot data.
     fig, plot_1=plt.subplots(1,1,figsize=(4,3), dpi=100)
@@ -281,7 +281,7 @@ def Plot_growth_curve_pCA25_topA(data_inpath, sheetname, outpath):
     
     return
 
-Plot_growth_curve_pCA25_topA(Growth_curves_data_pCA25_topA, WS_name_pCA25_topA, Outpath_pCA25_topA)
+Plot_growth_curve_pCA24_topA(Growth_curves_data_pCA24_topA, WS_name_pCA24_topA, Outpath_pCA24_topA)
 
 
 
@@ -290,14 +290,14 @@ Plot_growth_curve_pCA25_topA(Growth_curves_data_pCA25_topA, WS_name_pCA25_topA, 
 #########
 
 #Path to the raw data.
-Growth_curves_data_pCA25_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pCA24_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pCA25_EcTopoI_CTD="Sup_Table_11"
+WS_name_pCA24_EcTopoI_CTD="Sup_Table_11"
 #Path to the output plots.
-Outpath_pCA25_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_CTD_induction_growth_curve.png"
+Outpath_pCA24_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_CTD_induction_growth_curve.png"
 
 
-def Plot_growth_curve_pCA25_CTD(data_inpath, sheetname, outpath):
+def Plot_growth_curve_pCA24_CTD(data_inpath, sheetname, outpath):
     
     #Read growth curves data.
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
@@ -314,7 +314,7 @@ def Plot_growth_curve_pCA25_CTD(data_inpath, sheetname, outpath):
 
     Colors_list=['#000000', '#0000FF']
     Fill_color_list=['#000000', '#0000FF']
-    Label_list=['pCA25 14kDa CTD -IPTG', 'pCA25 14kDa CTD +IPTG 1mM']
+    Label_list=['pCA24 14kDa CTD -IPTG', 'pCA24 14kDa CTD +IPTG 1mM']
     
     #Plot data.
     fig, plot_1=plt.subplots(1,1,figsize=(4,3), dpi=100)
@@ -339,7 +339,7 @@ def Plot_growth_curve_pCA25_CTD(data_inpath, sheetname, outpath):
     
     return
 
-Plot_growth_curve_pCA25_CTD(Growth_curves_data_pCA25_EcTopoI_CTD, WS_name_pCA25_EcTopoI_CTD, Outpath_pCA25_EcTopoI_CTD)
+Plot_growth_curve_pCA24_CTD(Growth_curves_data_pCA24_EcTopoI_CTD, WS_name_pCA24_EcTopoI_CTD, Outpath_pCA24_EcTopoI_CTD)
 
 
 
@@ -348,14 +348,14 @@ Plot_growth_curve_pCA25_CTD(Growth_curves_data_pCA25_EcTopoI_CTD, WS_name_pCA25_
 #########
 
 #Path to the raw data.
-Growth_curves_data_pCA25_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pCA24_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pCA25_gfp="Sup_Table_11"
+WS_name_pCA24_gfp="Sup_Table_11"
 #Path to the output plots.
-Outpath_pCA25_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_GFP_induction_growth_curve.png"
+Outpath_pCA24_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_GFP_induction_growth_curve.png"
 
 
-def Plot_growth_curve_pCA25_gfp(data_inpath, sheetname, outpath):
+def Plot_growth_curve_pCA24_gfp(data_inpath, sheetname, outpath):
     
     #Read growth curves data.
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
@@ -372,7 +372,7 @@ def Plot_growth_curve_pCA25_gfp(data_inpath, sheetname, outpath):
 
     Colors_list=['#000000', '#008000']
     Fill_color_list=['#000000', '#008000']
-    Label_list=['pCA25 GFP -IPTG', 'pCA25 GFP +IPTG 1mM']
+    Label_list=['pCA24 GFP -IPTG', 'pCA24 GFP +IPTG 1mM']
     
     #Plot data.
     fig, plot_1=plt.subplots(1,1,figsize=(4,3), dpi=100)
@@ -397,4 +397,4 @@ def Plot_growth_curve_pCA25_gfp(data_inpath, sheetname, outpath):
     
     return
 
-Plot_growth_curve_pCA25_gfp(Growth_curves_data_pCA25_gfp, WS_name_pCA25_gfp, Outpath_pCA25_gfp)
+Plot_growth_curve_pCA24_gfp(Growth_curves_data_pCA24_gfp, WS_name_pCA24_gfp, Outpath_pCA24_gfp)

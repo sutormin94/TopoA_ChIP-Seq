@@ -96,14 +96,14 @@ Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-
 PC_data=pd.read_excel(Input_table, sheet_name='Sup_Table_14', header=None, index_col=0)
 print(PC_data)
 
-topA_primers_set=['topA_1', 'topA_2', 'topA_3', 'topA_4', 'topA_5', 'topA_6', 'topA_7']
-qPCR_primers_calibration(PC_data, topA_primers_set, 'topA primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TopA_primers_calibration.png")
-
-RpmH_primers_set=['rpmH_1', 'rpmH_2', 'rpmH_3', 'rpmH_4', 'rpmH_5', 'rpmH_6', 'rpmH_7', 'rpmH_8']
-qPCR_primers_calibration(PC_data, RpmH_primers_set, 'rpmH-rnpA-yidD-yidC cluster primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\RpmH_primers_calibration.png")
-
-BW_comp_set=['BW25113_wt', 'delta11', 'delta11_SPA', 'delta14', 'delta14_SPA']
-qPCR_primers_calibration(PC_data, BW_comp_set, 'BW25113 topA mutants competition primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\BW25113_topA_mut_primers_calibration.png")
+#topA_primers_set=['topA_1', 'topA_2', 'topA_3', 'topA_4', 'topA_5', 'topA_6', 'topA_7']
+#qPCR_primers_calibration(PC_data, topA_primers_set, 'topA primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TopA_primers_calibration.png")
+#
+#RpmH_primers_set=['rpmH_1', 'rpmH_2', 'rpmH_3', 'rpmH_4', 'rpmH_5', 'rpmH_6', 'rpmH_7', 'rpmH_8']
+#qPCR_primers_calibration(PC_data, RpmH_primers_set, 'rpmH-rnpA-yidD-yidC cluster primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\RpmH_primers_calibration.png")
+#
+#BW_comp_set=['BW25113_wt', 'delta11', 'delta11_SPA', 'delta14', 'delta14_SPA']
+#qPCR_primers_calibration(PC_data, BW_comp_set, 'BW25113 topA mutants competition primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\BW25113_topA_mut_primers_calibration.png")
 
 
 
@@ -118,10 +118,35 @@ def FE_calc_pair(ar_IP, ar_Mock, primers_eff, length):
     #Calculate FE for data points.
     FE_ar=[]
     for i in range(len(ar_IP)):
-        FE=primers_eff[i]**(ar_Mock[i]-ar_IP[i])
-        FE_ar.append(FE) 
+        FE_Rep_ar=[]
+        for j in range(len(ar_IP[i])):
+            FE=primers_eff[i]**(ar_Mock[i][j]-ar_IP[i][j])
+            FE_Rep_ar.append(FE) 
+        FE_ar.append(FE_Rep_ar) 
         
     return FE_ar
+
+#Count mean of replicates.
+def count_means(list_of_lists):
+    list_of_means=[]
+    
+    for some_list in list_of_lists:
+        List_mean=np.mean(some_list)
+        list_of_means.append(List_mean)
+    
+    return list_of_means
+
+#Compute fold enrichment mean and standard deviation.
+def FE_mean_and_std(ar):
+    Points_mean=[]
+    Points_std=[]
+    for points_set in ar:
+        points_set_mean=np.mean(points_set)
+        points_set_std=stats.sem(points_set)*1.96 #0.95 confidence interval for mean
+        Points_mean.append(points_set_mean)
+        Points_std.append(points_set_std)
+    
+    return Points_mean, Points_std
 
 #Plot data.
 def ChIP_qPCR_data_analysis(dataframe, outpath):
@@ -147,22 +172,45 @@ def ChIP_qPCR_data_analysis(dataframe, outpath):
     IP_Rif_data_means=[]
     Mock_Rif_data_means=[]    
     for pair in Conditions:
-        IP_data_means.append(np.mean(dataframe.loc[pair, ['IP_-CTD_-Rif_1', 'IP_-CTD_-Rif_2', 'IP_-CTD_-Rif_3']].dropna().tolist()))
-        Mock_data_means.append(np.mean(dataframe.loc[pair, ['Mock_-CTD_-Rif_1', 'Mock_-CTD_-Rif_2', 'Mock_-CTD_-Rif_3']].dropna().tolist()))
-        IP_Rif_data_means.append(np.mean(dataframe.loc[pair, ['IP_-CTD_+Rif_1', 'IP_-CTD_+Rif_2', 'IP_-CTD_+Rif_3']].dropna().tolist()))
-        Mock_Rif_data_means.append(np.mean(dataframe.loc[pair, ['Mock_-CTD_+Rif_1', 'Mock_-CTD_+Rif_2', 'Mock_-CTD_+Rif_3']].dropna().tolist()))   
-    
+        IP_data_means.append(dataframe.loc[pair, ['IP_-CTD_-Rif_1', 'IP_-CTD_-Rif_2', 'IP_-CTD_-Rif_3']].dropna().tolist())
+        Mock_data_means.append(dataframe.loc[pair, ['Mock_-CTD_-Rif_1', 'Mock_-CTD_-Rif_2', 'Mock_-CTD_-Rif_3']].dropna().tolist())
+        IP_Rif_data_means.append(dataframe.loc[pair, ['IP_-CTD_+Rif_1', 'IP_-CTD_+Rif_2', 'IP_-CTD_+Rif_3']].dropna().tolist())
+        Mock_Rif_data_means.append(dataframe.loc[pair, ['Mock_-CTD_+Rif_1', 'Mock_-CTD_+Rif_2', 'Mock_-CTD_+Rif_3']].dropna().tolist())
+        
     #Calculate fold enrichment of IP over mock samples.
     FE_data=FE_calc_pair(IP_data_means, Mock_data_means, Efficiency, Length)
     FE_Rif_data=FE_calc_pair(IP_Rif_data_means, Mock_Rif_data_means, Efficiency, Length)
+    print(FE_data)
     
-    #Normalizy by minimal FE value.
-    FE_data=FE_data/min(FE_data)
-    FE_Rif_data=FE_Rif_data/min(FE_Rif_data)
-        
+    #Count mean of replicates.
+    FE_data_means=count_means(FE_data)
+    FE_Rif_data_means=count_means(FE_Rif_data)
+    print(FE_data_means)
+    
+    #Normalize by minimal FE value.
+    FE_data=[in_ar/min(FE_data_means) for in_ar in FE_data]
+    FE_Rif_data=[in_ar/min(FE_Rif_data_means) for in_ar in FE_Rif_data]
+    print(FE_data)
+    
+    #Compute mean and standard deviation for fold enrichment.
+    FE_mean, FE_points_std=FE_mean_and_std(FE_data)
+    FE_Rif_mean, FE_Rif_points_std=FE_mean_and_std(FE_Rif_data)
+    print(FE_mean)
+    print(FE_points_std)
+    
     #Plot data.
-    plot_av.bar(np.asarray(X_coords)-0.2, FE_data, width=0.3, color='#89d8fa', edgecolor='k', linewidth=0.6, label='-CTD/-Rif')
-    plot_av.bar(np.asarray(X_coords)+0.2, FE_Rif_data, width=0.3, color='#e8d844', edgecolor='k', linewidth=0.6, label='-CTD/+Rif')
+    print(np.asarray(X_coords)-0.2)
+    plot_av.bar(np.asarray(X_coords)-0.2, FE_mean, yerr=FE_points_std, error_kw=dict(lw=1, capsize=3, capthick=1), width=0.3, color='#89d8fa', edgecolor='k', linewidth=0.6, label='-CTD/-Rif')
+    plot_av.bar(np.asarray(X_coords)+0.2, FE_Rif_mean, yerr=FE_Rif_points_std, error_kw=dict(lw=1, capsize=3, capthick=1), width=0.3, color='#e8d844', edgecolor='k', linewidth=0.6, label='-CTD/+Rif')
+    
+    for i in range(len(FE_data)):
+        for j in range(len(FE_data[i])):
+            plot_av.plot(X_coords[i]-0.2, FE_data[i][j], 'ko', markersize=1)
+    
+    for i in range(len(FE_Rif_data)):
+        for j in range(len(FE_Rif_data[i])):
+            plot_av.plot(X_coords[i]+0.2, FE_Rif_data[i][j], 'ko', markersize=1)
+    
     plot_av.set_ylabel('Fold enrichment\nIP/Mock', size=15)
     plot_av.set_yticks([1,10,100])
     plot_av.set_yticklabels([1,10,100], rotation=0, size=13)     
@@ -206,18 +254,6 @@ def FE_calc(ar, primers_eff, length):
         FE_ar.append(replicas_data) 
         
     return FE_ar
-
-#Compute fold enrichment mean and standard deviation.
-def FE_mean_and_std(ar):
-    Points_mean=[]
-    Points_std=[]
-    for points_set in ar:
-        points_set_mean=np.mean(points_set)
-        points_set_std=stats.sem(points_set)*1.96 #0.95 confidence interval for mean
-        Points_mean.append(points_set_mean)
-        Points_std.append(points_set_std)
-    
-    return Points_mean, Points_std
 
 
 #Plot data.
@@ -276,7 +312,7 @@ def CTD_ind_RNA_decay_qPCR(dataframe, rows_ar, outpath):
     plot_av.spines["bottom"].set_linewidth(1.5)
     plot_av.spines["left"].set_linewidth(1.5)    
     
-    #Place legend outside of a graph. Stolen from: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot
+    #Place legend outside of a graph. Taken from: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot
     box=plot_av.get_position()
     plot_av.set_position([box.x0, box.y0, box.width * 0.95, box.height])    
     plt.legend(loc='upper left', bbox_to_anchor=(1, 0.75), frameon=False)
@@ -292,16 +328,16 @@ Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-
 Input_dec=pd.read_excel(Input_table, sheet_name='Sup_Table_16', header=0, index_col=0)
 print(Input_dec)
 
-topA_points=['topA7', 'topA6', 'topA5', 'topA4', 'topA3', 'topA2', 'topA1']
-CTD_ind_RNA_decay_qPCR(Input_dec, topA_points, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TopA_CTD_expression_effect_qPCR.svg")
-rpmH_points=['rpmH8', 'rpmH7', 'rpmH6', 'rpmH5', 'rpmH4', 'rpmH3', 'rpmH2', 'rpmH1']
-CTD_ind_RNA_decay_qPCR(Input_dec, rpmH_points, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\RpmH_CTD_expression_effect_qPCR.svg")
+#topA_points=['topA7', 'topA6', 'topA5', 'topA4', 'topA3', 'topA2', 'topA1']
+#CTD_ind_RNA_decay_qPCR(Input_dec, topA_points, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TopA_CTD_expression_effect_qPCR.svg")
+#rpmH_points=['rpmH8', 'rpmH7', 'rpmH6', 'rpmH5', 'rpmH4', 'rpmH3', 'rpmH2', 'rpmH1']
+#CTD_ind_RNA_decay_qPCR(Input_dec, rpmH_points, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\RpmH_CTD_expression_effect_qPCR.svg")
 
 
 
 
 #################
-### BW25113 wt and topA mutants cocultivation competition.
+### BW25113 wt and topA mutants co-cultivation competition.
 #################
 
 def strains_comp_analysis(pathin, worksheet, wt_set_name, mut_name, outpath):
@@ -376,8 +412,8 @@ WS_name_BW25113="Sup_Table_15"
 
 #Path to the output plots.
 Outpath_BW25113_delta11="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TEST_BW25113_topA_delta11_vs_wt.svg"
-strains_comp_analysis(BW25113_strains_compet, WS_name_BW25113, 'wt_1', 'delta11', Outpath_BW25113_delta11)
+#strains_comp_analysis(BW25113_strains_compet, WS_name_BW25113, 'wt_1', 'delta11', Outpath_BW25113_delta11)
 
 #Path to the output plots.
 Outpath_BW25113_delta14="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TEST_BW25113_topA_delta14_vs_wt.svg"
-strains_comp_analysis(BW25113_strains_compet, WS_name_BW25113, 'wt_2', 'delta14', Outpath_BW25113_delta14)
+#strains_comp_analysis(BW25113_strains_compet, WS_name_BW25113, 'wt_2', 'delta14', Outpath_BW25113_delta14)

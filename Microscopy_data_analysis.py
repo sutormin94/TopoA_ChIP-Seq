@@ -140,8 +140,8 @@ def plot_cell_length_dist_GFP_CTD_oe(data_inpath, sheetname, out_plot_path):
     CTD_plus=cl_data.loc[:, 'CTD+ length, mkm'].dropna() 
     
     #Prepare data.
-    Data_dict={'GFP_minus' : [GFP_minus, "#f5d81a", 'pCA25 GFP -IPTG'], 'GFP_plus' : [GFP_plus, "#5bff7c", 'pCA25 GFP +IPTG 1mM'],
-               'CTD_minus' : [CTD_minus, "#878787", 'pCA25 CTD\n-IPTG'], 'CTD_plus' : [CTD_plus, "#212DA7", 'pCA25 CTD\n+IPTG 1mM']}
+    Data_dict={'GFP_minus' : [GFP_minus, "#f5d81a", 'pCA24 GFP -IPTG'], 'GFP_plus' : [GFP_plus, "#5bff7c", 'pCA24 GFP +IPTG 1mM'],
+               'CTD_minus' : [CTD_minus, "#878787", 'pCA24 CTD\n-IPTG'], 'CTD_plus' : [CTD_plus, "#212DA7", 'pCA24 CTD\n+IPTG 1mM']}
     
     #Compare the data statistically.
     #Test for normality.
