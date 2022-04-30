@@ -21,9 +21,9 @@ from scipy.stats import norm, shapiro, normaltest, mannwhitneyu
 #######
 
 #Path to raw data table.
-Cell_length_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Cell_length_path="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_cell_length="Sup_Table_13"
+WS_name_cell_length="Table S13"
 
 
 #######
@@ -126,7 +126,7 @@ plot_cell_length_dist_BW25113_topA_mut(Cell_length_path, WS_name_cell_length, Pl
 
 
 ##########
-## Read cell length data and plot for CTD anf GFP overexpression from pCA25 plasmid in E. coli DY330.
+## Read cell length data and plot for EcTopoI 14kDa CTD anf GFP overexpression from pCA24 plasmid in E. coli DY330.
 #########
 
 def plot_cell_length_dist_GFP_CTD_oe(data_inpath, sheetname, out_plot_path):

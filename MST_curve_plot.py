@@ -25,9 +25,9 @@ import pandas as pd
 #######
 
 #Path to the raw data.
-MST_curves_data="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+MST_curves_data="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-MST_WS_name="Sup_Table_4"
+MST_WS_name="Table S3"
 
 #Name of a worksheet.
 WS_names_ar=['Consensus F', 'Consensus R', 'Random F', 'Random R', 'Poly-T', 'Poly-A']
@@ -42,7 +42,8 @@ def binding_curve(L0, A0, Kd):
 def Plot_MST_curve(data_inpath, sheetname, ws_names_ar, outpath):
     
     #Read growth curves data.
-    MST_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=None)    
+    MST_data=pd.read_excel(data_inpath, sheet_name=sheetname, skiprows=[lambda x: x in range(11)], header=11, index_col=None)   
+    print(MST_data)
     
     #Create plot.
     fig, plot_1=plt.subplots(1,1,figsize=(4,3), dpi=100)
@@ -62,17 +63,17 @@ def Plot_MST_curve(data_inpath, sheetname, ws_names_ar, outpath):
         Sat=Unbound[dataset_name]-Bound[dataset_name]
         
         #Add 95% two-tail confident interval range for mean.
-        MST_data[dataset_name + ' rel_Mean']=(MST_data[dataset_name + ' mean']-Unbound[dataset_name])*(-1)/Sat
-        MST_data[dataset_name + ' CI95']=((MST_data[dataset_name + ' STD']*1.96)/np.sqrt(MST_data[dataset_name + ' replics']))/Sat
+        MST_data[dataset_name + ' rel_Mean']=(MST_data[dataset_name + ' MST signal, Mean']-Unbound[dataset_name])*(-1)/Sat
+        MST_data[dataset_name + ' CI95']=((MST_data[dataset_name + ' MST signal, STD']*1.96)/np.sqrt(MST_data[dataset_name + ' Number of replicates']))/Sat
         MST_data[dataset_name + ' rel_Mean_up']=MST_data[dataset_name + ' rel_Mean']+MST_data[dataset_name + ' CI95']
         MST_data[dataset_name + ' rel_Mean_dn']=MST_data[dataset_name + ' rel_Mean']-MST_data[dataset_name + ' CI95']
         
         conc_range=np.linspace(2E-11,10E-6, 10000)
     
         #Plot data.
-        plot_1.plot(MST_data[dataset_name + ' concentration'], MST_data[dataset_name + ' rel_Mean'], marker='o', mfc=Mfc_colors[dataset_name], mec=Mec_colors[dataset_name], linewidth=0, label=f'{dataset_name} Kd={int(Kd_dict[dataset_name]*1E9)}$\pm${int(Kd_std[dataset_name]*1E9)} nM', markersize=2)
+        plot_1.plot(MST_data[dataset_name + ' EcTopoI concentration, M'], MST_data[dataset_name + ' rel_Mean'], marker='o', mfc=Mfc_colors[dataset_name], mec=Mec_colors[dataset_name], linewidth=0, label=f'{dataset_name} Kd={int(Kd_dict[dataset_name]*1E9)}$\pm${int(Kd_std[dataset_name]*1E9)} nM', markersize=2)
         plot_1.plot(conc_range, binding_curve(conc_range, A0_dict[dataset_name], Kd_dict[dataset_name]), '--', color=Mec_colors[dataset_name], linewidth=0.7)
-        plot_1.errorbar(MST_data[dataset_name + ' concentration'], MST_data[dataset_name + ' rel_Mean'], yerr=MST_data[dataset_name + ' CI95'], marker='o', color=Mfc_colors[dataset_name], ecolor=Mec_colors[dataset_name], elinewidth=0.5, capsize=2, markersize=2, linewidth=0)
+        plot_1.errorbar(MST_data[dataset_name + ' EcTopoI concentration, M'], MST_data[dataset_name + ' rel_Mean'], yerr=MST_data[dataset_name + ' CI95'], marker='o', color=Mfc_colors[dataset_name], ecolor=Mec_colors[dataset_name], elinewidth=0.5, capsize=2, markersize=2, linewidth=0)
     
     plot_1.spines["top"].set_visible(False)
     plot_1.spines["right"].set_visible(False)  
@@ -88,7 +89,7 @@ def Plot_MST_curve(data_inpath, sheetname, ws_names_ar, outpath):
     plt.tight_layout()
     plt.show()
     plt.savefig(outpath+'MST_binding_curves.png', dpi=300, figsize=(4,3))
-    plt.close()
+    #plt.close()
     
     return
 

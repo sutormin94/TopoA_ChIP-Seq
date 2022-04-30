@@ -23,9 +23,9 @@ import pandas as pd
 #########
 
 #Path to the raw data.
-Growth_curves_data_BW25113_mutants="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_BW25113_mutants="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_BW25113_mutants="Sup_Table_12"
+WS_name_BW25113_mutants="Table S14"
 #Path to the output plots.
 Outpath_BW25113_mutants="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\BW25113_topA_mutants_growth_curve.png"
 Outpath1_BW25113_mutants="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\BW25113_topA_mutants_growth_rate_doubling_time.png"
@@ -170,13 +170,13 @@ growth_rate_BW25113_mutants(Growth_curves_data_BW25113_mutants, WS_name_BW25113_
 
 
 #########
-## Import data for overexpression of EcTopoI G116S M320V from the pBAD33 plasmid.
+## Import data for overexpression of EcTopoI G116S/M320V from the pBAD33 plasmid.
 #########
 
 #Path to the raw data.
-Growth_curves_data_pBAD33_topA_mut="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pBAD33_topA_mut="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pBAD33_topA_mut="Sup_Table_11"
+WS_name_pBAD33_topA_mut="Table S10"
 #Path to the output plots.
 Outpath_pBAD33_topA_mut="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_pBAD33_EcTopoI_G116S_M320V_induction_growth_curve.png"
 
@@ -187,8 +187,8 @@ def Plot_growth_curve_pBAD33_topA_mut(data_inpath, sheetname, outpath):
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
     
     #Retrive non induced data and induced data.
-    no_Ara=['EcTopoI_mut_Replicate_1', 'EcTopoI_mut_Replicate_2', 'EcTopoI_mut_Replicate_3']
-    plus_Ara=['EcTopoI_mut_Replicate_1_Ara', 'EcTopoI_mut_Replicate_2_Ara', 'EcTopoI_mut_Replicate_3_Ara']
+    no_Ara=['EcTopoI_G116S_M320V_Replicate_1', 'EcTopoI_G116S_M320V_Replicate_2', 'EcTopoI_G116S_M320V_Replicate_3']
+    plus_Ara=['EcTopoI_G116S_M320V_Replicate_1_Ara', 'EcTopoI_G116S_M320V_Replicate_2_Ara', 'EcTopoI_G116S_M320V_Replicate_3_Ara']
     
     Sets=[no_Ara, plus_Ara]
     
@@ -228,13 +228,13 @@ Plot_growth_curve_pBAD33_topA_mut(Growth_curves_data_pBAD33_topA_mut, WS_name_pB
 
 
 #########
-## Import data for overexpression of EcTopoI from the pCA25 plasmid.
+## Import data for overexpression of EcTopoI from the pCA24 plasmid.
 #########
 
 #Path to the raw data.
-Growth_curves_data_pCA24_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pCA24_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pCA24_topA="Sup_Table_11"
+WS_name_pCA24_topA="Table S10"
 #Path to the output plots.
 Outpath_pCA24_topA="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_EcTopoI_induction_growth_curve.png"
 
@@ -245,10 +245,10 @@ def Plot_growth_curve_pCA24_topA(data_inpath, sheetname, outpath):
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
     
     #Retrive non induced data and induced data.
-    no_Ara=['EcTopoI_Replicate_1', 'EcTopoI_Replicate_2', 'EcTopoI_Replicate_3']
-    plus_Ara=['EcTopoI_Replicate_1_IPTG', 'EcTopoI_Replicate_2_IPTG', 'EcTopoI_Replicate_3_IPTG']
+    no_IPTG=['EcTopoI_Replicate_1', 'EcTopoI_Replicate_2', 'EcTopoI_Replicate_3']
+    plus_IPTG=['EcTopoI_Replicate_1_IPTG', 'EcTopoI_Replicate_2_IPTG', 'EcTopoI_Replicate_3_IPTG']
     
-    Sets=[no_Ara, plus_Ara]
+    Sets=[no_IPTG, plus_IPTG]
     
     All_dataframes=[]
     for deta_set in Sets:
@@ -286,13 +286,13 @@ Plot_growth_curve_pCA24_topA(Growth_curves_data_pCA24_topA, WS_name_pCA24_topA, 
 
 
 #########
-## Import data for overexpression of EcTopoI CTD from the pCA25 plasmid.
+## Import data for overexpression of EcTopoI 14kDa CTD from the pCA24 plasmid.
 #########
 
 #Path to the raw data.
-Growth_curves_data_pCA24_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pCA24_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pCA24_EcTopoI_CTD="Sup_Table_11"
+WS_name_pCA24_EcTopoI_CTD="Table S10"
 #Path to the output plots.
 Outpath_pCA24_EcTopoI_CTD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_CTD_induction_growth_curve.png"
 
@@ -303,10 +303,10 @@ def Plot_growth_curve_pCA24_CTD(data_inpath, sheetname, outpath):
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
     
     #Retrive non induced data and induced data.
-    no_Ara=['CTD_Replicate_1', 'CTD_Replicate_2', 'CTD_Replicate_3']
-    plus_Ara=['CTD_Replicate_1_IPTG', 'CTD_Replicate_2_IPTG', 'CTD_Replicate_3_IPTG']
+    no_IPTG=['CTD_Replicate_1', 'CTD_Replicate_2', 'CTD_Replicate_3']
+    plus_IPTG=['CTD_Replicate_1_IPTG', 'CTD_Replicate_2_IPTG', 'CTD_Replicate_3_IPTG']
     
-    Sets=[no_Ara, plus_Ara]
+    Sets=[no_IPTG, plus_IPTG]
     
     All_dataframes=[]
     for deta_set in Sets:
@@ -344,13 +344,13 @@ Plot_growth_curve_pCA24_CTD(Growth_curves_data_pCA24_EcTopoI_CTD, WS_name_pCA24_
 
 
 #########
-## Import data for overexpression of GFP from the pCA25 plasmid.
+## Import data for overexpression of GFP from the pCA24 plasmid.
 #########
 
 #Path to the raw data.
-Growth_curves_data_pCA24_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables.xlsx"
+Growth_curves_data_pCA24_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
 #Name of a worksheet.
-WS_name_pCA24_gfp="Sup_Table_11"
+WS_name_pCA24_gfp="Table S10"
 #Path to the output plots.
 Outpath_pCA24_gfp="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_GFP_induction_growth_curve.png"
 
@@ -361,10 +361,10 @@ def Plot_growth_curve_pCA24_gfp(data_inpath, sheetname, outpath):
     gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
     
     #Retrive non induced data and induced data.
-    no_Ara=['GFP_Replicate_1', 'GFP_Replicate_2', 'GFP_Replicate_3']
-    plus_Ara=['GFP_Replicate_1_IPTG', 'GFP_Replicate_2_IPTG', 'GFP_Replicate_3_IPTG']
+    no_IPTG=['GFP_Replicate_1', 'GFP_Replicate_2', 'GFP_Replicate_3']
+    plus_IPTG=['GFP_Replicate_1_IPTG', 'GFP_Replicate_2_IPTG', 'GFP_Replicate_3_IPTG']
     
-    Sets=[no_Ara, plus_Ara]
+    Sets=[no_IPTG, plus_IPTG]
     
     All_dataframes=[]
     for deta_set in Sets:
@@ -398,3 +398,61 @@ def Plot_growth_curve_pCA24_gfp(data_inpath, sheetname, outpath):
     return
 
 Plot_growth_curve_pCA24_gfp(Growth_curves_data_pCA24_gfp, WS_name_pCA24_gfp, Outpath_pCA24_gfp)
+
+
+
+#########
+## Import data for overexpression of EcTopoI Y319F from the pCA24 plasmid.
+#########
+
+#Path to the raw data.
+Growth_curves_data_pCA24_EcTopoI_Y319F="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+#Name of a worksheet.
+WS_name_pCA24_EcTopoI_Y319F="Table S10"
+#Path to the output plots.
+Outpath_pCA24_EcTopoI_Y319F="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Growth_curves\DY330_EcTopoI_Y319F_induction_growth_curve.png"
+
+
+def Plot_growth_curve_pCA24_EcTopoI_Y319F(data_inpath, sheetname, outpath):
+    
+    #Read growth curves data.
+    gc_data=pd.read_excel(data_inpath, sheet_name=sheetname, header=0, index_col=0)
+    
+    #Retrive non induced data and induced data.
+    no_IPTG=['EcTopoI_Y319F_Replicate_1', 'EcTopoI_Y319F_Replicate_2', 'EcTopoI_Y319F_Replicate_3']
+    plus_IPTG=['EcTopoI_Y319F_Replicate_1_IPTG', 'EcTopoI_Y319F_Replicate_2_IPTG', 'EcTopoI_Y319F_Replicate_3_IPTG']
+    
+    Sets=[no_IPTG, plus_IPTG]
+    
+    All_dataframes=[]
+    for deta_set in Sets:
+        All_dataframes.append(prepare_data(gc_data, deta_set))
+
+    Colors_list=['#000000', '#7E71B1']
+    Fill_color_list=['#000000', '#7E71B1']
+    Label_list=['pCA24 topA Y319F -IPTG', 'pCA24 topA Y319F +IPTG 1mM']
+    
+    #Plot data.
+    fig, plot_1=plt.subplots(1,1,figsize=(4,3), dpi=100)
+    for i in range(len(All_dataframes)):
+        plot_1.plot(All_dataframes[i].index, All_dataframes[i].Mean, Colors_list[i], linewidth=2, label=Label_list[i])
+        plot_1.plot(All_dataframes[i].index, All_dataframes[i].Mean_up, Fill_color_list[i], linewidth=1, alpha=0.3)
+        plot_1.plot(All_dataframes[i].index, All_dataframes[i].Mean_dn, Fill_color_list[i], linewidth=1, alpha=0.3)
+        plot_1.fill_between(All_dataframes[i].index, All_dataframes[i].Mean_dn, All_dataframes[i].Mean_up, color=Fill_color_list[i], alpha=0.3, linewidth=0.2)
+        
+    plot_1.spines["top"].set_visible(False)
+    plot_1.spines["right"].set_visible(False)  
+    plot_1.spines["bottom"].set_linewidth(1.5)
+    plot_1.spines["left"].set_linewidth(1.5)
+    plt.xticks(fontsize=14)
+    plt.yticks(fontsize=14)
+    plt.xlabel('time, min', size=16)
+    plt.ylabel('OD$_{600}$', size=16)
+    plt.legend(fontsize=10, frameon=False, markerscale=2, handlelength=1, handletextpad=0.3)
+    plt.tight_layout()
+    plt.show()
+    plt.savefig(outpath, dpi=300, figsize=(3, 2))
+    
+    return
+
+Plot_growth_curve_pCA24_EcTopoI_Y319F(Growth_curves_data_pCA24_EcTopoI_Y319F, WS_name_pCA24_EcTopoI_Y319F, Outpath_pCA24_EcTopoI_Y319F)
