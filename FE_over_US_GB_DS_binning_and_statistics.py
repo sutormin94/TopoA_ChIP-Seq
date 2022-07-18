@@ -53,7 +53,7 @@ Type_of_annot_10='broadPeak'
 Genes_set_name_10='LATU_no_dps'  
 
 #Path to the file with regions to be omitted (e.g. deletions).
-Deletions_inpath='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\EcTopoI_G116S_M320V_Topo-Seq\Scripts_TopoI_Topo-seq\Additional_genome_features\\Deletions_w3110_G_Mu_SGS.broadPeak'
+Deletions_inpath='C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts\TopoA_ChIP-Seq\Additional_genome_features\\Deletions_w3110_G_Mu_SGS.broadPeak'
 #Width of US, DS regions.
 Win_width=15000
 #Length of GB.
@@ -84,6 +84,11 @@ Dict_of_wigs_path_4={'EcTopoI'                 : 'C:\\Users\sutor\OneDrive\Think
                      'EcTopoI_CTDplus_Rifplus' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_plus_Rif_plus_FE_av.wig',                     
                      }
 
+Set_name_4='EcTopoI_all_conditions'
+Dict_of_wigs_path_4={'EcTopoI'                 : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
+                     'EcTopoI_CTDplus'         : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_plus_Rif_minus_FE_av.wig',                     
+                     }
+
 Set_name_7='Mooney_RNAP'                        
 Dict_of_wigs_path_7={'Mooney_RpoC' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_FE_av.wig',
                      'Mooney_RpoD' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoD_FE_av.wig',
@@ -112,6 +117,13 @@ Set_name_11='RpoC_Rif'
 Dict_of_wigs_path_11={'Borukhov_RpoC'   : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Borukhov_RpoC_Pol_Sofi_LB_FE.wig',
                       'Mooney_RpoC_Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_Rif_FE.wig',
                      }
+Set_name_12='NAPs'
+Dict_of_wigs_path_12={'HNS'  : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_HNS_IP_ME.wig',
+                      'Fis'  : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Kahramanoglou_Fis_IP_ME.wig',
+                      'MukB' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Nolivos_MukB_IP_av.wig',
+                      'MatP' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Nolivos_MatP_IP_av.wig',
+                     }
+
 
 
 #######
@@ -134,12 +146,12 @@ def create_out_dirs(out_path, genes_set_name, track_set_name):
     Dir_check_create(f'{out_path}\Signal_of_TUs_wig\{track_set_name}\{genes_set_name}')    
     return
 
-create_out_dirs(Out_path, Genes_set_name_7,  Set_name_4)
-create_out_dirs(Out_path, Genes_set_name_6,  Set_name_4)
-create_out_dirs(Out_path, Genes_set_name_5,  Set_name_4)
-create_out_dirs(Out_path, Genes_set_name_8,  Set_name_4)
-create_out_dirs(Out_path, Genes_set_name_9,  Set_name_4)
-create_out_dirs(Out_path, Genes_set_name_10, Set_name_4)
+create_out_dirs(Out_path, Genes_set_name_5,  Set_name_12)
+create_out_dirs(Out_path, Genes_set_name_6,  Set_name_12)
+create_out_dirs(Out_path, Genes_set_name_7,  Set_name_12)
+create_out_dirs(Out_path, Genes_set_name_8,  Set_name_12)
+create_out_dirs(Out_path, Genes_set_name_9,  Set_name_12)
+create_out_dirs(Out_path, Genes_set_name_10, Set_name_12)
 
 
 #######
@@ -732,6 +744,7 @@ def genes_FE_comb_plot(gene_annotation, genes_set_name, tracks_group_name, track
     plt.close() 
     
     #Welch t-test. Compare signal for different regions.
+    print('\nCompare tracks within US, TSS, GB, DS regions\n')
     for i in range(4):
         for j in range(len(tracks_dict)):
             for k in range(len(tracks_dict)):
@@ -740,7 +753,15 @@ def genes_FE_comb_plot(gene_annotation, genes_set_name, tracks_group_name, track
                     print(f'Test difference between: {list(tracks_dict.keys())[j]} {Regions[i]} and {list(tracks_dict.keys())[k]} {Regions[i]}')
                     print(f'Sample size: {len(Data_ar[(i*len(tracks_dict))+j])}, Sample size: {len(Data_ar[(i*len(tracks_dict))+k])}')
                     print(f'\nT-test FE Mean1={round(np.mean(Data_ar[(i*len(tracks_dict))+j]),3)}; Mean2={round(np.mean(Data_ar[(i*len(tracks_dict))+k]),3)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
-
+    
+    #Welch t-test. Compare US and DS regions.
+    print('\nCompare US vs DS regions\n')
+    for j in range(len(tracks_dict)):
+        Intervals_stat=stats.ttest_ind(Data_ar[j], Data_ar[(3*len(tracks_dict))+j], equal_var=False)
+        print(f'Test difference between: {list(tracks_dict.keys())[j]} {Regions[0]} and {list(tracks_dict.keys())[j]} {Regions[3]}')
+        print(f'Sample size: {len(Data_ar[j])}, Sample size: {len(Data_ar[(3*len(tracks_dict))+j])}')
+        print(f'\nT-test FE Mean1={round(np.mean(Data_ar[j]),3)}; Mean2={round(np.mean(Data_ar[(3*len(tracks_dict))+j]),3)}\np-value={Intervals_stat[1]}\nt-statistic={Intervals_stat[0]}\n')    
+    
     return
 
 #######
@@ -777,9 +798,9 @@ def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot
     
     return
 
-Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_6,  Type_of_annot_6,  Genes_set_name_6,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_7,  Type_of_annot_7,  Genes_set_name_7,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_8,  Type_of_annot_8,  Genes_set_name_8,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_9,  Type_of_annot_9,  Genes_set_name_9,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+#Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+#Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_6,  Type_of_annot_6,  Genes_set_name_6,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_12, Path_to_annotation_7,  Type_of_annot_7,  Genes_set_name_7,  Set_name_12, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_12, Path_to_annotation_8,  Type_of_annot_8,  Genes_set_name_8,  Set_name_12, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_12, Path_to_annotation_9,  Type_of_annot_9,  Genes_set_name_9,  Set_name_12, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+#Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)

@@ -93,7 +93,7 @@ def qPCR_primers_calibration(dataframe, Primers_list, suptitle_text, outpath):
 
     return
 
-Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 PC_data=pd.read_excel(Input_table, sheet_name='Table S7', header=None, index_col=0)
 print(PC_data)
 
@@ -105,6 +105,9 @@ qPCR_primers_calibration(PC_data, RpmH_primers_set, 'rpmH-rnpA-yidD-yidC cluster
 
 BW_comp_set=['BW25113_wt', 'delta11', 'delta11_SPA', 'delta14', 'delta14_SPA']
 qPCR_primers_calibration(PC_data, BW_comp_set, 'BW25113 topA mutants competition primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\BW25113_topA_mut_primers_calibration.png")
+
+sup_rel_primers_set=['rho', 'rnhB', 'rnhA', 'topB', 'parE', 'parC', 'gyrB', 'gyrA']
+qPCR_primers_calibration(PC_data, sup_rel_primers_set, 'gyrAB parCE rnhAB topB rho primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\gyrAB_parCE_rnhAB_topB_rho_primers_calibration.png")
 
 
 
@@ -229,115 +232,11 @@ def ChIP_qPCR_data_analysis(dataframe, outpath):
     return
     
 #Path to qPCR data table.
-ChIP_qPCR_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+ChIP_qPCR_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 ChIP_qPCR_data=pd.read_excel(ChIP_qPCR_table, sheet_name='Table S12', header=0, index_col=0)
 print(ChIP_qPCR_data)    
 
 ChIP_qPCR_data_analysis(ChIP_qPCR_data, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\EcTopoI_ChIP_qPCR_plot.png")
-
-
-
-
-#################
-### EcTopoI 14kDa CTD overexpression effects. RT-qPCR data visualization, transcripts enrichement over long transcripts.
-#################
-
-#Compute fold enrichment.
-def FE_calc(ar, primers_eff, length):
-
-    #Calculate FE for data points.
-    FE_ar=[]
-    for i in range(len(ar)):
-        replicas_data=[]
-        for j in range(len(ar[i])):
-            FE=(length[-1]*(primers_eff[-1]**ar[-1][j]))/(length[i]*(primers_eff[i]**ar[i][j]))
-            replicas_data.append(FE)
-        FE_ar.append(replicas_data) 
-        
-    return FE_ar
-
-
-#Plot data.
-def CTD_ind_RNA_decay_qPCR(dataframe, rows_ar, outpath):
-    
-    ###
-    ##Plot all Cts.
-    ###
-    
-    fig, plot_av=plt.subplots(1,1,figsize=(12,3), dpi=100)
-    
-    #Prepare x axis, extract data.
-    Conditions=rows_ar
-    
-    X_coords_c=np.asarray(dataframe.loc[rows_ar, 'Distance'].tolist())
-    X_coords_l=X_coords_c-25
-    X_coords_r=X_coords_c+25
-    
-    Efficiency=dataframe.loc[rows_ar, 'Effectiveness'].tolist()
-    Length=dataframe.loc[rows_ar, 'Length'].tolist()
-    
-    wt_data_points=[]
-    IPTG_data_points=[]
-    for pair in Conditions:
-        wt_data_points.append(dataframe.loc[pair, ['wt1', 'wt2', 'wt3']].tolist())
-        IPTG_data_points.append(dataframe.loc[pair, ['IPTG1', 'IPTG2', 'IPTG3']].tolist())
-    
-    #Compute fold enrichment for mean data points.
-    FE_wt=FE_calc(wt_data_points, Efficiency, Length)
-    FE_IPTG=FE_calc(IPTG_data_points, Efficiency, Length)
-    
-    #Compute mean and standard deviation for fold enrichment.
-    Points_mean_wt, Points_std_wt=FE_mean_and_std(FE_wt)
-    Points_mean_IPTG, Points_std_IPTG=FE_mean_and_std(FE_IPTG)
-    
-    #Compare means, stat.
-    Data_points=[FE_wt, FE_IPTG]
-    for i in range(len(Data_points[0])):
-        print(f'T-test for {Conditions[i]} : {stats.ttest_ind(Data_points[0][i], Data_points[1][i])}')
-        
-    #Plot data.
-    plot_av.bar(X_coords_l, Points_mean_wt, yerr=Points_std_wt, error_kw=dict(lw=1, capsize=3, capthick=1), width=50, color='#b2e69a', edgecolor='k', linewidth=0.6, label='-IPTG')
-    plot_av.bar(X_coords_r, Points_mean_IPTG, yerr=Points_std_IPTG, error_kw=dict(lw=1, capsize=3, capthick=1), width=50, color='#89d8fa', edgecolor='k', linewidth=0.6, label='+IPTG 1mM')
-    
-    plot_av.plot(X_coords_l, FE_wt, 'ko', markersize=1)
-    plot_av.plot(X_coords_r, FE_IPTG, 'ko', markersize=1)
-    
-    plot_av.set_ylabel('Fold enrichment', size=20)
-    plot_av.set_xticks(X_coords_c, minor=True)
-    plot_av.set_xticklabels(Conditions, minor=True, rotation=0, size=12)  
-    plot_av.set_xticks(range(0, max(X_coords_c)+200, 500), minor=False)
-    plot_av.set_xticklabels(range(0, max(X_coords_c)+200, 500), minor=False, rotation=90, size=7) 
-    
-    plot_av.tick_params(axis='x', which='minor', pad=1.5)
-    plot_av.tick_params(axis='x', which='major', pad=15)
-    
-    plot_av.set_yticks(np.arange(0, max(Points_mean_wt)+0.2, 0.25), minor=False)
-    plot_av.set_yticklabels(np.arange(0, max(Points_mean_wt)+0.2, 0.25), minor=False, rotation=0, size=12)  
-    plot_av.spines["top"].set_visible(False)
-    plot_av.spines["right"].set_visible(False)  
-    plot_av.spines["bottom"].set_linewidth(1.5)
-    plot_av.spines["left"].set_linewidth(1.5)    
-    
-    #Place legend outside of a graph. Taken from: https://stackoverflow.com/questions/4700614/how-to-put-the-legend-out-of-the-plot
-    box=plot_av.get_position()
-    plot_av.set_position([box.x0, box.y0, box.width * 0.95, box.height])    
-    plt.legend(loc='upper left', bbox_to_anchor=(1, 0.75), frameon=False)
-    
-    plt.tight_layout(rect=[0,0,0.95,1])
-    plt.show()
-    plt.savefig(outpath, dpi=300, size=(12,3))
-    
-    return
-
-#Path to qPCR data table.
-Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
-Input_dec=pd.read_excel(Input_table, sheet_name='Table S8', header=0, index_col=0)
-print(Input_dec)
-
-topA_points=['topA7', 'topA6', 'topA5', 'topA4', 'topA3', 'topA2', 'topA1']
-CTD_ind_RNA_decay_qPCR(Input_dec, topA_points, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\TopA_CTD_expression_effect_qPCR.svg")
-rpmH_points=['rpmH8', 'rpmH7', 'rpmH6', 'rpmH5', 'rpmH4', 'rpmH3', 'rpmH2', 'rpmH1']
-CTD_ind_RNA_decay_qPCR(Input_dec, rpmH_points, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\RpmH_CTD_expression_effect_qPCR.svg")
 
 
 
@@ -401,8 +300,8 @@ def topA_rpmH_ChIP_qPCR(dataframe, rows_ar, bar_width, outpath):
     
     for pair in Conditions:
         #-CTD/-Rif
-        wt_mock_data_points.append(dataframe.loc[pair, ['wt_mock_1', 'wt_mock_2', 'wt_mock_3',  'wt_mock_4', 'wt_mock_5', 'wt_mock_6']].tolist())
-        wt_IP_data_points.append(dataframe.loc[pair, ['wt_IP_1', 'wt_IP_2', 'wt_IP_3', 'wt_IP_4', 'wt_IP_5', 'wt_IP_6']].tolist())
+        wt_mock_data_points.append(dataframe.loc[pair, ['wt_mock_1', 'wt_mock_2', 'wt_mock_3',  'wt_mock_4']].tolist())
+        wt_IP_data_points.append(dataframe.loc[pair, ['wt_IP_1', 'wt_IP_2', 'wt_IP_3', 'wt_IP_4']].tolist())        
         #+CTD/-Rif
         CTD_mock_data_points.append(dataframe.loc[pair, ['CTD_mock_1',  'CTD_mock_2', 'CTD_mock_3', 'CTD_mock_4']].tolist())
         CTD_IP_data_points.append(dataframe.loc[pair, ['CTD_IP_1',  'CTD_IP_2', 'CTD_IP_3', 'CTD_IP_4']].tolist())     
@@ -476,7 +375,7 @@ def topA_rpmH_ChIP_qPCR(dataframe, rows_ar, bar_width, outpath):
     return
 
 #Path to qPCR data table.
-Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+Input_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 Input_dec=pd.read_excel(Input_table, sheet_name='Table S9', header=0, index_col=0)
 print(Input_dec)
 
@@ -557,7 +456,7 @@ def strains_comp_analysis(pathin, worksheet, wt_set_name, mut_name, outpath):
     return
 
 #Path to the raw data.
-BW25113_strains_compet="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+BW25113_strains_compet="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 #Name of a worksheet.
 WS_name_BW25113="Table S16"
 
@@ -571,3 +470,177 @@ Outpath_BW25113_delta14="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science
 
 
 
+#################
+### rnhAB gyrAB parCE topB expression response on EcTopoI Y319F mutant overexpression.
+#################
+
+#Compute fold enrichment.
+def FE_calc_qPCR(ar, primers_eff, length):
+
+    #Calculate FE for data points.
+    FE_ar=[]
+    for i in range(len(ar)):
+        replicas_data=[]
+        for j in range(len(ar[i])):
+            FE=(length[-1]*(primers_eff[-1]**ar[-1][j]))/(length[i]*(primers_eff[i]**ar[i][j]))
+            replicas_data.append(FE)
+        FE_ar.append(replicas_data) 
+        
+    return FE_ar
+
+
+#Path to qPCR data table.
+data_table="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
+data_tab=pd.read_excel(data_table, sheet_name='Table S8', header=0, index_col=0)
+print(data_tab)
+
+
+#Plot data.
+def qPCR_Y319F_expression_response(dataframe, outpath):
+    
+    ###
+    ##Plot all FEs.
+    ###
+    
+    fig, plot_av=plt.subplots(1,1,figsize=(6.5,3), dpi=100)
+    
+    #Prepare x axis.
+    Genes_studied=['$\it{gyrA}$', '$\it{gyrB}$', '$\it{topB}$', '$\it{parC}$', '$\it{parE}$', '$\it{rnhA}$', '$\it{rnhB}$', '$\it{rho}$']
+    print(len(Genes_studied))
+    
+    X_coords_main=[1.9,4.9,7.9,10.9,13.9,16.9,19.9, 22.9]
+    
+    Efficiency=dataframe.loc[:, 'Effectiveness'].tolist()
+    Length=dataframe.loc[:, 'Length'].tolist()
+    
+    Conditions_rho_gyrAB=['gyrA2', 'gyrB1', 'rho2_R1']
+    dataframe_rho_gyrAB=dataframe.loc[Conditions_rho_gyrAB, :]
+    print(dataframe_rho_gyrAB)
+    Conditions_rho_topB_parE_parC=['topB1', 'parC2', 'parE1', 'rho2_R2']
+    dataframe_rho_topB_parE_parC=dataframe.loc[Conditions_rho_topB_parE_parC, :]
+    print(dataframe_rho_topB_parE_parC)
+    Conditions_rho_rnhAB=['rnhA1', 'rnhB1', 'rho2_R3']
+    dataframe_rho_rnhAB=dataframe.loc[Conditions_rho_rnhAB, :]
+    print(dataframe_rho_rnhAB)
+    
+    #rho and gyrAB
+    Efficiency_rho_gyrAB=dataframe_rho_gyrAB.loc[:, 'Effectiveness'].tolist()
+    Length_rho_gyrAB=dataframe_rho_gyrAB.loc[:, 'Length'].tolist()
+    GFP_m_rho_gyrAB=[]
+    GFP_p_rho_gyrAB=[]
+    Y319F_m_rho_gyrAB=[]
+    Y319F_p_rho_gyrAB=[]    
+    for pair in Conditions_rho_gyrAB:
+        GFP_m_rho_gyrAB.append(dataframe_rho_gyrAB.loc[pair, ['GFP-1', 'GFP-2', 'GFP-3', 'GFP-4', 'GFP-5', 'GFP-6']].tolist())
+        GFP_p_rho_gyrAB.append(dataframe_rho_gyrAB.loc[pair, ['GFP+1', 'GFP+2', 'GFP+3', 'GFP+4', 'GFP+5', 'GFP+6']].tolist())
+        Y319F_m_rho_gyrAB.append(dataframe_rho_gyrAB.loc[pair, ['Y319F-1', 'Y319F-2', 'Y319F-3', 'Y319F-4', 'Y319F-5', 'Y319F-6']].tolist())
+        Y319F_p_rho_gyrAB.append(dataframe_rho_gyrAB.loc[pair, ['Y319F+1', 'Y319F+2', 'Y319F+3', 'Y319F+4', 'Y319F+5', 'Y319F+6']].tolist())        
+    
+    #Compute normalized fold enrichment for mean data points.
+    Norm_GFP_m_rho_gyrAB=FE_calc_qPCR(GFP_m_rho_gyrAB, Efficiency_rho_gyrAB, Length_rho_gyrAB)
+    Norm_GFP_p_rho_gyrAB=FE_calc_qPCR(GFP_p_rho_gyrAB, Efficiency_rho_gyrAB, Length_rho_gyrAB)
+    Norm_Y319F_m_rho_gyrAB=FE_calc_qPCR(Y319F_m_rho_gyrAB, Efficiency_rho_gyrAB, Length_rho_gyrAB)
+    Norm_Y319F_p_rho_gyrAB=FE_calc_qPCR(Y319F_p_rho_gyrAB, Efficiency_rho_gyrAB, Length_rho_gyrAB)
+    print(Norm_GFP_m_rho_gyrAB, Norm_GFP_p_rho_gyrAB)
+    
+    #rho, topB, parE, and parC
+    Efficiency_rho_topB_parE_parC=dataframe_rho_topB_parE_parC.loc[:, 'Effectiveness'].tolist()
+    Length_rho_topB_parE_parC=dataframe_rho_topB_parE_parC.loc[:, 'Length'].tolist()
+    GFP_m_rho_topB_parE_parC=[]
+    GFP_p_rho_topB_parE_parC=[]
+    Y319F_m_rho_topB_parE_parC=[]
+    Y319F_p_rho_topB_parE_parC=[]      
+    for pair in Conditions_rho_topB_parE_parC:
+        GFP_m_rho_topB_parE_parC.append(dataframe_rho_topB_parE_parC.loc[pair, ['GFP-1', 'GFP-2', 'GFP-3', 'GFP-4', 'GFP-5', 'GFP-6']].tolist())
+        GFP_p_rho_topB_parE_parC.append(dataframe_rho_topB_parE_parC.loc[pair, ['GFP+1', 'GFP+2', 'GFP+3', 'GFP+4', 'GFP+5', 'GFP+6']].tolist())
+        Y319F_m_rho_topB_parE_parC.append(dataframe_rho_topB_parE_parC.loc[pair, ['Y319F-1', 'Y319F-2', 'Y319F-3', 'Y319F-4', 'Y319F-5', 'Y319F-6']].tolist())
+        Y319F_p_rho_topB_parE_parC.append(dataframe_rho_topB_parE_parC.loc[pair, ['Y319F+1', 'Y319F+2', 'Y319F+3', 'Y319F+4', 'Y319F+5', 'Y319F+6']].tolist())          
+    
+    #Compute normalized fold enrichment for mean data points.
+    Norm_GFP_m_rho_topB_parE_parC=FE_calc_qPCR(GFP_m_rho_topB_parE_parC, Efficiency_rho_topB_parE_parC, Length_rho_topB_parE_parC)
+    Norm_GFP_p_rho_topB_parE_parC=FE_calc_qPCR(GFP_p_rho_topB_parE_parC, Efficiency_rho_topB_parE_parC, Length_rho_topB_parE_parC)
+    Norm_Y319F_m_rho_topB_parE_parC=FE_calc_qPCR(Y319F_m_rho_topB_parE_parC, Efficiency_rho_topB_parE_parC, Length_rho_topB_parE_parC)
+    Norm_Y319F_p_rho_topB_parE_parC=FE_calc_qPCR(Y319F_p_rho_topB_parE_parC, Efficiency_rho_topB_parE_parC, Length_rho_topB_parE_parC)    
+    print(Norm_GFP_m_rho_topB_parE_parC, Norm_GFP_p_rho_topB_parE_parC)
+    
+    #rho and rnhAB
+    Efficiency_rho_rnhAB=dataframe_rho_rnhAB.loc[:, 'Effectiveness'].tolist()
+    Length_rho_rnhAB=dataframe_rho_rnhAB.loc[:, 'Length'].tolist()
+    GFP_m_rho_rnhAB=[]
+    GFP_p_rho_rnhAB=[]
+    Y319F_m_rho_rnhAB=[]
+    Y319F_p_rho_rnhAB=[]      
+    for pair in Conditions_rho_rnhAB:
+        GFP_m_rho_rnhAB.append(dataframe_rho_rnhAB.loc[pair, ['GFP-1', 'GFP-2', 'GFP-3', 'GFP-4', 'GFP-5', 'GFP-6']].tolist())
+        GFP_p_rho_rnhAB.append(dataframe_rho_rnhAB.loc[pair, ['GFP+1', 'GFP+2', 'GFP+3', 'GFP+4', 'GFP+5', 'GFP+6']].tolist())
+        Y319F_m_rho_rnhAB.append(dataframe_rho_rnhAB.loc[pair, ['Y319F-1', 'Y319F-2', 'Y319F-3', 'Y319F-4', 'Y319F-5', 'Y319F-6']].tolist())
+        Y319F_p_rho_rnhAB.append(dataframe_rho_rnhAB.loc[pair, ['Y319F+1', 'Y319F+2', 'Y319F+3', 'Y319F+4', 'Y319F+5', 'Y319F+6']].tolist())        
+    
+    #Compute normalized fold enrichment for mean data points.
+    Norm_GFP_m_rho_rnhAB=FE_calc_qPCR(GFP_m_rho_rnhAB, Efficiency_rho_rnhAB, Length_rho_rnhAB)
+    Norm_GFP_p_rho_rnhAB=FE_calc_qPCR(GFP_p_rho_rnhAB, Efficiency_rho_rnhAB, Length_rho_rnhAB)
+    Norm_Y319F_m_rho_rnhAB=FE_calc_qPCR(Y319F_m_rho_rnhAB, Efficiency_rho_rnhAB, Length_rho_rnhAB)
+    Norm_Y319F_p_rho_rnhAB=FE_calc_qPCR(Y319F_p_rho_rnhAB, Efficiency_rho_rnhAB, Length_rho_rnhAB)    
+    print(Norm_GFP_m_rho_rnhAB, Norm_GFP_p_rho_rnhAB)    
+    
+    #Compute mean and standard deviation for fold enrichment.
+    Norm_GFP_m=Norm_GFP_m_rho_gyrAB[:-1]+Norm_GFP_m_rho_topB_parE_parC[:-1]+Norm_GFP_m_rho_rnhAB
+    Norm_GFP_p=Norm_GFP_p_rho_gyrAB[:-1]+Norm_GFP_p_rho_topB_parE_parC[:-1]+Norm_GFP_p_rho_rnhAB
+    Norm_Y319F_m=Norm_Y319F_m_rho_gyrAB[:-1]+Norm_Y319F_m_rho_topB_parE_parC[:-1]+Norm_Y319F_m_rho_rnhAB
+    Norm_Y319F_p=Norm_Y319F_p_rho_gyrAB[:-1]+Norm_Y319F_p_rho_topB_parE_parC[:-1]+Norm_Y319F_p_rho_rnhAB
+    
+    Points_mean_GFP_m, Points_std_GFP_m=FE_mean_and_std(Norm_GFP_m)
+    Points_mean_GFP_p, Points_std_GFP_p=FE_mean_and_std(Norm_GFP_p)
+    Points_mean_Y319F_m, Points_std_Y319F_m=FE_mean_and_std(Norm_Y319F_m)
+    Points_mean_Y319F_p, Points_std_Y319F_p=FE_mean_and_std(Norm_Y319F_p)  
+    
+    print(len(Norm_GFP_m), len(Norm_GFP_p), len(Norm_Y319F_m), len(Norm_Y319F_p))
+    print(len(Points_mean_GFP_m), len(Points_mean_GFP_p), len(Points_mean_Y319F_m), len(Points_mean_Y319F_p))
+    
+    #Compare conditions.
+    All_data_ar=[Norm_GFP_m, Norm_GFP_p, Norm_Y319F_m, Norm_Y319F_p]
+    Experimental_conditions=['GFP-', 'GFP+', 'topA Y319F-', 'topA Y319F+']
+    for k in range(len(All_data_ar[0])):
+        for i in range(len(All_data_ar)):
+            for j in range(len(All_data_ar)):
+                if j>i:
+                    qPCR_stat=stats.ttest_ind(All_data_ar[i][k], All_data_ar[j][k], equal_var=False, nan_policy='omit')
+                    print(f'Test difference between: {Experimental_conditions[i]} and {Experimental_conditions[j]} for gene {Genes_studied[k]}')
+                    print(f'Sample size: {len(All_data_ar[i][k])}, Sample size: {len(All_data_ar[j][k])}')   
+                    print(f'\nT-test FE Mean1={round(np.mean(All_data_ar[i][k]),3)}; Mean2={round(np.mean(All_data_ar[j][k]),3)}\np-value={qPCR_stat[1]}\nt-statistic={qPCR_stat[0]}\n')                  
+                    
+        
+    #Set colors for bars.
+    Colors=['#b2e69a', '#f598b8', '#f5ab87', '#89d8fa']*len(Norm_GFP_m)
+    print(len(Colors))
+    
+    X_coords_GFP_m=np.array(X_coords_main)-0.9
+    X_coords_GFP_p=np.array(X_coords_main)-0.3
+    X_coords_Y319F_m=np.array(X_coords_main)+0.3
+    X_coords_Y319F_p=np.array(X_coords_main)+0.9
+    
+    #Plot data.
+    Bars_GFP_m=plot_av.bar(X_coords_GFP_m, Points_mean_GFP_m, yerr=Points_std_GFP_m, error_kw=dict(lw=1, capsize=3, capthick=1), align='center', width=0.6, color='#b2e69a', edgecolor='k', linewidth=0.6)
+    Bars_GFP_p=plot_av.bar(X_coords_GFP_p, Points_mean_GFP_p, yerr=Points_std_GFP_p, error_kw=dict(lw=1, capsize=3, capthick=1), align='center', width=0.6, color='#f598b8', edgecolor='k', linewidth=0.6)
+    Bars_Y319F_m=plot_av.bar(X_coords_Y319F_m, Points_mean_Y319F_m, yerr=Points_std_Y319F_m, error_kw=dict(lw=1, capsize=3, capthick=1), align='center', width=0.6, color='#f5ab87', edgecolor='k', linewidth=0.6)
+    Bars_Y319F_p=plot_av.bar(X_coords_Y319F_p, Points_mean_Y319F_p, yerr=Points_std_Y319F_p, error_kw=dict(lw=1, capsize=3, capthick=1), align='center', width=0.6, color='#89d8fa', edgecolor='k', linewidth=0.6)
+    plot_av.plot(X_coords_GFP_m, Norm_GFP_m, 'ko', markersize=1) 
+    plot_av.plot(X_coords_GFP_p, Norm_GFP_p, 'ko', markersize=1) 
+    plot_av.plot(X_coords_Y319F_m, Norm_Y319F_m, 'ko', markersize=1) 
+    plot_av.plot(X_coords_Y319F_p, Norm_Y319F_p, 'ko', markersize=1) 
+    plot_av.set_ylabel('Normalized value', size=17)
+    plot_av.set_xticks(X_coords_main)
+    plot_av.set_xticklabels(Genes_studied, rotation=0, size=14)  
+    plot_av.set_yticklabels([0,1,2,3,4,5], rotation=0, size=12)
+    plot_av.tick_params(axis='x', which='major', pad=5)
+    plot_av.set_ylim([0, 5])
+    
+    plt.legend((Bars_GFP_m[0],Bars_GFP_p[0],Bars_Y319F_m[0],Bars_Y319F_p[0]), ('$\it{gfp}$-', '$\it{gfp}$+', '$\it{topA}$ Y319F-', '$\it{topA}$ Y319F+'), fontsize=14, ncol=4, frameon=False, markerscale=2, handlelength=0.7, handletextpad=0.3, columnspacing=0.7)
+    plt.tight_layout()
+    
+    plt.show()    
+    plt.savefig(outpath, dpi=300, size=(6.5,3))   
+
+    return
+
+qPCR_Y319F_expression_response(data_tab, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\\rnhAB_gyrAB_parCE_topB_response_on_Y319F_expression_qPCR.png")

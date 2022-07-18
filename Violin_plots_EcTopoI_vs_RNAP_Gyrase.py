@@ -33,7 +33,10 @@ path_to_intervals_data_dict={'EcTopoI'     : 'C:\\Users\sutor\OneDrive\ThinkPad_
                              'Gyrase'      : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\Cfx_10mkM_trusted_GCSs_h_s.broadPeak',
                              'EcTopoI Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\Peak_calling\Reproducible_peaks\TopoA_noCTD_Rif_rep123_thr_3_nm_0.001_peaks.narrowPeak',
                              'RpoC Rif'    : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data_analysis\EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Rif_Mooney\Mooney_RpoC_Rif_peaks_threshold_1.5.BroadPeak',
-                                                          
+                             'MtbRNAP' :   'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\\Uplekar_MtbRNAP_peaks_threshold_3.BroadPeak',
+                             'MtbGyrase' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\Ahmed_MtbGyrase_peaks_threshold_2.BroadPeak',                                                          
+                             'MsmRNAP' :   'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\Landick_MsmRNAP_peaks_threshold_4.BroadPeak',
+                             'MsmTopoI' :  'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\Peak_calling\Rani_MsmTopoI_FC_peaks_threshold_3.BroadPeak'                             
                              }
 
 path_to_wig_files_dict={'EcTopoI'     : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
@@ -42,6 +45,10 @@ path_to_wig_files_dict={'EcTopoI'     : 'C:\\Users\sutor\OneDrive\ThinkPad_worki
                         'Gyrase'      : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_Gyrase_Cfx_10mkM_FE_av.wig',
                         'EcTopoI Rif' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Sutormin_TopA_ChIP_CTD_minus_Rif_plus_FE_av_123.wig',
                         'RpoC Rif'    : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\Mooney_RpoC_Rif_FE.wig',
+                        'MtbRNAP' :   'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\FE\\Uplekar_MtbRNAP_FE_av.wig',
+                        'MtbGyrase' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\FE\Ahmed_Gyrase_MtbRa_nodup_FE_1.wig',                        
+                        'MsmRNAP' :   'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\FE\Landick_MsmRNAP_FE_av.wig',
+                        'MsmTopoI' :  'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\Other\Mycobacterium_TopoI_Gyrase_RNAP\FE\Rani_MsmTopoI_nodup_FC.wig'                        
                         }
 
 #Output: path to the dir to store output
@@ -97,14 +104,14 @@ def read_wig(path_dict, signal_name):
 #Mark peaks.
 #######
 
-def mark_peaks_return_subsets(peaks_set_name, peaks_set, wig_name, wig, calc_option):
-    deletions_ar=[[274500, 372148], [793800, 807500], [1199000, 1214000]]
+def mark_peaks_return_subsets(peaks_set_name, peaks_set, wig_name, wig, calc_option, deletions_ar):
+    mask_len=len(wig)
     sets_dict={}
 
     print(f'{wig_name} masked with {peaks_set_name} peaks')
     
     if calc_option=='all_positions': #Calculate statistics over all positions.
-        mask=[0]*4647454
+        mask=[0]*mask_len
         for peak in peaks_set:
             mask[peak[0]:(peak[1]+1)]=[1]*((peak[1]+1)-peak[0])
         
@@ -135,7 +142,7 @@ def mark_peaks_return_subsets(peaks_set_name, peaks_set, wig_name, wig, calc_opt
                 peak_len.append(peak[1]-peak[0]+1)
         
         #Exclude peaks and deleted regions.
-        mask=[0]*4647454
+        mask=[0]*mask_len
         for peak in peaks_set:
             mask[peak[0]:(peak[1]+1)]=[1]*((peak[1]+1)-peak[0])   
         for deletion in deletions_ar:
@@ -233,7 +240,7 @@ def draw_violins(dataset1, parameters, pwd):
 #Wrapper function.
 #######
 
-def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, parameters, Outpath):
+def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, parameters, Outpath): 
     
     #Dataset. Specify names of datasets to be compared.
     signal_name=parameters['signal_name']
@@ -244,7 +251,7 @@ def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, paramete
     WIG_array=read_wig(path_to_wig_files_dict, signal_name)
     
     #Mask regions, get data inside and outside of peaks.
-    Sets_dictionary=mark_peaks_return_subsets(interval_name, Peaks_array, signal_name, WIG_array, parameters['calc_option'])
+    Sets_dictionary=mark_peaks_return_subsets(interval_name, Peaks_array, signal_name, WIG_array, parameters['calc_option'], parameters['del_ar'])
     dataset=[Sets_dictionary[f'{signal_name}_wig_in_{interval_name}_peaks'], Sets_dictionary[f'{signal_name}_wig_out_{interval_name}_peaks']]
     
     #Welch t-test.
@@ -255,14 +262,50 @@ def violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, paramete
     
     return
 
-Parameters1={'signal_name' : 'RpoC', 'interval_name' : 'EcTopoI', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5]}
+Parameters1={'signal_name' : 'RpoC', 'interval_name' : 'EcTopoI', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5], 
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
 violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters1, Outputpath)
 
-Parameters2={'signal_name' : 'EcTopoI', 'interval_name' : 'RpoC', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5]}
+Parameters2={'signal_name' : 'EcTopoI', 'interval_name' : 'RpoC', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
 violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters2, Outputpath)
 
-Parameters3={'signal_name' : 'RpoC Rif', 'interval_name' : 'EcTopoI Rif', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5]}
+Parameters3={'signal_name' : 'RpoC Rif', 'interval_name' : 'EcTopoI Rif', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
 violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters3, Outputpath)
 
-Parameters4={'signal_name' : 'EcTopoI Rif', 'interval_name' : 'RpoC Rif', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5]}
+Parameters4={'signal_name' : 'EcTopoI Rif', 'interval_name' : 'RpoC Rif', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
 violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters4, Outputpath)
+
+Parameters5={'signal_name' : 'Gyrase', 'interval_name' : 'EcTopoI', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters5, Outputpath)
+
+Parameters6={'signal_name' : 'EcTopoI', 'interval_name' : 'Gyrase', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters6, Outputpath)
+
+Parameters7={'signal_name' : 'RpoB', 'interval_name' : 'EcTopoI', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters7, Outputpath)
+
+Parameters8={'signal_name' : 'EcTopoI', 'interval_name' : 'RpoB', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[274500, 372148], [793800, 807500], [1199000, 1214000]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters8, Outputpath)
+
+Parameters9={'signal_name' : 'MsmRNAP', 'interval_name' : 'MsmTopoI', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+             'del_ar' : [[0, 0]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters9, Outputpath)
+
+Parameters10={'signal_name' : 'MsmTopoI', 'interval_name' : 'MsmRNAP', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+              'del_ar' : [[0, 0]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters10, Outputpath)
+
+Parameters11={'signal_name' : 'MtbGyrase', 'interval_name' : 'MtbRNAP', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+              'del_ar' : [[0, 0]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters11, Outputpath)
+
+Parameters12={'signal_name' : 'MtbRNAP', 'interval_name' : 'MtbGyrase', 'calc_option' : 'regions', 'yticknames_pos' : [0, 8.5, 2], 'ylim' : [-0.5, 8], 'annotate_pos' : [5, 5],
+              'del_ar' : [[0, 0]]}
+violin_wrapper(path_to_intervals_data_dict, path_to_wig_files_dict, Parameters12, Outputpath)

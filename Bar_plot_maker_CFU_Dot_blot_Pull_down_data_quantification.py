@@ -27,12 +27,12 @@ from scipy.stats import pearsonr, binom, ttest_ind
 #################
 
 #Path to CFU data table.
-data_table_CTD_st="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+data_table_CTD_st="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 data_tab_CTD_st=pd.read_excel(data_table_CTD_st, sheet_name='Table S6', header=0, index_col=0)
 print(data_tab_CTD_st)
 
 def compute_standard_error(column):
-    std_err=(np.std(column)/np.sqrt(len(column)))*1.96
+    std_err=(np.std(column)/np.sqrt(len(column)))
     return std_err
 
 #Plot data.
@@ -108,7 +108,7 @@ count_CFU_CTD_short_term(data_tab_CTD_st, "C:\\Users\sutor\OneDrive\ThinkPad_wor
 #################
 
 #Path to CFU counts.
-data_table_CTD_lt="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+data_table_CTD_lt="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 data_tab_CTD_lt=pd.read_excel(data_table_CTD_lt, sheet_name='Table S5', header=0, index_col=0)
 print(data_tab_CTD_lt)
 
@@ -151,7 +151,7 @@ def count_CFU_CTD_long_term(dataframe, outpath):
     
     plot_av.set_ylabel('CFU number, log', size=20)
     plot_av.set_xticks(X_coords_Glc, minor=False)
-    plot_av.set_xticklabels(['-\nplasmid', 'pCA25\nGFP', 'pCA25\n14kDa CTD'], minor=False, rotation=0, size=12)  
+    plot_av.set_xticklabels(['-\nplasmid', 'pCA24\nGFP', 'pCA24\n14kDa CTD'], minor=False, rotation=0, size=12)  
       
     plot_av.set_yscale('log')
     
@@ -166,7 +166,7 @@ def count_CFU_CTD_long_term(dataframe, outpath):
     
     return
 
-count_CFU_CTD_long_term(data_tab_CTD_lt, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\CTD_effect_long_term_CFU_counting_24h.png")
+#count_CFU_CTD_long_term(data_tab_CTD_lt, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\CTD_effect_long_term_CFU_counting_24h.png")
 
 
 
@@ -175,7 +175,7 @@ count_CFU_CTD_long_term(data_tab_CTD_lt, "C:\\Users\sutor\OneDrive\ThinkPad_work
 #################
 
 #Path to Dot-blot data table.
-data_table_Dot_blot="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+data_table_Dot_blot="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 data_tab_Dot_blot=pd.read_excel(data_table_Dot_blot, sheet_name='Table S17', header=0, index_col=0)
 print(data_tab_Dot_blot)
 
@@ -220,8 +220,8 @@ def plot_dot_blot(dataframe, conditions_list, outpath):
 
     return
 
-plot_dot_blot(data_tab_Dot_blot, ['pCA25 EcTopoI CTD -IPTG', 'pCA25 EcTopoI CTD +IPTG'], "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\R_loops_14kDa_CTD_dot_blot_quantification.png")
-plot_dot_blot(data_tab_Dot_blot, ['pCA25 EcTopoI Y319F -IPTG', 'pCA25 EcTopoI Y319F +IPTG'], "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\R_loops_EcTopoI_Y319F_dot_blot_quantification.png")
+#plot_dot_blot(data_tab_Dot_blot, ['pCA24 EcTopoI CTD -IPTG', 'pCA24 EcTopoI CTD +IPTG'], "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\R_loops_14kDa_CTD_dot_blot_quantification.png")
+#plot_dot_blot(data_tab_Dot_blot, ['pCA24 EcTopoI Y319F -IPTG', 'pCA24 EcTopoI Y319F +IPTG'], "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\R_loops_EcTopoI_Y319F_dot_blot_quantification.png")
 
 
 
@@ -230,7 +230,7 @@ plot_dot_blot(data_tab_Dot_blot, ['pCA25 EcTopoI Y319F -IPTG', 'pCA25 EcTopoI Y3
 #################
 
 #Path to pull-down data table.
-data_table_PD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+data_table_PD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 data_tab_PD=pd.read_excel(data_table_PD, sheet_name='Table S4', header=0, index_col=0)
 print(data_tab_PD)
 
@@ -241,7 +241,7 @@ def plot_pull_down(dataframe, outpath):
     fig, plot_av=plt.subplots(1,1,figsize=(3.9,2.5), dpi=100)
     
     #Prepare x axis.
-    Conditions=['pCA25\nGFP', 'pCA25\n14kDa CTD']
+    Conditions=['pCA24\nGFP', 'pCA24\n14kDa CTD']
     #print(len(Conditions))
     
     X_coords=[1,1.5, 2.5,3]
@@ -303,7 +303,7 @@ def plot_pull_down(dataframe, outpath):
 
     return
 
-plot_pull_down(data_tab_PD, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\EcTopoI_pull_down_quantification.png")
+#plot_pull_down(data_tab_PD, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\EcTopoI_pull_down_quantification.png")
 
 
 
@@ -312,7 +312,7 @@ plot_pull_down(data_tab_PD, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Sci
 #################
 
 #Path to pull-down data table.
-data_table_topA_SOS="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+data_table_topA_SOS="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 data_tab_topA_SOS=pd.read_excel(data_table_topA_SOS, sheet_name='Table S11', header=0, index_col=0)
 print(data_tab_topA_SOS)
 
@@ -382,7 +382,7 @@ def plot_SOS_response_1(dataframe, outpath):
 
     return
 
-plot_SOS_response_1(data_tab_topA_SOS, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\EcTopoI_G116S_M320V_SOS_response_quantification.png")
+#plot_SOS_response_1(data_tab_topA_SOS, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\EcTopoI_G116S_M320V_SOS_response_quantification.png")
 
 
 
@@ -391,7 +391,7 @@ plot_SOS_response_1(data_tab_topA_SOS, "C:\\Users\sutor\OneDrive\ThinkPad_workin
 #################
 
 #Path to pull-down data table.
-data_table_CTD_SOS="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Supplementary_Tables.xlsx"
+data_table_CTD_SOS="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Manuscript\Supplementary_Tables\Sutormin_et_al.,2022,Supplementary_Tables.xlsx"
 data_tab_CTD_SOS=pd.read_excel(data_table_CTD_SOS, sheet_name='Table S15', header=0, index_col=0)
 print(data_tab_CTD_SOS)
 
@@ -461,5 +461,5 @@ def plot_SOS_response_2(dataframe, outpath):
 
     return
 
-plot_SOS_response_2(data_tab_CTD_SOS, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\EcTopoI_CTD_SOS_response_quantification.png")
+#plot_SOS_response_2(data_tab_CTD_SOS, "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\Bar_plots\EcTopoI_CTD_SOS_response_quantification.png")
 

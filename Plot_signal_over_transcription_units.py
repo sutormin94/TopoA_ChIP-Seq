@@ -118,26 +118,12 @@ Wig_data_in_dict_transcripts_gyrase={'All TUs no dps 1660 Rif-' :  PWD + 'Signal
 
 Wig_data_in_dict_transcripts_tr_assoc={'RNAP_Borukhov'           :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_RpoC_Borukhov_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
                                        'RNAP_Borukhov_HETU'      :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_RpoC_Borukhov_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
-                                       'RpoD_Myers'              :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_RpoD_Myers_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
-                                       'RpoS_Seo'                :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_RpoS_Seo_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
                                        'TopA_Sutormin_All_TUs'   :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Sutormin_TopA_CTD_minus_Rif_minus_av_346_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
                                        'TopA_Sutormin_HETU'      :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_Sutormin_TopA_CTD_minus_Rif_minus_av_346_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
                                        'TopA_Sutormin_LETU'      :      PWD + 'Signal_of_TUs_wig\LETU_no_dps_200\Signal_Sutormin_TopA_CTD_minus_Rif_minus_av_346_over_LETU_no_dps_200_width_15000bp_gb_5000bp.wig',
                                        'Gyrase_Sutormin_All_TUs' :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Gyrase_Cfx_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
                                        'Gyrase_Sutormin_HETU'    :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_Gyrase_Cfx_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
                                        'Gyrase_Rif_Sutormin_All_TUs' :  PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Gyrase_Cfx_Rif_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta11_HETU'       :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_Sutormin_EcTopoI_BW25113_delta11_FE_av_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta11_LETU'       :      PWD + 'Signal_of_TUs_wig\LETU_no_dps_200\Signal_Sutormin_EcTopoI_BW25113_delta11_FE_av_over_LETU_no_dps_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta11_All_TUs'    :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Sutormin_EcTopoI_BW25113_delta11_FE_av_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta14_HETU'       :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_Sutormin_EcTopoI_BW25113_delta14_FE_av_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta14_LETU'       :      PWD + 'Signal_of_TUs_wig\LETU_no_dps_200\Signal_Sutormin_EcTopoI_BW25113_delta14_FE_av_over_LETU_no_dps_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta14_All_TUs'    :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Sutormin_EcTopoI_BW25113_delta14_FE_av_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig', 
-                                       'TopA_delta30_HETU'       :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_Sutormin_EcTopoI_BW25113_delta30_FE_av_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta30_LETU'       :      PWD + 'Signal_of_TUs_wig\LETU_no_dps_200\Signal_Sutormin_EcTopoI_BW25113_delta30_FE_av_over_LETU_no_dps_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_delta30_All_TUs'    :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Sutormin_EcTopoI_BW25113_delta30_FE_av_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig',                                      
-                                       'TopA_Y319F_plus_All_TUs' :      PWD + 'Signal_of_TUs_wig\All_TUs_no_dps_1660\Signal_Sutormin_EcTopoI_Y319F_FE_av_over_All_TUs_no_dps_1660_width_15000bp_gb_5000bp.wig', 
-                                       'TopA_Y319F_plus_HETU'    :      PWD + 'Signal_of_TUs_wig\HETU_no_dps_rfa_200\Signal_Sutormin_EcTopoI_Y319F_FE_av_over_HETU_no_dps_rfa_200_width_15000bp_gb_5000bp.wig',
-                                       'TopA_Y319F_plus_LETU'    :      PWD + 'Signal_of_TUs_wig\LETU_no_dps_200\Signal_Sutormin_EcTopoI_Y319F_FE_av_over_LETU_no_dps_200_width_15000bp_gb_5000bp.wig',
                                        }
 
 #Set type to choose plotting parameters: genes, operons or transcripts.
