@@ -26,7 +26,7 @@ PWD="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Data
 
 #Dictionary of datasets.
 Input_dict={'EcTopoI' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
-            'EcRpoB' :  PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak"}
+            'EcRpoB'  : PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak"}
 
 Input_dict1={'EcTopoI_ChIP' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
              'EcTopoI_Topo' : PWD + "EcTopoI_ChIP_Seq_vs_Topo_Seq\Try2\TopoI_Ara_TCSs_called_15.BroadPeak"}
@@ -36,6 +36,9 @@ Input_dict2={'EcTopoI_Rif' : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD
 
 Input_dict3={'EcRpoC' :       PWD + "EcTopoI_vs_RNApol_Gyrase\RNApol_peaks\RpoC_Borukhov\RNApol_peaks_threshold_3.BroadPeak",
              'EcTopoI_Topo' : PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\TopoI_Ara_TCSs_called_15.BroadPeak"}
+
+Input_dict4={'EcTopoI'  : PWD + "Peak_calling\Reproducible_peaks\\TopoA_noCTD_noRif_rep346_thr_3_nm_0.001_peaks.narrowPeak",
+             'EcGyrase' : "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_Gyrase_Topo-Seq\Scripts\Gyrase_Topo-seq\Additional_genome_features\Cfx_10mkM_trusted_GCSs_h_s.BroadPeak"}
 
 
 #Pre-calculated data.
@@ -64,10 +67,10 @@ Deletion_correction=126348 #Correcion on deletions cumulative length: E. coli DY
 Binning='Real' #Supprted options: 'Real' - real peaks are used to simulate overlap; 'Generic' - uses peaks with a width equal to a mean width of peaks in a real dataset.
 
 #Data analysis regime.
-Run_regime='Read' #Supports options: 'Simulate' - run actual Monte-Carlo simmulation, takes some time; 'Read' - read and plot already pre-computed data (obtained in a 'Simulate' regime).
+Run_regime='Simulate' #Supports options: 'Simulate' - run actual Monte-Carlo simmulation, takes some time; 'Read' - read and plot already pre-computed data (obtained in a 'Simulate' regime).
 
 #Output data path.
-Outpath=PWD + "EcTopoI_Topo_overlap_EcRpoC_simulation\\"
+Outpath=PWD + "EcTopoI_overlap_EcGyrase_simulation\\"
 
 #################
 ### Read input sets. Calculate bin width and number of peaks. Get number of real overlaying peaks.
@@ -390,7 +393,7 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     plt.annotate(f'p-value: {"{:.1e}".format(p_value)}', xy=(Real_overlay_peaks_num+0.5, 0.03), xycoords='data', size=12, rotation=90)    
     plt.ylabel('Probability', size=13)
     plt.xlabel('Number of peaks in overlay', size=13)
-    plt.xlim([np.min(Overlay_peaks_num)-7, Real_overlay_peaks_num+25])
+    plt.xlim([np.min(Overlay_peaks_num)-100, Real_overlay_peaks_num+100])
     plt.show()
     plt.savefig(f'{output_path}{names_list[0]}_peaks_overlay_{Number_of_simulations}_it_{peak_type}_delcor.png', dpi=300, figsize=(5, 3))
     plt.close()
@@ -438,7 +441,7 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     plt.annotate(f'p-value: {"{:.1e}".format(p_value12)}', xy=(Real_peaks12_in_overlay_num+0.5, 0.045), xycoords='data', size=12, rotation=90)    
     plt.ylabel('Probability', size=13)
     plt.xlabel(f'Number of {names_list[1]} peaks in overlay', size=13)
-    plt.xlim([np.min(Peaks12_in_overlay)-5, Real_peaks12_in_overlay_num+25])
+    plt.xlim([np.min(Peaks12_in_overlay)-100, Real_peaks12_in_overlay_num+100])
     plt.show()
     plt.savefig(f'{output_path}{names_list[1]}_peaks_in_overlay_{Number_of_simulations}_it_{peak_type}_delcor.png', dpi=300, figsize=(5, 3))    
     plt.close()
@@ -456,7 +459,7 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     plt.annotate(f'p-value: {"{:.1e}".format(p_value21)}', xy=(Real_peaks21_in_overlay_num+0.5, 0.02), xycoords='data', size=12, rotation=90)    
     plt.ylabel('Probability', size=13)
     plt.xlabel(f'Number of {names_list[2]} peaks in overlay', size=13)
-    plt.xlim([np.min(Peaks21_in_overlay)-10, Real_peaks21_in_overlay_num+30])
+    plt.xlim([np.min(Peaks21_in_overlay)-100, Real_peaks21_in_overlay_num+100])
     plt.show()
     plt.savefig(f'{output_path}{names_list[2]}_peaks_in_overlay_{Number_of_simulations}_it_{peak_type}_delcor.png', dpi=300, figsize=(5, 3))    
     plt.close()    
@@ -464,4 +467,4 @@ def analyse_simulated_data(input_data, genome_len, deletion_correction, peak_typ
     return
 
 
-analyse_simulated_data(Input_dict3, Genome_len, Deletion_correction, Binning, 10000, Run_regime, Simulated_data_dict3, Outpath)
+analyse_simulated_data(Input_dict4, Genome_len, Deletion_correction, Binning, 100, Run_regime, Simulated_data_dict3, Outpath)

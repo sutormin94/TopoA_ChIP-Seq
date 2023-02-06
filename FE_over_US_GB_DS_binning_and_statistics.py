@@ -124,6 +124,13 @@ Dict_of_wigs_path_12={'HNS'  : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\
                       'MatP' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Nolivos_MatP_IP_av.wig',
                      }
 
+Set_name_13='BW25113_EcTopoI_mutants_and_DY330_wt'
+Dict_of_wigs_path_13={'EcTopoI'         : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\E_coli_ChIP-Seqs\All_tracks\\Sutormin_TopA_ChIP_CTD_minus_Rif_minus_FE_av_346.wig',
+                      'EcTopoI_delta11' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta11_FE_av.wig',
+                      'EcTopoI_delta14' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta14_FE_av.wig',
+                      'EcTopoI_delta30' : 'C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\TopA_ChIP-Seq\BW25113_EcTopoI_mutants_ChIP-Seq\FE\EcTopoI_BW25113_delta30_FE_av.wig',
+                     }
+
 
 
 #######
@@ -146,12 +153,12 @@ def create_out_dirs(out_path, genes_set_name, track_set_name):
     Dir_check_create(f'{out_path}\Signal_of_TUs_wig\{track_set_name}\{genes_set_name}')    
     return
 
-create_out_dirs(Out_path, Genes_set_name_5,  Set_name_12)
-create_out_dirs(Out_path, Genes_set_name_6,  Set_name_12)
-create_out_dirs(Out_path, Genes_set_name_7,  Set_name_12)
-create_out_dirs(Out_path, Genes_set_name_8,  Set_name_12)
-create_out_dirs(Out_path, Genes_set_name_9,  Set_name_12)
-create_out_dirs(Out_path, Genes_set_name_10, Set_name_12)
+create_out_dirs(Out_path, Genes_set_name_5,  Set_name_13)
+create_out_dirs(Out_path, Genes_set_name_6,  Set_name_13)
+create_out_dirs(Out_path, Genes_set_name_7,  Set_name_13)
+create_out_dirs(Out_path, Genes_set_name_8,  Set_name_13)
+create_out_dirs(Out_path, Genes_set_name_9,  Set_name_13)
+create_out_dirs(Out_path, Genes_set_name_10, Set_name_13)
 
 
 #######
@@ -798,9 +805,9 @@ def Wrapper_signal_over_TUs(dict_of_wigs_path, path_to_annotation, type_of_annot
     
     return
 
-#Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-#Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_6,  Type_of_annot_6,  Genes_set_name_6,  Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_12, Path_to_annotation_7,  Type_of_annot_7,  Genes_set_name_7,  Set_name_12, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_12, Path_to_annotation_8,  Type_of_annot_8,  Genes_set_name_8,  Set_name_12, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-Wrapper_signal_over_TUs(Dict_of_wigs_path_12, Path_to_annotation_9,  Type_of_annot_9,  Genes_set_name_9,  Set_name_12, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
-#Wrapper_signal_over_TUs(Dict_of_wigs_path_4, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Set_name_4, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_13, Path_to_annotation_5,  Type_of_annot_5,  Genes_set_name_5,  Set_name_13, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_13, Path_to_annotation_6,  Type_of_annot_6,  Genes_set_name_6,  Set_name_13, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_13, Path_to_annotation_7,  Type_of_annot_7,  Genes_set_name_7,  Set_name_13, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_13, Path_to_annotation_8,  Type_of_annot_8,  Genes_set_name_8,  Set_name_13, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_13, Path_to_annotation_9,  Type_of_annot_9,  Genes_set_name_9,  Set_name_13, Deletions_inpath, Win_width, Length, Bin_width, Out_path)
+Wrapper_signal_over_TUs(Dict_of_wigs_path_13, Path_to_annotation_10, Type_of_annot_10, Genes_set_name_10, Set_name_13, Deletions_inpath, Win_width, Length, Bin_width, Out_path)

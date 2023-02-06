@@ -109,6 +109,13 @@ qPCR_primers_calibration(PC_data, BW_comp_set, 'BW25113 topA mutants competition
 sup_rel_primers_set=['rho', 'rnhB', 'rnhA', 'topB', 'parE', 'parC', 'gyrB', 'gyrA']
 qPCR_primers_calibration(PC_data, sup_rel_primers_set, 'gyrAB parCE rnhAB topB rho primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\gyrAB_parCE_rnhAB_topB_rho_primers_calibration.png")
 
+Input_table_1="C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\BW25113_topA_mutants\Strains_competiton\Competition 2.0_wt_and_delta30_strains.xlsx"
+PC_data_1=pd.read_excel(Input_table_1, sheet_name='Primer_titration_data', header=None, index_col=0)
+print(PC_data_1)
+
+BWtopA_primers_set=['delta30', 'wt_SPA', 'BW25113_wt', 'delta11', 'delta11_SPA', 'delta14', 'delta14_SPA']
+qPCR_primers_calibration(PC_data_1, BWtopA_primers_set, 'delta30 and wt_SPA primers calibration', "C:\\Users\sutor\OneDrive\ThinkPad_working\Sutor\Science\TopoI-ChIP-Seq\Scripts_test\qPCR\delta30_wt_SPA_primers_calibration.png")
+
 
 
 
