@@ -1,5 +1,6 @@
 # TopoA_ChIP-Seq
-Analysis of TopoI ChIP-Seq data obtained for *E. coli*.
+
+Analysis of TopoI ChIP-Seq data obtained for *E. coli* W3110.
 
 This repository contains a set of bash and python scripts which have been used for ChIP-Seq data analysis and visualization.
 Raw sequencing data and some processed files can be retrieved from GEO datasets with accessions GSE181915 and GSE182850.
